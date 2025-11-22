@@ -66,7 +66,7 @@ const observer = new IntersectionObserver((entries) => {
 
 // Observe elements for animation
 document.addEventListener('DOMContentLoaded', () => {
-    const animatedElements = document.querySelectorAll('.project-card, .about-content, .contact-content');
+    const animatedElements = document.querySelectorAll('.project-card, .about-content, .contact-content, .blog-card');
     
     animatedElements.forEach(el => {
         el.style.opacity = '0';
@@ -74,12 +74,23 @@ document.addEventListener('DOMContentLoaded', () => {
         el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
         observer.observe(el);
     });
+
+    // Blog Card Click Handler
+    const blogCards = document.querySelectorAll('.blog-card');
+    blogCards.forEach(card => {
+        card.addEventListener('click', () => {
+            // For now, just alert or log since we don't have actual posts yet
+            console.log('Blog card clicked');
+            // In a real scenario, this would navigate to the post URL
+            // window.location.href = card.dataset.link;
+        });
+    });
 });
 
 // CTA Button click handler
 document.querySelector('.cta-button').addEventListener('click', () => {
-    const aboutSection = document.querySelector('#about');
-    aboutSection.scrollIntoView({
+    const projectsSection = document.querySelector('#projects');
+    projectsSection.scrollIntoView({
         behavior: 'smooth',
         block: 'start'
     });
@@ -95,45 +106,6 @@ window.addEventListener('load', () => {
     }, 100);
 });
 
-// Form validation (if you add a contact form later)
-function validateEmail(email) {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-}
-
-// Add some interactive effects
-document.addEventListener('DOMContentLoaded', () => {
-    // Add hover effects to skill tags
-    const skillTags = document.querySelectorAll('.skill-tag');
-    skillTags.forEach(tag => {
-        tag.addEventListener('mouseenter', () => {
-            tag.style.transform = 'scale(1.1)';
-        });
-        tag.addEventListener('mouseleave', () => {
-            tag.style.transform = 'scale(1)';
-        });
-    });
-
-    // Add typing effect to hero title (optional)
-    const heroTitle = document.querySelector('.hero-title');
-    if (heroTitle) {
-        const text = heroTitle.textContent;
-        heroTitle.textContent = '';
-        let i = 0;
-        
-        function typeWriter() {
-            if (i < text.length) {
-                heroTitle.textContent += text.charAt(i);
-                i++;
-                setTimeout(typeWriter, 100);
-            }
-        }
-        
-        // Uncomment the line below to enable typing effect
-        // typeWriter();
-    }
-});
-
 // Scroll to top functionality
 function createScrollToTopButton() {
     const button = document.createElement('button');
@@ -141,13 +113,13 @@ function createScrollToTopButton() {
     button.className = 'scroll-to-top';
     button.style.cssText = `
         position: fixed;
-        bottom: 20px;
-        right: 20px;
+        bottom: 30px;
+        right: 30px;
         width: 50px;
         height: 50px;
         border-radius: 50%;
-        background-color: #3498db;
-        color: white;
+        background-color: var(--accent-color);
+        color: var(--bg-color);
         border: none;
         cursor: pointer;
         font-size: 20px;
@@ -155,6 +127,10 @@ function createScrollToTopButton() {
         visibility: hidden;
         transition: all 0.3s ease;
         z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
     `;
     
     document.body.appendChild(button);
@@ -179,3 +155,4 @@ function createScrollToTopButton() {
 
 // Initialize scroll to top button
 createScrollToTopButton();
+
