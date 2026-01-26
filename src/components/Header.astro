@@ -12,8 +12,8 @@ const isBlog = pathname === '/blog' || pathname === '/blog/';
     <a
       href="/"
       class:list={[
-        'transition-colors hover:text-accent',
-        isAbout ? 'text-accent' : 'text-sub',
+        'transition-colors hover:text-accent pb-1',
+        isAbout ? 'text-accent border-b border-accent' : 'text-sub',
       ]}
     >
       About
@@ -21,8 +21,8 @@ const isBlog = pathname === '/blog' || pathname === '/blog/';
     <a
       href="/blog"
       class:list={[
-        'transition-colors hover:text-accent',
-        isBlog ? 'text-accent' : 'text-sub',
+        'transition-colors hover:text-accent pb-1',
+        isBlog ? 'text-accent border-b border-accent' : 'text-sub',
       ]}
     >
       Blog

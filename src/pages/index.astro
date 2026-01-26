@@ -1,39 +1,52 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import ListItem from '../components/ListItem.astro';
-
-const experiences = [
-  {
-    title: 'Seoul National University',
-    sub: 'Mechanical Engineering',
-    date: '2026.02',
-  },
-];
 ---
 
 <BaseLayout title="Yoonchul Yi">
   <!-- About Section -->
   <section class="py-8">
     <p class="font-serif text-lg leading-relaxed text-text">
-      안녕하세요, 이윤철입니다. 
-      기술과 사람을 연결하는 일에 관심이 많습니다. 
-      AI와 제품 관리(PM)에 대해 고민하고 글을 씁니다.
+      Hi, I'm Yoonchul Yi.{' '}
+      <a
+        href="https://yoonchulyi.notion.site/"
+        class="text-sub hover:text-accent hover:underline transition-colors"
+      >
+        more about me...
+      </a>
     </p>
-  </section>
-
-  <!-- Experience Section -->
-  <section class="py-8">
-    <h2 class="font-mono text-sm text-sub uppercase tracking-wider mb-4">
-      Experience
-    </h2>
-    <div>
-      {experiences.map((exp) => (
-        <ListItem
-          title={exp.title}
-          sub={exp.sub}
-          date={exp.date}
-        />
-      ))}
+    
+    <!-- Social Links -->
+    <div class="flex gap-4 mt-6 font-mono text-sm">
+      <a
+        href="https://x.com/yiyoonchul"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-sub hover:text-accent transition-colors"
+      >
+        X ↗
+      </a>
+      <a
+        href="https://www.linkedin.com/in/ycyi/"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-sub hover:text-accent transition-colors"
+      >
+        LinkedIn ↗
+      </a>
+      <a
+        href="https://github.com/yyoonchul"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-sub hover:text-accent transition-colors"
+      >
+        GitHub ↗
+      </a>
+      <a
+        href="mailto:yoonchulyi@gmail.com"
+        class="text-sub hover:text-accent transition-colors"
+      >
+        Email ↗
+      </a>
     </div>
   </section>
 </BaseLayout>
