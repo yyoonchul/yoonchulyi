@@ -1,0 +1,31 @@
+---
+const pathname = Astro.url.pathname;
+const isAbout = pathname === '/' || pathname === '/index.html';
+const isBlog = pathname === '/blog' || pathname === '/blog/';
+---
+
+<header class="flex items-baseline justify-between py-8">
+  <a href="/" class="font-serif italic text-3xl hover:text-accent transition-colors">
+    Yoonchul Yi
+  </a>
+  <nav class="flex gap-6 font-mono text-sm">
+    <a
+      href="/"
+      class:list={[
+        'transition-colors hover:text-accent',
+        isAbout ? 'text-accent' : 'text-sub',
+      ]}
+    >
+      About
+    </a>
+    <a
+      href="/blog"
+      class:list={[
+        'transition-colors hover:text-accent',
+        isBlog ? 'text-accent' : 'text-sub',
+      ]}
+    >
+      Blog
+    </a>
+  </nav>
+</header>

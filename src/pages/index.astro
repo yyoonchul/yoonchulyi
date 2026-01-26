@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ListItem from '../components/ListItem.astro';
+
+const experiences = [
+  {
+    title: 'Seoul National University',
+    sub: 'Mechanical Engineering',
+    date: '2026.02',
+  },
+];
+---
+
+<BaseLayout title="Yoonchul Yi">
+  <!-- About Section -->
+  <section class="py-8">
+    <p class="font-serif text-lg leading-relaxed text-text">
+      안녕하세요, 이윤철입니다. 
+      기술과 사람을 연결하는 일에 관심이 많습니다. 
+      AI와 제품 관리(PM)에 대해 고민하고 글을 씁니다.
+    </p>
+  </section>
+
+  <!-- Experience Section -->
+  <section class="py-8">
+    <h2 class="font-mono text-sm text-sub uppercase tracking-wider mb-4">
+      Experience
+    </h2>
+    <div>
+      {experiences.map((exp) => (
+        <ListItem
+          title={exp.title}
+          sub={exp.sub}
+          date={exp.date}
+        />
+      ))}
+    </div>
+  </section>
+</BaseLayout>

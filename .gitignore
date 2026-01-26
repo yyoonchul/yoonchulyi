@@ -1,2 +1,23 @@
-증명사진.jpg
-프로필사진.jpg
+# build output
+dist/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+
+# environment
+.env
+.env.local
+.env.production
+
+# editor
+.vscode/
+*.swp
+*.swo
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

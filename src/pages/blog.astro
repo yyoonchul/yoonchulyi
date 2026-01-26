@@ -1,0 +1,133 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ListItem from '../components/ListItem.astro';
+---
+
+<BaseLayout title="Blog - Yoonchul Yi">
+  <section class="py-8">
+    <h1 class="font-serif text-2xl mb-2">Blog</h1>
+    
+    <!-- Substack Link (Main) -->
+    <div class="mb-12">
+      <ListItem
+        title="Subscribe on Substack"
+        sub="Weekly newsletter on tech & life"
+        date="External Link ↗"
+        href="https://yoonchulnotes.substack.com/" // Replace with your Substack URL
+      />
+    </div>
+
+    <!-- Toggle Sections -->
+    <div class="space-y-4">
+      <!-- What I want to build -->
+      <div class="border-b border-sub/20">
+        <button
+          class="toggle-button w-full flex items-center justify-between py-4 text-left font-mono text-sm text-sub hover:text-accent transition-colors"
+          data-target="what-i-want"
+        >
+          <span>What I want to build</span>
+          <span class="toggle-icon">+</span>
+        </button>
+        <div
+          id="what-i-want"
+          class="toggle-content hidden pb-6"
+        >
+          <div class="font-serif text-base leading-relaxed space-y-4 text-text">
+            <p>
+              What I have always thought about is changing the world. To be precise, changing the way people live.
+            </p>
+            <p>
+              Search engines changed how people consume information to such an extent that a new word, 'Googling,' was coined. Instagram created a new way for people to form social relationships. The products created by these great companies have redefined our 'daily lives' by changing the way we live. Most recently, it seems TikTok and ChatGPT are doing just that.
+            </p>
+            <p>
+              I have seen numerous success stories of companies, but the ones that truly make my heart race seem to share this common thread.
+            </p>
+            <p>
+              They created value that people could not enjoy before, and that added value became the norm for the next generation. It seems that change has mostly come with the great waves of technology.
+            </p>
+            <p>
+              What we often talk about—PC, Internet, Mobile, Cloud, etc.
+            </p>
+            <p>
+              New technology makes possible what was impossible before and creates value that could not be enjoyed previously. This new way of life, enjoying this added value, becomes the everyday over time, and the world changes.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mutant -->
+      <div class="border-b border-sub/20">
+        <button
+          class="toggle-button w-full flex items-center justify-between py-4 text-left font-mono text-sm text-sub hover:text-accent transition-colors"
+          data-target="mutant"
+        >
+          <span>Mutant</span>
+          <span class="toggle-icon">+</span>
+        </button>
+        <div
+          id="mutant"
+          class="toggle-content hidden pb-6"
+        >
+          <div class="font-serif text-base leading-relaxed space-y-4 text-text">
+            <p>
+              Most mutations are disadvantageous to an organism's survival and tend to disappear over generations.
+            </p>
+            <p>
+              However, a very select few, chosen by natural selection, become the driving force of evolution and create new species.
+            </p>
+            <p>
+              In our society, too, there are those who create new things rather than just inheriting and repeating what already exists.
+            </p>
+            <p>
+              The vast majority of them face failure. But the few who survive change the world. They create new products, cultures, demands, and standards that never existed before. They are the ones who lead the evolution of the world.
+            </p>
+            <p>
+              Here, I will share the journey of a story that will either change the world or fade away without a sound.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  document.querySelectorAll('.toggle-button').forEach((button) => {
+    button.addEventListener('click', () => {
+      const targetId = button.getAttribute('data-target');
+      const content = document.getElementById(targetId);
+      const icon = button.querySelector('.toggle-icon');
+      
+      if (content) {
+        const isHidden = content.classList.contains('hidden');
+        
+        if (isHidden) {
+          content.classList.remove('hidden');
+          icon.textContent = '−';
+          button.classList.add('text-accent');
+        } else {
+          content.classList.add('hidden');
+          icon.textContent = '+';
+          button.classList.remove('text-accent');
+        }
+      }
+    });
+  });
+</script>
+
+<style>
+  .toggle-content {
+    animation: fadeIn 0.2s ease-in;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

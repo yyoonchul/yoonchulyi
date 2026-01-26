@@ -1,0 +1,37 @@
+---
+interface Props {
+  title: string;
+  sub?: string;
+  date: string;
+  href?: string;
+}
+
+const { title, sub, date, href } = Astro.props;
+const isExternal = href?.startsWith('http');
+const Tag = href ? 'a' : 'div';
+---
+
+<Tag
+  href={href}
+  target={isExternal ? '_blank' : undefined}
+  rel={isExternal ? 'noopener noreferrer' : undefined}
+  class:list={[
+    'group flex items-baseline justify-between gap-4 py-4 border-b border-sub/20',
+    'transition-colors duration-200',
+    href && 'hover:text-accent cursor-pointer',
+  ]}
+>
+  <div class="flex flex-col gap-1 min-w-0">
+    <span class="font-serif text-base group-hover:text-accent transition-colors">
+      {title}
+    </span>
+    {sub && (
+      <span class="text-sub text-sm">
+        {sub}
+      </span>
+    )}
+  </div>
+  <span class="font-mono text-xs text-sub shrink-0 group-hover:text-accent transition-colors">
+    {date}
+  </span>
+</Tag>
