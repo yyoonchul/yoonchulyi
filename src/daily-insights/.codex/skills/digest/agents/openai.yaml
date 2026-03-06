@@ -1,0 +1,6 @@
+interface:
+  display_name: "Daily Digest"
+  short_description: "인박스 링크를 수집해 일일 다이제스트를 생성"
+
+policy:
+  allow_implicit_invocation: false

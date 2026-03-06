@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getDailyInsightEntriesSorted } from '../lib/dailyInsights';
+
+const dailyInsights = await getDailyInsightEntriesSorted();
+---
+
+<BaseLayout title="Daily Insights - Yoonchul Yi">
+  <section class="py-8">
+    <h1 class="font-serif text-2xl mb-8">Daily Insights</h1>
+
+    <div class="space-y-3">
+      {dailyInsights.map(({ meta }) => (
+        <a
+          href={meta.href}
+          class="block font-mono text-sm text-sub hover:text-accent transition-colors"
+        >
+          {meta.isoDate}
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

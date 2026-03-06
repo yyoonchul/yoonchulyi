@@ -1,0 +1,214 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import type { DailyInsightPageProps } from '../lib/dailyInsights';
+import { getDailyInsightsMarkdownProcessor } from '../lib/markdown';
+
+const { meta, content } = Astro.props as DailyInsightPageProps;
+
+const markdownProcessor = await getDailyInsightsMarkdownProcessor();
+const enRendered = await markdownProcessor.render(content.enMarkdown);
+const koRendered = await markdownProcessor.render(content.koMarkdown);
+---
+
+<BaseLayout title={`${meta.isoDate} - Daily Insights - Yoonchul Yi`}>
+  <article class="py-8">
+    <a
+      href="/daily-insights"
+      class="inline-block font-mono text-xs text-sub hover:text-accent transition-colors"
+    >
+      ← Back to daily insights
+    </a>
+
+    <header class="mt-4 mb-8 flex flex-wrap items-start justify-between gap-4">
+      <h1 class="font-serif text-2xl md:text-3xl text-text break-words">
+        {meta.isoDate}
+      </h1>
+
+      <div class="flex items-center gap-4">
+        <div
+          role="group"
+          aria-label="Language toggle"
+          class="font-mono text-xs text-sub flex items-center gap-2"
+        >
+          <button
+            id="lang-en"
+            type="button"
+            class="daily-lang-button text-accent"
+            data-lang="en"
+            aria-pressed="true"
+          >
+            En
+          </button>
+          <span>/</span>
+          <button
+            id="lang-ko"
+            type="button"
+            class="daily-lang-button"
+            data-lang="ko"
+            aria-pressed="false"
+          >
+            Ko
+          </button>
+        </div>
+
+        <button
+          id="share-button"
+          type="button"
+          data-relative-url={meta.href}
+          class="font-mono text-xs text-sub hover:text-accent transition-colors"
+        >
+          <span id="share-label">Share</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="daily-insight-content text-text" data-lang-panel="en">
+      <div set:html={enRendered.code} />
+    </div>
+    <div class="daily-insight-content text-text hidden" data-lang-panel="ko">
+      <div set:html={koRendered.code} />
+    </div>
+  </article>
+</BaseLayout>
+
+<script>
+  const langEnButton = document.getElementById('lang-en');
+  const langKoButton = document.getElementById('lang-ko');
+  const panels = Array.from(document.querySelectorAll('[data-lang-panel]'));
+
+  const setLanguage = (lang) => {
+    panels.forEach((panel) => {
+      panel.classList.toggle('hidden', panel.dataset.langPanel !== lang);
+    });
+
+    if (langEnButton && langKoButton) {
+      const isEnglish = lang === 'en';
+      langEnButton.setAttribute('aria-pressed', isEnglish ? 'true' : 'false');
+      langKoButton.setAttribute('aria-pressed', isEnglish ? 'false' : 'true');
+      langEnButton.classList.toggle('text-accent', isEnglish);
+      langKoButton.classList.toggle('text-accent', !isEnglish);
+    }
+  };
+
+  if (langEnButton && langKoButton) {
+    langEnButton.addEventListener('click', () => setLanguage('en'));
+    langKoButton.addEventListener('click', () => setLanguage('ko'));
+  }
+
+  const shareButton = document.getElementById('share-button');
+  const shareLabel = document.getElementById('share-label');
+  const shareFeedbackDurationMs = 1600;
+
+  const copyFromFallback = (text) => {
+    const input = document.createElement('textarea');
+    input.value = text;
+    input.setAttribute('readonly', '');
+    input.style.position = 'absolute';
+    input.style.left = '-9999px';
+    document.body.appendChild(input);
+    input.select();
+    const copied = document.execCommand('copy');
+    document.body.removeChild(input);
+    return copied;
+  };
+
+  const copyToClipboard = async (text) => {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+
+    return copyFromFallback(text);
+  };
+
+  if (shareButton && shareLabel) {
+    let resetLabelTimer;
+
+    shareButton.addEventListener('click', async () => {
+      const relativeUrl = shareButton.dataset.relativeUrl ?? window.location.pathname;
+      const absoluteUrl = new URL(relativeUrl, window.location.origin).toString();
+      const copied = await copyToClipboard(absoluteUrl).catch(() => false);
+
+      shareLabel.textContent = copied ? 'Link copied' : 'Copy failed';
+
+      clearTimeout(resetLabelTimer);
+      resetLabelTimer = setTimeout(() => {
+        shareLabel.textContent = 'Share';
+      }, shareFeedbackDurationMs);
+    });
+  }
+</script>
+
+<style>
+  :global(.daily-lang-button) {
+    transition: color 0.2s ease;
+  }
+
+  :global(.daily-lang-button:hover) {
+    color: #ea580c;
+  }
+
+  :global(.daily-insight-content) {
+    font-family: 'Newsreader', serif;
+    font-size: 1rem;
+    line-height: 1.8;
+    color: #191919;
+  }
+
+  :global(.daily-insight-content h2) {
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.5rem;
+    line-height: 1.25;
+  }
+
+  :global(.daily-insight-content h3) {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+    line-height: 1.35;
+  }
+
+  :global(.daily-insight-content p) {
+    margin-bottom: 1rem;
+  }
+
+  :global(.daily-insight-content a) {
+    color: #ea580c;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  :global(.daily-insight-content ul),
+  :global(.daily-insight-content ol) {
+    margin: 1rem 0;
+    padding-left: 1.25rem;
+  }
+
+  :global(.daily-insight-content ul) {
+    list-style: disc;
+  }
+
+  :global(.daily-insight-content ol) {
+    list-style: decimal;
+  }
+
+  :global(.daily-insight-content li + li) {
+    margin-top: 0.35rem;
+  }
+
+  :global(.daily-insight-content blockquote) {
+    margin: 1.25rem 0;
+    padding-left: 0.9rem;
+    border-left: 2px solid rgba(140, 140, 140, 0.35);
+    color: rgba(25, 25, 25, 0.8);
+  }
+
+  :global(.daily-insight-content code) {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.9em;
+    background: rgba(140, 140, 140, 0.12);
+    border-radius: 0.25rem;
+    padding: 0.1rem 0.3rem;
+  }
+</style>
