@@ -1,7 +1,10 @@
 ---
 const pathname = Astro.url.pathname;
 const isAbout = pathname === '/' || pathname === '/index.html';
-const isBlog = pathname === '/blog' || pathname === '/blog/';
+const isBlog =
+  pathname === '/blog' ||
+  pathname === '/blog/' ||
+  pathname.startsWith('/blog/');
 ---
 
 <header class="flex items-baseline justify-between py-8">
