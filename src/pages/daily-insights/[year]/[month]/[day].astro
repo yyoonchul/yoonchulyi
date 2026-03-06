@@ -1,0 +1,13 @@
+---
+import DailyInsightDetailPage from '../../../../daily-insights/pages/DailyInsightDetailPage.astro';
+import {
+  getDailyInsightStaticPaths,
+  type DailyInsightPageProps,
+} from '../../../../daily-insights/lib/dailyInsights';
+
+export const getStaticPaths = getDailyInsightStaticPaths;
+
+const { entry, meta, content } = Astro.props as DailyInsightPageProps;
+---
+
+<DailyInsightDetailPage entry={entry} meta={meta} content={content} />

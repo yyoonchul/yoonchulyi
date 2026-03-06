@@ -1,0 +1,158 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatBlogDate, getBlogHrefFromTitle } from '../lib/blog';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+  slug: string;
+  title: string;
+}
+
+const { post, slug, title } = Astro.props as Props;
+const { Content } = await render(post);
+const postRelativeUrl = getBlogHrefFromTitle(title);
+---
+
+<BaseLayout title={`${title} - Blog - Yoonchul Yi`}>
+  <article class="py-8">
+    <a
+      href="/blog"
+      class="inline-block font-mono text-xs text-sub hover:text-accent transition-colors"
+    >
+      ← Back to blog
+    </a>
+
+    <header class="mt-4 mb-8 border-b border-sub/20 pb-6 flex flex-wrap items-start justify-between gap-4">
+      <div class="min-w-0">
+        <h1 class="font-serif text-2xl md:text-3xl text-text break-words">
+          {title}
+        </h1>
+        <p class="mt-2 font-mono text-xs text-sub">
+          {formatBlogDate(post.data.date)}
+        </p>
+      </div>
+
+      <button
+        id="copy-link-button"
+        type="button"
+        data-relative-url={postRelativeUrl}
+        data-slug={slug}
+        class="font-mono text-xs text-sub hover:text-accent transition-colors"
+      >
+        <span id="copy-link-label">Share</span>
+      </button>
+    </header>
+
+    <div class="blog-content font-serif text-base leading-relaxed text-text">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>
+
+<script>
+  const copyButton = document.getElementById('copy-link-button');
+  const copyLabel = document.getElementById('copy-link-label');
+  const copyFeedbackDurationMs = 1600;
+
+  const copyFromFallback = (text) => {
+    const input = document.createElement('textarea');
+    input.value = text;
+    input.setAttribute('readonly', '');
+    input.style.position = 'absolute';
+    input.style.left = '-9999px';
+    document.body.appendChild(input);
+    input.select();
+    const copied = document.execCommand('copy');
+    document.body.removeChild(input);
+    return copied;
+  };
+
+  const copyToClipboard = async (text) => {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+
+    return copyFromFallback(text);
+  };
+
+  if (copyButton && copyLabel) {
+    let resetLabelTimer;
+
+    copyButton.addEventListener('click', async () => {
+      const relativeUrl = copyButton.dataset.relativeUrl ?? window.location.pathname;
+      const absoluteUrl = new URL(relativeUrl, window.location.origin).toString();
+      const copied = await copyToClipboard(absoluteUrl).catch(() => false);
+
+      copyLabel.textContent = copied ? 'Link copied' : 'Copy failed';
+
+      clearTimeout(resetLabelTimer);
+      resetLabelTimer = setTimeout(() => {
+        copyLabel.textContent = 'Share';
+      }, copyFeedbackDurationMs);
+    });
+  }
+</script>
+
+<style>
+  :global(.blog-content h2) {
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    font-family: 'Newsreader', serif;
+    font-size: 1.5rem;
+    line-height: 1.25;
+  }
+
+  :global(.blog-content h3) {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-family: 'Newsreader', serif;
+    font-size: 1.25rem;
+    line-height: 1.35;
+  }
+
+  :global(.blog-content p) {
+    margin-bottom: 1rem;
+  }
+
+  :global(.blog-content a) {
+    color: #ea580c;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  :global(.blog-content ul),
+  :global(.blog-content ol) {
+    margin: 1rem 0;
+    padding-left: 1.25rem;
+  }
+
+  :global(.blog-content ul) {
+    list-style: disc;
+  }
+
+  :global(.blog-content ol) {
+    list-style: decimal;
+  }
+
+  :global(.blog-content li + li) {
+    margin-top: 0.35rem;
+  }
+
+  :global(.blog-content blockquote) {
+    margin: 1.25rem 0;
+    padding-left: 0.9rem;
+    border-left: 2px solid rgba(140, 140, 140, 0.35);
+    color: rgba(25, 25, 25, 0.8);
+  }
+
+  :global(.blog-content code) {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.9em;
+    background: rgba(140, 140, 140, 0.12);
+    border-radius: 0.25rem;
+    padding: 0.1rem 0.3rem;
+  }
+</style>

@@ -1,0 +1,37 @@
+---
+import { getCollection } from 'astro:content';
+import ListItem from '../../components/ListItem.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatBlogDate, getBlogHrefFromTitle } from '../lib/blog';
+
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+---
+
+<BaseLayout title="Blog - Yoonchul Yi">
+  <section class="py-8">
+    <h1 class="font-serif text-2xl mb-2">Blog</h1>
+
+    <div class="mb-12">
+      <ListItem
+        title="Subscribe on Substack"
+        date="External Link ↗"
+        href="https://yoonchulnotes.substack.com/"
+      />
+    </div>
+
+    <div>
+      {posts.map((post) => {
+        const title = post.data.title;
+        return (
+          <ListItem
+            title={title}
+            date={formatBlogDate(post.data.date)}
+            href={getBlogHrefFromTitle(title)}
+          />
+        );
+      })}
+    </div>
+  </section>
+</BaseLayout>

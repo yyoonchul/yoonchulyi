@@ -5,6 +5,10 @@ const isBlog =
   pathname === '/blog' ||
   pathname === '/blog/' ||
   pathname.startsWith('/blog/');
+const isDailyInsights =
+  pathname === '/daily-insights' ||
+  pathname === '/daily-insights/' ||
+  pathname.startsWith('/daily-insights/');
 ---
 
 <header class="flex items-baseline justify-between py-8">
@@ -29,6 +33,15 @@ const isBlog =
       ]}
     >
       Blog
+    </a>
+    <a
+      href="/daily-insights"
+      class:list={[
+        'transition-colors hover:text-accent pb-1',
+        isDailyInsights ? 'text-accent border-b border-accent' : 'text-sub',
+      ]}
+    >
+      Daily Insights
     </a>
   </nav>
 </header>

@@ -1,0 +1,15 @@
+{
+  "$ref": "#/definitions/dailyInsights",
+  "definitions": {
+    "dailyInsights": {
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
