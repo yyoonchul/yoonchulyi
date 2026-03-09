@@ -21,3 +21,6 @@ npm-debug.log*
 # OS
 .DS_Store
 Thumbs.db
+
+# Local Inbox for AI Agents
+src/daily-insights/content/inbox.md
