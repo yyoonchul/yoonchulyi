@@ -22,7 +22,15 @@
 
 ### 1. {Article Title}
 
-{Detailed notes}
+1. {Major point 1}
+   - {Detail bullet A}
+   - {Detail bullet B}
+   - {Detail bullet C}
+2. {Major point 2}
+   - {Detail bullet A}
+   - {Detail bullet B}
+   - {Detail bullet C}
+(...)
 <!-- LANG:EN:END -->
 
 <!-- LANG:KO:START -->
@@ -46,7 +54,15 @@
 
 ### 1. {글 제목}
 
-{상세 정리}
+1. {핵심 포인트 1}
+   - {디테일 불렛 A}
+   - {디테일 불렛 B}
+   - {디테일 불렛 C}
+2. {핵심 포인트 2}
+   - {디테일 불렛 A}
+   - {디테일 불렛 B}
+   - {디테일 불렛 C}
+(...)
 <!-- LANG:KO:END -->
 ```
 

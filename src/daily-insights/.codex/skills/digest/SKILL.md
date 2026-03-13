@@ -1,12 +1,8 @@
 ---
-name: digest
-description: >
-  Use this skill to read URLs from content/inbox.md, collect source content,
-  and generate a bilingual daily digest file at content/YYYY/MM/DD.md.
-  The output must be EN first, then KO translation, in one file with fixed markers.
----
 
-# Daily Digest (EN -> KO)
+## name: digest description: &gt; Use this skill to read URLs from content/inbox.md, collect source content, and generate a bilingual daily digest file at content/YYYY/MM/DD.md. The output must be EN first, then KO translation, in one file with fixed markers.
+
+# Daily Digest (EN -&gt; KO)
 
 Generate or update one daily digest markdown file from `content/inbox.md`.
 
@@ -39,11 +35,14 @@ For each URL:
 
 ### 3. Summarize in English first
 
-Follow [`references/prompt-summarize.md`](references/prompt-summarize.md):
+Follow `references/prompt-summarize.md`:
 
 - Select one category from the allowed list.
 - Produce 3 bullet quick summary.
-- Produce detailed notes.
+- Produce detailed notes with structured lists (not a flat bullet dump).
+- Detailed notes: 20-30 lines per article.
+- 상세 정리: 기사별 20-30줄.
+- Use numbered major points, and under each major point add indented bullet lists for detailed notes.
 - If memo includes `summary-only`, skip detailed notes for that item.
 
 ### 4. Translate EN output to Korean
@@ -54,7 +53,7 @@ Follow [`references/prompt-summarize.md`](references/prompt-summarize.md):
 
 ### 5. Write one bilingual markdown file
 
-Use the fixed template in [`assets/template-daily.md`](assets/template-daily.md).
+Use the fixed template in `assets/template-daily.md`.
 
 - EN section MUST come first.
 - KO section MUST come second.

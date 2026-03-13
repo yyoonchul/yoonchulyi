@@ -35,9 +35,22 @@ Choose one per article:
 
 ## Detailed Notes
 
-- Start from key announcement or core argument.
-- Structure content with first-level bullets or numbered points.
-- Keep order consistent with quick summary order.
+- Do not output one flat bullet list.
+- Keep article order consistent with quick summary order.
+- Write detailed notes in 20-30 lines per article.
+- 기사별 상세 정리는 20-30줄로 작성합니다.
+
+### Required List Style Per Article
+
+Formatting rules:
+
+- Use numbered major points (`1.`, `2.`, `3.` ...) for the main storyline.
+- Under each major point, add 2-4 indented bullets with concrete details.
+- Detail bullets can include facts, numbers, implications, caveats, or assumptions as needed.
+- Write 2-5 major points per article, and keep total 20-30 lines.
+- Prefer concrete facts, named entities, numbers, and explicit assumptions.
+- Avoid repeating the same point across major points.
+- Do not enforce fixed sub-labels (for example `Evidence:`, `Why it matters:`, `Caveat:`).
 
 ## Failure Handling
 

@@ -17,6 +17,9 @@ Generate or update one daily digest file from `content/inbox.md`.
 1. Read and parse inbox URLs.
 2. Fetch source contents and metadata.
 3. Create digest in English first (summary + detail).
+   - Detailed notes: 20-30 lines per article.
+   - 상세 정리: 기사별 20-30줄.
+   - Use numbered major points, and under each major point add indented bullet lists for detailed notes.
 4. Translate that digest into Korean.
 5. Write one file with fixed markers:
    - `<!-- LANG:EN:START -->`

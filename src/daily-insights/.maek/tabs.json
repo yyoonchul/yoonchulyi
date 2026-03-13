@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "activeTabId": "/Users/yoonchul/Desktop/yoonchulyi.com/src/daily-insights/content/2026/03/06.md",
+  "tabs": [
+    {
+      "id": "/Users/yoonchul/Desktop/yoonchulyi.com/src/daily-insights/.codex/skills/digest/SKILL.md",
+      "name": "SKILL.md",
+      "parentName": "digest",
+      "isPreview": false
+    },
+    {
+      "id": "/Users/yoonchul/Desktop/yoonchulyi.com/src/daily-insights/content/2026/03/06.md",
+      "name": "06.md",
+      "parentName": "03",
+      "isPreview": true
+    }
+  ]
+}
