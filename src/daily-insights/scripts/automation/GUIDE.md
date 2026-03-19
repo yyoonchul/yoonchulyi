@@ -105,9 +105,14 @@ claude auth login
 - `run-digest-codex.sh`는 기본적으로 아래로 실행됩니다.
   - `codex exec --dangerously-bypass-approvals-and-sandbox`
 - 즉, 승인/샌드박스 질의 없이 비대화식으로 실행되며, 외부 URL fetch도 도메인 화이트리스트 없이 처리합니다.
+- Codex 실행 실패 시 폴백 재시도 기본값:
+  - `DIGEST_CODEX_RETRY_MAX_ATTEMPTS=3` (총 시도 횟수)
+  - `DIGEST_CODEX_RETRY_INTERVAL_SECONDS=600` (시도 간 대기 초)
 - 필요하면 기본값을 환경변수로 바꿀 수 있습니다.
   - `DIGEST_CODEX_BYPASS_APPROVALS_AND_SANDBOX=false`
   - `DIGEST_CODEX_SANDBOX_MODE=workspace-write` (위 값을 `false`로 바꾼 경우에 사용)
+  - `DIGEST_CODEX_RETRY_MAX_ATTEMPTS=5`
+  - `DIGEST_CODEX_RETRY_INTERVAL_SECONDS=300`
 
 원하면 환경변수로 변경 가능합니다.
 
@@ -127,6 +132,8 @@ DIGEST_PUSH_REMOTE=origin DIGEST_PUSH_BRANCH=main ./scripts/automation/run-diges
 - Codex 작업 추가:
   - `DIGEST_CODEX_SANDBOX_MODE` (기본 `danger-full-access`)
   - `DIGEST_CODEX_BYPASS_APPROVALS_AND_SANDBOX` (기본 `true`)
+  - `DIGEST_CODEX_RETRY_MAX_ATTEMPTS` (기본 `3`)
+  - `DIGEST_CODEX_RETRY_INTERVAL_SECONDS` (기본 `600`)
   - `DIGEST_PRE_SYNC_SHORTCUT_NAME` (기본 `digest`)
   - `DIGEST_PRE_SYNC_DELAY_SECONDS` (기본 `0`)
   - `DIGEST_PRE_SYNC_SHORTCUT_TIMEOUT_SECONDS` (기본 `300`)

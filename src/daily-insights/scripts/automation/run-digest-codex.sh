@@ -11,9 +11,18 @@ require_command codex
 CODEX_SANDBOX_MODE="${DIGEST_CODEX_SANDBOX_MODE:-danger-full-access}"
 CODEX_BYPASS_APPROVALS_AND_SANDBOX="${DIGEST_CODEX_BYPASS_APPROVALS_AND_SANDBOX:-true}"
 CODEX_TIMEOUT_SECONDS="${DIGEST_CODEX_TIMEOUT_SECONDS:-10800}"
+CODEX_RETRY_MAX_ATTEMPTS="${DIGEST_CODEX_RETRY_MAX_ATTEMPTS:-3}"
+CODEX_RETRY_INTERVAL_SECONDS="${DIGEST_CODEX_RETRY_INTERVAL_SECONDS:-600}"
 PRE_SYNC_SHORTCUT_NAME="${DIGEST_PRE_SYNC_SHORTCUT_NAME:-}"
 PRE_SYNC_DELAY_SECONDS="${DIGEST_PRE_SYNC_DELAY_SECONDS:-0}"
 PRE_SYNC_SHORTCUT_TIMEOUT_SECONDS="${DIGEST_PRE_SYNC_SHORTCUT_TIMEOUT_SECONDS:-300}"
+
+if [[ ! "${CODEX_RETRY_MAX_ATTEMPTS}" =~ ^[1-9][0-9]*$ ]]; then
+  CODEX_RETRY_MAX_ATTEMPTS="3"
+fi
+if [[ ! "${CODEX_RETRY_INTERVAL_SECONDS}" =~ ^[0-9]+$ ]]; then
+  CODEX_RETRY_INTERVAL_SECONDS="600"
+fi
 
 if ! codex_login_ok; then
   echo "ERROR: Codex is not logged in. Run: codex login" >&2
@@ -67,39 +76,62 @@ if [[ ! -s "${local_inbox_path}" ]]; then
   exit 0
 fi
 
-print_header "Running digest with Codex skill"
 if [[ "${CODEX_BYPASS_APPROVALS_AND_SANDBOX}" == "true" ]]; then
   print_header "Codex mode: bypass approvals+sandbox (non-interactive)"
-  set +e
-  run_with_timeout "${CODEX_TIMEOUT_SECONDS}" \
-    codex exec \
-      -c 'model_reasoning_effort="high"' \
-      -C "${REPO_ROOT}" \
-      --dangerously-bypass-approvals-and-sandbox \
-      "${PROMPT}"
-  run_status="$?"
-  set -e
 else
   print_header "Codex mode: sandbox=${CODEX_SANDBOX_MODE} (non-interactive)"
-  set +e
-  run_with_timeout "${CODEX_TIMEOUT_SECONDS}" \
-    codex exec \
-      -c 'model_reasoning_effort="high"' \
-      -C "${REPO_ROOT}" \
-      -s "${CODEX_SANDBOX_MODE}" \
-      "${PROMPT}"
-  run_status="$?"
-  set -e
 fi
 
-if [[ "${run_status}" -eq 124 ]]; then
-  echo "ERROR: codex run timed out after ${CODEX_TIMEOUT_SECONDS}s." >&2
-  exit 124
-fi
-if [[ "${run_status}" -ne 0 ]]; then
-  echo "ERROR: codex run failed with exit code ${run_status}." >&2
-  exit "${run_status}"
-fi
+attempt=1
+while true; do
+  print_header "Running digest with Codex skill (attempt ${attempt}/${CODEX_RETRY_MAX_ATTEMPTS})"
+
+  if [[ "${CODEX_BYPASS_APPROVALS_AND_SANDBOX}" == "true" ]]; then
+    set +e
+    run_with_timeout "${CODEX_TIMEOUT_SECONDS}" \
+      codex exec \
+        -c 'model_reasoning_effort="high"' \
+        -C "${REPO_ROOT}" \
+        --dangerously-bypass-approvals-and-sandbox \
+        "${PROMPT}"
+    run_status="$?"
+    set -e
+  else
+    set +e
+    run_with_timeout "${CODEX_TIMEOUT_SECONDS}" \
+      codex exec \
+        -c 'model_reasoning_effort="high"' \
+        -C "${REPO_ROOT}" \
+        -s "${CODEX_SANDBOX_MODE}" \
+        "${PROMPT}"
+    run_status="$?"
+    set -e
+  fi
+
+  if [[ "${run_status}" -eq 0 ]]; then
+    break
+  fi
+
+  if [[ "${attempt}" -ge "${CODEX_RETRY_MAX_ATTEMPTS}" ]]; then
+    if [[ "${run_status}" -eq 124 ]]; then
+      echo "ERROR: codex run timed out after ${CODEX_TIMEOUT_SECONDS}s (attempt ${attempt}/${CODEX_RETRY_MAX_ATTEMPTS})." >&2
+      exit 124
+    fi
+    echo "ERROR: codex run failed with exit code ${run_status} (attempt ${attempt}/${CODEX_RETRY_MAX_ATTEMPTS})." >&2
+    exit "${run_status}"
+  fi
+
+  if [[ "${run_status}" -eq 124 ]]; then
+    print_header "Codex run timed out after ${CODEX_TIMEOUT_SECONDS}s. Retrying in ${CODEX_RETRY_INTERVAL_SECONDS}s."
+  else
+    print_header "Codex run failed with exit code ${run_status}. Retrying in ${CODEX_RETRY_INTERVAL_SECONDS}s."
+  fi
+
+  if [[ "${CODEX_RETRY_INTERVAL_SECONDS}" -gt 0 ]]; then
+    sleep "${CODEX_RETRY_INTERVAL_SECONDS}"
+  fi
+  attempt="$((attempt + 1))"
+done
 
 clear_icloud_inbox_if_local_cleared
 
