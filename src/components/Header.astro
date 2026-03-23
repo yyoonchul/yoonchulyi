@@ -1,14 +1,10 @@
 ---
+import { isPathActive } from '../lib/navigation';
+
 const pathname = Astro.url.pathname;
-const isAbout = pathname === '/' || pathname === '/index.html';
-const isBlog =
-  pathname === '/blog' ||
-  pathname === '/blog/' ||
-  pathname.startsWith('/blog/');
-const isDailyInsights =
-  pathname === '/daily-insights' ||
-  pathname === '/daily-insights/' ||
-  pathname.startsWith('/daily-insights/');
+const isAbout = isPathActive(pathname, '/about', { exact: false });
+const isBlog = isPathActive(pathname, '/blog', { exact: false });
+const isDailyInsights = isPathActive(pathname, '/daily-insights', { exact: false });
 ---
 
 <header class="flex items-baseline justify-between py-8">
@@ -17,7 +13,7 @@ const isDailyInsights =
   </a>
   <nav class="flex gap-6 font-mono text-sm">
     <a
-      href="/"
+      href="/about"
       class:list={[
         'transition-colors hover:text-accent pb-1',
         isAbout ? 'text-accent border-b border-accent' : 'text-sub',

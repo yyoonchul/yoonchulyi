@@ -1,0 +1,102 @@
+---
+import AboutSection from '../components/AboutSection.astro';
+import { getAboutExperiences, getAboutProjects } from '../lib/about';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const experiences = await getAboutExperiences();
+const projects = await getAboutProjects();
+---
+
+<BaseLayout title="About - Yoonchul Yi">
+  <main class="py-8 space-y-12">
+    <AboutSection title="Experiences">
+      {experiences.map(({ entry, Content }) => (
+        <article class="space-y-2">
+          <h2 class="font-serif text-lg text-text">
+            {entry.data.role}
+            {entry.data.organization && (
+              <>
+                {' '}@{' '}
+                {entry.data.organizationHref ? (
+                  <a
+                    href={entry.data.organizationHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-sub hover:text-accent hover:underline transition-colors"
+                  >
+                    {entry.data.organization}
+                  </a>
+                ) : (
+                  entry.data.organization
+                )}
+              </>
+            )}
+            <span class="block font-mono text-xs text-sub mt-1">
+              {entry.data.period}
+            </span>
+          </h2>
+          <div class="about-rich-text font-serif text-sm leading-relaxed text-text/90">
+            <Content />
+          </div>
+        </article>
+      ))}
+    </AboutSection>
+
+    <AboutSection title="Projects">
+      {projects.map(({ entry, Content }) => (
+        <article class="space-y-2">
+          <h2 class="font-serif text-lg text-text">
+            {entry.data.title}
+          </h2>
+          <div class="about-rich-text font-serif text-sm leading-relaxed text-text/90">
+            <Content />
+          </div>
+          {entry.data.href && (
+            <a
+              href={entry.data.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="font-mono text-xs text-sub hover:text-accent hover:underline transition-colors"
+            >
+              {entry.data.linkLabel ?? 'learn more ↗'}
+            </a>
+          )}
+        </article>
+      ))}
+    </AboutSection>
+  </main>
+</BaseLayout>
+
+<style>
+  :global(.about-rich-text p) {
+    margin-bottom: 1rem;
+  }
+
+  :global(.about-rich-text p:last-child) {
+    margin-bottom: 0;
+  }
+
+  :global(.about-rich-text ul),
+  :global(.about-rich-text ol) {
+    margin: 0.75rem 0;
+    padding-left: 1.25rem;
+  }
+
+  :global(.about-rich-text ul) {
+    list-style: disc;
+  }
+
+  :global(.about-rich-text ol) {
+    list-style: decimal;
+  }
+
+  :global(.about-rich-text li + li) {
+    margin-top: 0.25rem;
+  }
+
+  :global(.about-rich-text a) {
+    color: #ea580c;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+</style>
