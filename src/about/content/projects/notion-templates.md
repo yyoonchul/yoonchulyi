@@ -5,4 +5,4 @@ linkLabel: learn more ↗
 order: 80
 ---
 
-I design and sell Notion templates to boost personal productivity. (30k+ downloads) Many templates are free, feel free to take a look!
+I design and sell Notion templates to boost personal productivity. (66k+ downloads) Many templates are free, feel free to take a look!
