@@ -13,15 +13,7 @@ const posts = (await getCollection('blog')).sort(
   <section class="py-8">
     <h1 class="font-serif text-2xl mb-2">Blog</h1>
 
-    <div class="mb-12">
-      <ListItem
-        title="Subscribe on Substack"
-        date="External Link ↗"
-        href="https://yoonchulnotes.substack.com/"
-      />
-    </div>
-
-    <div>
+    <div class="mt-6">
       {posts.map((post) => {
         const title = post.data.title;
         return (

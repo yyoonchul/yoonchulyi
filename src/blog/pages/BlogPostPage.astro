@@ -16,9 +16,19 @@ interface Props {
 }
 
 const { post, slug, title, content } = Astro.props as Props;
+
+const enHasContent = content.enMarkdown.trim().length > 0;
+const koHasContent = content.koMarkdown.trim().length > 0;
+const defaultLang = enHasContent ? 'en' : koHasContent ? 'ko' : 'en';
+
 const markdownProcessor = await getBlogMarkdownProcessor();
-const enRendered = await markdownProcessor.render(content.enMarkdown);
-const koRendered = await markdownProcessor.render(content.koMarkdown);
+const enRendered = enHasContent
+  ? await markdownProcessor.render(content.enMarkdown)
+  : null;
+const koRendered = koHasContent
+  ? await markdownProcessor.render(content.koMarkdown)
+  : null;
+
 const postRelativeUrl = getBlogHrefFromTitle(title);
 ---
 
@@ -50,9 +60,12 @@ const postRelativeUrl = getBlogHrefFromTitle(title);
           <button
             id="blog-lang-en"
             type="button"
-            class="blog-lang-button text-accent"
+            class:list={[
+              'blog-lang-button',
+              { 'text-accent': defaultLang === 'en' },
+            ]}
             data-lang="en"
-            aria-pressed="true"
+            aria-pressed={defaultLang === 'en' ? 'true' : 'false'}
           >
             En
           </button>
@@ -60,9 +73,12 @@ const postRelativeUrl = getBlogHrefFromTitle(title);
           <button
             id="blog-lang-ko"
             type="button"
-            class="blog-lang-button"
+            class:list={[
+              'blog-lang-button',
+              { 'text-accent': defaultLang === 'ko' },
+            ]}
             data-lang="ko"
-            aria-pressed="false"
+            aria-pressed={defaultLang === 'ko' ? 'true' : 'false'}
           >
             Ko
           </button>
@@ -81,16 +97,64 @@ const postRelativeUrl = getBlogHrefFromTitle(title);
     </header>
 
     <div
-      class="blog-content font-serif text-base leading-relaxed text-text"
+      class:list={[
+        'blog-content font-serif text-base leading-relaxed text-text',
+        { hidden: defaultLang !== 'en' },
+      ]}
       data-lang-panel="en"
     >
-      <div set:html={enRendered.code} />
+      {
+        enHasContent && enRendered ? (
+          <div set:html={enRendered.code} />
+        ) : (
+          <div
+            class="blog-empty-lang rounded-md border border-sub/25 bg-sub/5 px-5 py-6"
+            role="status"
+            aria-live="polite"
+          >
+            <p class="font-mono text-sm text-sub">
+              English version is not available yet.
+            </p>
+            <p class="mt-2 font-mono text-xs text-sub/80">
+              {
+                koHasContent
+                  ? 'Use the Ko toggle above to read this post in Korean.'
+                  : 'Korean text is not available for this post either.'
+              }
+            </p>
+          </div>
+        )
+      }
     </div>
     <div
-      class="blog-content font-serif text-base leading-relaxed text-text hidden"
+      class:list={[
+        'blog-content font-serif text-base leading-relaxed text-text',
+        { hidden: defaultLang !== 'ko' },
+      ]}
       data-lang-panel="ko"
     >
-      <div set:html={koRendered.code} />
+      {
+        koHasContent && koRendered ? (
+          <div set:html={koRendered.code} />
+        ) : (
+          <div
+            class="blog-empty-lang rounded-md border border-sub/25 bg-sub/5 px-5 py-6"
+            role="status"
+            aria-live="polite"
+          >
+            <p class="font-mono text-sm text-sub">
+              한국어 버전은 아직 준비 중입니다.
+            </p>
+            <p class="mt-2 font-mono text-xs text-sub/80">
+              {
+                enHasContent
+                  ? '위에서 En을 눌러 영어 본문을 읽을 수 있습니다.'
+                  : '영어 본문도 아직 없습니다.'
+              }
+            </p>
+          </div>
+        )
+      }
     </div>
   </article>
 </BaseLayout>
@@ -214,6 +278,44 @@ const postRelativeUrl = getBlogHrefFromTitle(title);
 
   :global(.blog-content li + li) {
     margin-top: 0.35rem;
+  }
+
+  :global(.blog-content hr) {
+    margin: 1.25rem 0 0.5rem;
+    border: 0;
+    border-top: 1px solid rgba(140, 140, 140, 0.35);
+  }
+
+  :global(.blog-content hr + p) {
+    margin-top: 0;
+  }
+
+  :global(.blog-content hr + ul),
+  :global(.blog-content hr + ol) {
+    margin-top: 0.5rem;
+  }
+
+  :global(.blog-content hr + section[data-footnotes]) {
+    margin-top: 0.75rem;
+  }
+
+  :global(.blog-content section[data-footnotes]) {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: rgba(25, 25, 25, 0.82);
+  }
+
+  :global(.blog-content section[data-footnotes] ol) {
+    margin: 0.5rem 0 0;
+  }
+
+  :global(.blog-content section[data-footnotes] p) {
+    margin-bottom: 0.5rem;
+  }
+
+  :global(.blog-content sup) {
+    font-size: 0.75em;
+    line-height: 0;
   }
 
   :global(.blog-content blockquote) {

@@ -182,10 +182,6 @@ export function parseBlogBilingualContent(
     koEndIndex,
   );
 
-  if (!enMarkdown || !koMarkdown) {
-    throw new Error(`[blog] Empty EN or KO section in ${entry.id}.`);
-  }
-
   return {
     enMarkdown,
     koMarkdown,
