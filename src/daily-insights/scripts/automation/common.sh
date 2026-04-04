@@ -210,9 +210,9 @@ sync_inbox_from_icloud() {
   fi
 
   print_header "Using iCloud inbox path: ${source_path}"
-  print_header "Syncing inbox from iCloud"
+  print_header "Moving iCloud inbox into repo (append), then clearing iCloud"
   local tmp_inbox_path
-  tmp_inbox_path="$(mktemp "${local_inbox_path}.tmp.XXXXXX")"
+  tmp_inbox_path="$(mktemp "${local_inbox_path}.icloud.XXXXXX")"
   if ! cat "${source_path}" > "${tmp_inbox_path}"; then
     rm -f "${tmp_inbox_path}"
     print_header "Failed to read iCloud inbox (${source_path}). Using local inbox."
@@ -222,41 +222,20 @@ sync_inbox_from_icloud() {
     fi
     return 0
   fi
-  mv "${tmp_inbox_path}" "${local_inbox_path}"
-}
 
-clear_icloud_inbox_if_local_cleared() {
-  local source_path="${DIGEST_ICLOUD_INBOX_PATH}"
-  local local_inbox_path="${REPO_ROOT}/${LOCAL_INBOX_RELATIVE_PATH}"
-
-  ensure_local_inbox_file
-
-  if [[ -z "${source_path}" ]]; then
-    print_header "DIGEST_ICLOUD_INBOX_PATH is empty. Skip iCloud inbox clear."
-    return 0
+  if [[ -s "${tmp_inbox_path}" ]]; then
+    if [[ -s "${local_inbox_path}" ]]; then
+      printf '\n' >> "${local_inbox_path}"
+    fi
+    cat "${tmp_inbox_path}" >> "${local_inbox_path}"
   fi
-
-  if [[ "${DIGEST_ICLOUD_AVAILABLE}" != "1" ]]; then
-    print_header "Skipping iCloud inbox clear because iCloud sync is disabled for this run."
-    return 0
-  fi
-
-  if [[ ! -f "${source_path}" ]]; then
-    print_header "iCloud inbox not found (${source_path}). Skip iCloud inbox clear."
-    return 0
-  fi
+  rm -f "${tmp_inbox_path}"
 
   if [[ ! -w "${source_path}" ]]; then
-    print_header "iCloud inbox is not writable (${source_path}). Skip iCloud inbox clear."
+    print_header "iCloud inbox is not writable (${source_path}). Skip iCloud clear after move."
     return 0
   fi
 
-  if [[ -s "${local_inbox_path}" ]]; then
-    print_header "Local inbox is not empty after digest. Skip iCloud inbox clear."
-    return 0
-  fi
-
-  print_header "Clearing iCloud inbox after successful digest"
   if ! : > "${source_path}"; then
     print_header "Failed to clear iCloud inbox (${source_path})."
     return 0

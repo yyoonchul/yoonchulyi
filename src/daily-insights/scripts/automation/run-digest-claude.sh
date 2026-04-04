@@ -47,6 +47,4 @@ if [[ "${run_status}" -ne 0 ]]; then
   exit "${run_status}"
 fi
 
-clear_icloud_inbox_if_local_cleared
-
 run_git_commit_and_push

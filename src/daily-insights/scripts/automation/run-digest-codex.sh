@@ -133,6 +133,4 @@ while true; do
   attempt="$((attempt + 1))"
 done
 
-clear_icloud_inbox_if_local_cleared
-
 run_git_commit_and_push

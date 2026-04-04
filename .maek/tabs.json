@@ -1,5 +1,18 @@
 {
-  "version": 1,
-  "activeTabId": null,
-  "tabs": []
+  "version": 2,
+  "activeTabId": "/Users/yoonchul/dev/yoonchulyi.com/package-lock.json",
+  "tabs": [
+    {
+      "id": "/Users/yoonchul/dev/yoonchulyi.com/src/about/content/experiences/rlwrld-business-research.md",
+      "name": "rlwrld-business-research.md",
+      "parentName": "experiences",
+      "isEphemeral": false
+    },
+    {
+      "id": "/Users/yoonchul/dev/yoonchulyi.com/package-lock.json",
+      "name": "package-lock.json",
+      "parentName": "",
+      "isEphemeral": true
+    }
+  ]
 }

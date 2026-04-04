@@ -7,7 +7,7 @@ import {
 
 export const getStaticPaths = getBlogPostStaticPaths;
 
-const { post, slug, title } = Astro.props as BlogPostPageProps;
+const { post, slug, title, content } = Astro.props as BlogPostPageProps;
 ---
 
-<BlogPostPage post={post} slug={slug} title={title} />
+<BlogPostPage post={post} slug={slug} title={title} content={content} />

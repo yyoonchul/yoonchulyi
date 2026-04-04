@@ -1,17 +1,24 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { formatBlogDate, getBlogHrefFromTitle } from '../lib/blog';
+import {
+  formatBlogDate,
+  getBlogHrefFromTitle,
+  type BlogBilingualContent,
+} from '../lib/blog';
+import { getBlogMarkdownProcessor } from '../lib/markdown';
 
 interface Props {
   post: CollectionEntry<'blog'>;
   slug: string;
   title: string;
+  content: BlogBilingualContent;
 }
 
-const { post, slug, title } = Astro.props as Props;
-const { Content } = await render(post);
+const { post, slug, title, content } = Astro.props as Props;
+const markdownProcessor = await getBlogMarkdownProcessor();
+const enRendered = await markdownProcessor.render(content.enMarkdown);
+const koRendered = await markdownProcessor.render(content.koMarkdown);
 const postRelativeUrl = getBlogHrefFromTitle(title);
 ---
 
@@ -34,24 +41,84 @@ const postRelativeUrl = getBlogHrefFromTitle(title);
         </p>
       </div>
 
-      <button
-        id="copy-link-button"
-        type="button"
-        data-relative-url={postRelativeUrl}
-        data-slug={slug}
-        class="font-mono text-xs text-sub hover:text-accent transition-colors"
-      >
-        <span id="copy-link-label">Share</span>
-      </button>
+      <div class="flex items-center gap-4">
+        <div
+          role="group"
+          aria-label="Language toggle"
+          class="font-mono text-xs text-sub flex items-center gap-2"
+        >
+          <button
+            id="blog-lang-en"
+            type="button"
+            class="blog-lang-button text-accent"
+            data-lang="en"
+            aria-pressed="true"
+          >
+            En
+          </button>
+          <span>/</span>
+          <button
+            id="blog-lang-ko"
+            type="button"
+            class="blog-lang-button"
+            data-lang="ko"
+            aria-pressed="false"
+          >
+            Ko
+          </button>
+        </div>
+
+        <button
+          id="copy-link-button"
+          type="button"
+          data-relative-url={postRelativeUrl}
+          data-slug={slug}
+          class="font-mono text-xs text-sub hover:text-accent transition-colors"
+        >
+          <span id="copy-link-label">Share</span>
+        </button>
+      </div>
     </header>
 
-    <div class="blog-content font-serif text-base leading-relaxed text-text">
-      <Content />
+    <div
+      class="blog-content font-serif text-base leading-relaxed text-text"
+      data-lang-panel="en"
+    >
+      <div set:html={enRendered.code} />
+    </div>
+    <div
+      class="blog-content font-serif text-base leading-relaxed text-text hidden"
+      data-lang-panel="ko"
+    >
+      <div set:html={koRendered.code} />
     </div>
   </article>
 </BaseLayout>
 
 <script>
+  const langEnButton = document.getElementById('blog-lang-en');
+  const langKoButton = document.getElementById('blog-lang-ko');
+  const panels = Array.from(document.querySelectorAll('[data-lang-panel]'));
+
+  const setLanguage = (lang) => {
+    panels.forEach((panel) => {
+      panel.classList.toggle('hidden', panel.dataset.langPanel !== lang);
+    });
+
+    if (langEnButton && langKoButton) {
+      const isEnglish = lang === 'en';
+      langEnButton.setAttribute('aria-pressed', isEnglish ? 'true' : 'false');
+      langKoButton.setAttribute('aria-pressed', isEnglish ? 'false' : 'true');
+      langEnButton.classList.toggle('text-accent', isEnglish);
+      langKoButton.classList.toggle('text-accent', !isEnglish);
+    }
+  };
+
+  if (langEnButton && langKoButton) {
+    langEnButton.addEventListener('click', () => setLanguage('en'));
+    langKoButton.addEventListener('click', () => setLanguage('ko'));
+  }
+
   const copyButton = document.getElementById('copy-link-button');
   const copyLabel = document.getElementById('copy-link-label');
   const copyFeedbackDurationMs = 1600;
@@ -97,6 +164,14 @@ const postRelativeUrl = getBlogHrefFromTitle(title);
 </script>
 
 <style>
+  :global(.blog-lang-button) {
+    transition: color 0.2s ease;
+  }
+
+  :global(.blog-lang-button:hover) {
+    color: #ea580c;
+  }
+
   :global(.blog-content h2) {
     margin-top: 2rem;
     margin-bottom: 0.75rem;
