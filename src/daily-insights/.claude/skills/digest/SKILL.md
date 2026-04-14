@@ -16,6 +16,9 @@ Generate or update one daily digest file from `content/inbox.md`.
 
 1. Read and parse inbox URLs.
 2. Fetch source contents and metadata.
+   - **YouTube URLs** (`youtube.com`, `youtu.be`): Run `scripts/fetch-yt-transcript.sh <URL>` to extract transcript and metadata (title, channel, duration). Use the transcript text as source content.
+   - **Other URLs**: Fetch via standard web fetch.
+   - If YouTube transcript extraction fails: mark `⚠️ Transcript unavailable`, skip detailed notes.
 3. Create digest in English first (summary + detail).
    - Detailed notes: 20-30 lines per article.
    - 상세 정리: 기사별 20-30줄.

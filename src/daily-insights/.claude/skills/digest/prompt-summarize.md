@@ -49,7 +49,19 @@ Formatting rules:
 - Avoid repeating the same point across major points.
 - Do not enforce fixed sub-labels (for example `Evidence:`, `Why it matters:`, `Caveat:`).
 
+## YouTube / Video Content
+
+When the source is a YouTube video (transcript extracted via `scripts/fetch-yt-transcript.sh`):
+
+- **Source**: `YouTube`
+- **Metadata line**: `**Source:** YouTube · **Channel:** {Channel} · **Duration:** {Duration} · **Category:** {Category} · **Link:** [Original]({URL})`
+- Summarize based on the transcript text, not the video description.
+- Convert spoken/colloquial language into structured written form.
+- Focus on the speaker's key arguments, demonstrations, or announcements.
+- If the transcript is very long, prioritize the main thesis and concrete examples over tangential remarks.
+
 ## Exceptions
 
 - If fetch fails: mark `⚠️ Fetch failed`, skip detailed notes.
+- If YouTube transcript unavailable: mark `⚠️ Transcript unavailable`, skip detailed notes.
 - If memo contains `summary-only`: skip detailed notes for that item.

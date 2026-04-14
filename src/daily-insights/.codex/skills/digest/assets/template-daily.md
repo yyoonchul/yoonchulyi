@@ -24,6 +24,12 @@ Use this exact fixed structure.
 - Bullet 2
 - Bullet 3
 
+### {Video Title} _(YouTube)_
+**Source:** YouTube · **Channel:** {Channel} · **Duration:** {Duration} · **Category:** {Category} · **Link:** [Original]({URL})
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
 (...)
 
 ---
@@ -76,6 +82,12 @@ Use this exact fixed structure.
 
 ### {글 제목 2}
 **출처:** {출처} · **카테고리:** {카테고리} · **링크:** [원문]({URL})
+- 불렛 1
+- 불렛 2
+- 불렛 3
+
+### {영상 제목} _(YouTube)_
+**출처:** YouTube · **채널:** {채널} · **길이:** {길이} · **카테고리:** {카테고리} · **링크:** [원문]({URL})
 - 불렛 1
 - 불렛 2
 - 불렛 3

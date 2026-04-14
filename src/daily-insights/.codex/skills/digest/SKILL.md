@@ -30,8 +30,8 @@ Generate or update one daily digest markdown file from `content/inbox.md`.
 
 For each URL:
 
-- Fetch article content and metadata (title, source, publish date if available).
-- If fetch fails, keep title/link and mark as `⚠️ Fetch failed`.
+- **YouTube URLs** (`youtube.com`, `youtu.be`): Run `scripts/fetch-yt-transcript.sh <URL>` to extract transcript and metadata (title, channel, duration). Use the transcript text as source content. If transcript extraction fails, mark as `⚠️ Transcript unavailable`.
+- **Other URLs**: Fetch article content and metadata (title, source, publish date if available). If fetch fails, keep title/link and mark as `⚠️ Fetch failed`.
 
 ### 3. Summarize in English first
 
