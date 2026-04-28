@@ -5,4 +5,4 @@ linkLabel: learn more ↗
 order: 110
 ---
 
-A Markdown editor I built for myself.
+I wanted to make my note sexy again.

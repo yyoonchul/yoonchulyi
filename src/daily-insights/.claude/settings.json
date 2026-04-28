@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(npx tsx src/daily-insights/meta/card-news/generate.ts:*)",
+      "Bash(npx tsx src/daily-insights/meta/card-news/build-examples.ts)",
+      "Bash(npx tsx meta/card-news/generate.ts:*)",
+      "Bash(npx tsx meta/card-news/build-examples.ts)",
+      "Bash((set -a; [ -f src/daily-insights/.env ] && . src/daily-insights/.env; set +a; npx tsx src/daily-insights/meta/card-news/generate.ts:*)",
+      "Bash(mkdir -p meta/card-news/headers/*)",
+      "Bash(mkdir -p meta/card-news/queries/*)",
+      "Bash(rm -rf meta/card-news/output/*)",
+      "Bash(rm meta/card-news/headers/*.json)",
+      "Bash(awk *)"
+    ]
+  }
+}

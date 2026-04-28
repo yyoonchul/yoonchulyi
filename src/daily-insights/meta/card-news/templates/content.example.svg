@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350">
+  <defs>
+    <linearGradient id="editorialBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1B1B1D"/>
+      <stop offset="55%" stop-color="#121214"/>
+      <stop offset="100%" stop-color="#050506"/>
+    </linearGradient>
+    <radialGradient id="editorialBacklight" cx="50%" cy="32%" r="48%">
+      <stop offset="0%" stop-color="#6A6A70" stop-opacity="0.85"/>
+      <stop offset="55%" stop-color="#2A2A2E" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="editorialFigure" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#050506" stop-opacity="0.95"/>
+      <stop offset="70%" stop-color="#050506" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#050506" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="editorialTextBackdrop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="38%" stop-color="#000" stop-opacity="0.72"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.96"/>
+    </linearGradient>
+    <filter id="editorialGrain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" stitchTiles="stitch"/>
+      <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.1 0"/>
+    </filter>
+    <filter id="editorialBlur" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+  </defs>
+
+  <rect width="1080" height="1350" fill="url(#editorialBg)"/>
+  <rect width="1080" height="1350" fill="url(#editorialBacklight)"/>
+  <g filter="url(#editorialBlur)" opacity="0.9">
+    <ellipse cx="570" cy="430" rx="180" ry="230" fill="url(#editorialFigure)"/>
+  </g>
+
+  <rect width="1080" height="1350" filter="url(#editorialGrain)" opacity="0.8"/>
+  <rect x="0" y="610" width="1080" height="740" fill="url(#editorialTextBackdrop)"/>
+
+  <!-- Header (centered) -->
+  <text x="80" y="776"
+          font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="130" font-weight="700" fill="#FFFFFF" letter-spacing="-1">Stella,</text>
+  <text x="80" y="920"
+          font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="130" font-weight="700" fill="#FFFFFF" letter-spacing="-1">인간 비서</text>
+  <text x="80" y="1064"
+          font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="130" font-weight="700" fill="#FFFFFF" letter-spacing="-1">대체</text>
+
+  <!-- Bullet body -->
+  <circle cx="88" cy="1150" r="4" fill="#F26B1F"/>
+  <text x="108" y="1160"
+          font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="24" fill="#A8A8AD">Ryan Sarver가 OpenClaw 기반 비서 Stella를</text>
+  <text x="108" y="1200"
+          font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="24" fill="#A8A8AD">공개했다. 지속 메모리, 미팅 준비, 태스크 추적을 결합해 인간 비서를</text>
+  <text x="108" y="1240"
+          font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="24" fill="#A8A8AD">대체했다고 주장한다.</text>
+</svg>

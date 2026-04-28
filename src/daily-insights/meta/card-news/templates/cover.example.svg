@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350">
+  <defs>
+    <linearGradient id="editorialBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1B1B1D"/>
+      <stop offset="55%" stop-color="#121214"/>
+      <stop offset="100%" stop-color="#050506"/>
+    </linearGradient>
+    <radialGradient id="editorialBacklight" cx="50%" cy="32%" r="48%">
+      <stop offset="0%" stop-color="#6A6A70" stop-opacity="0.85"/>
+      <stop offset="55%" stop-color="#2A2A2E" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="editorialFigure" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#050506" stop-opacity="0.95"/>
+      <stop offset="70%" stop-color="#050506" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#050506" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="editorialTextBackdrop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="38%" stop-color="#000" stop-opacity="0.72"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.96"/>
+    </linearGradient>
+    <filter id="editorialGrain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" stitchTiles="stitch"/>
+      <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.1 0"/>
+    </filter>
+    <filter id="editorialBlur" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+  </defs>
+
+  <rect width="1080" height="1350" fill="url(#editorialBg)"/>
+  <rect width="1080" height="1350" fill="url(#editorialBacklight)"/>
+  <g filter="url(#editorialBlur)" opacity="0.9">
+    <ellipse cx="570" cy="430" rx="180" ry="230" fill="url(#editorialFigure)"/>
+  </g>
+
+  <rect width="1080" height="1350" filter="url(#editorialGrain)" opacity="0.8"/>
+
+  <!-- Headline -->
+  <text x="80" y="577" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="120" font-weight="700" fill="#FFFFFF" letter-spacing="-1">AI 비서 실전</text>
+  <text x="80" y="715" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="120" font-weight="700" fill="#FFFFFF" letter-spacing="-1">구축법, 반도체</text>
+  <text x="80" y="853" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="120" font-weight="700" fill="#FFFFFF" letter-spacing="-1">판도 재편</text>
+
+  <!-- Date -->
+  <text x="80" y="1180"
+        font-family="'IBM Plex Mono', monospace" font-size="18" fill="#F26B1F" letter-spacing="4">2026.04.13 MON</text>
+
+  <!-- Subtitle -->
+  <text x="80" y="1228"
+        font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="28" fill="#A8A8AD">서울대 공대생이 오늘 읽은 테크 뉴스</text>
+</svg>

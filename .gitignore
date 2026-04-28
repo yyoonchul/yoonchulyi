@@ -23,3 +23,9 @@ npm-debug.log*
 Thumbs.db
 
 .maek
+
+# card-news generated output
+src/daily-insights/meta/card-news/output/
+
+# card-news downloaded image cache (라이선스 자료 재배포 회피)
+src/daily-insights/meta/card-news/assets/cache/
