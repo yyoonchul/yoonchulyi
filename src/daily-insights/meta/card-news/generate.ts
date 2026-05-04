@@ -125,7 +125,7 @@ async function main() {
     writeFileSync(join(outDir, `${num}.png`), png);
   }
 
-  // 인스타 캡션용 크레딧 메타 — 모든 슬라이드 기록 (해석 실패도 null로 남김)
+  // 이미지 크레딧 메타 — 모든 슬라이드 기록 (해석 실패도 null로 남김)
   const credits = slides.map((s, i) =>
     s.credit
       ? { slide: i + 1, status: 'ok' as const, query: s.query, ...s.credit }

@@ -39,9 +39,8 @@ Use the \`\$card-news\` skill in this repository and execute the full workflow n
 
 Constraints:
 - Today's digest already exists at \`content/${DATE_PATH}.md\`. Do not regenerate it.
-- Follow the skill end-to-end: parse digest KO section, generate \`meta/card-news/headers/${DATE_PATH}.json\`, generate \`meta/card-news/queries/${DATE_PATH}.json\`, run the renderer, and write \`meta/card-news/output/${DATE_PATH}/caption.md\` with attribution.
+- Follow the skill end-to-end: parse digest KO section, generate \`meta/card-news/headers/${DATE_PATH}.json\`, generate \`meta/card-news/queries/${DATE_PATH}.json\`, and run the renderer.
 - Renderer execution is hard-coded in this repository. Do not run \`node\`, \`npm\`, \`npx\`, or \`tsx\` directly for rendering. To render, execute exactly: \`scripts/automation/render-cardnews.sh ${DATE_PATH}\`.
-- Generate the caption only after \`scripts/automation/render-cardnews.sh ${DATE_PATH}\` succeeds, and read the fresh \`meta/card-news/output/${DATE_PATH}/credits.json\` for attribution.
 - Do not run any git commands.
 EOF
 

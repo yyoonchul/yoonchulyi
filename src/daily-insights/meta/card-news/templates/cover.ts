@@ -100,7 +100,7 @@ export function renderCover(data: CoverData, backgroundPath?: string | null): st
 
   <!-- Subtitle -->
   <text x="${spacing.page}" y="${subtitleY}"
-        font-family="${sansStack}" font-size="${font.subtitle}" fill="${cover.sub}">서울대 공대생이 오늘 읽은 테크 뉴스</text>
+        font-family="${sansStack}" font-size="${font.subtitle}" fill="${cover.sub}">이윤철이 오늘 읽은 인사이트</text>
 </svg>`;
 }
 

@@ -69,6 +69,22 @@ Style:
 - Prefer strong nouns and active shifts: `AI`, `반도체`, `빅테크`, `전력`, `규제`, `채용`, `가격`, `속도`, `경쟁`, `전환`.
 - Avoid bland labels like `오늘의 테크 뉴스`, article-title mashups, source names with no angle, and generic category lists.
 - Do not restate any bullet header verbatim.
+- Avoid reusing the same cover-title grammar across days. Do not default to `X가 Y를 바꾼다`, `X의 판이 바뀐다`, or `X가 다시 쓴다` unless it is clearly the strongest fit.
+
+Cover title pattern bank:
+
+| Pattern | Use when | Example |
+|---|---|---|
+| `무엇이 흔들린다` | market power, trust, rules, or assumptions are weakening | `AI 신뢰가 흔들린다` |
+| `무엇이 빨라진다` | speed, adoption, automation, or competition is the main signal | `자동화 경쟁이 빨라진다` |
+| `무엇의 기준이 바뀐다` | evaluation, pricing, hiring, design, or policy standards shift | `개발 도구의 기준이 바뀐다` |
+| `무엇이 어디로 간다` | capital, talent, users, or compute moves to a new place | `자본이 AI 인프라로 간다` |
+| `누가 무엇을 좁힌다` | a gap closes between competitors or technologies | `오픈소스가 격차를 좁힌다` |
+| `무엇이 비용이 된다` | hidden cost, energy, data, security, or regulation becomes central | `보안이 AI의 비용이 된다` |
+| `무엇이 실험을 넘는다` | prototypes become products, workflows, or infrastructure | `AI 에이전트가 실험을 넘는다` |
+| `무엇은 커지고, 무엇은 작아진다` | two forces move in opposite directions | `모델은 커지고, 팀은 작아진다` |
+| `무엇의 다음 전장` | a new competitive arena is emerging | `AI 검색의 다음 전장` |
+| `무엇을 다시 묻는다` | the day is about a renewed debate or unresolved question | `오픈소스를 다시 묻는다` |
 
 Examples:
 
@@ -81,6 +97,32 @@ Examples:
 ```json
 {
   "cover": ["빅테크 경쟁의 판이 바뀐다"]
+}
+```
+
+More varied examples:
+
+```json
+{
+  "cover": ["AI 신뢰가 흔들린다"]
+}
+```
+
+```json
+{
+  "cover": ["자동화 경쟁이 빨라진다"]
+}
+```
+
+```json
+{
+  "cover": ["보안이 AI의 비용이 된다"]
+}
+```
+
+```json
+{
+  "cover": ["모델은 커지고, 팀은 작아진다"]
 }
 ```
 

@@ -48,5 +48,5 @@
 
   <!-- Subtitle -->
   <text x="80" y="1228"
-        font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="28" fill="#A8A8AD">서울대 공대생이 오늘 읽은 테크 뉴스</text>
+        font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="28" fill="#A8A8AD">이윤철이 오늘 읽은 인사이트</text>
 </svg>

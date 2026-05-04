@@ -38,9 +38,9 @@ claude auth login
 
 주의: 두 스케줄을 동시에 켜면 같은 인박스를 중복 처리할 수 있습니다. 보통 하나만 활성화하세요.
 
-## Shortcut 선행 동기화 모드 (Codex)
+## Shortcut 선행 동기화 모드 (Codex / Claude Code)
 
-`run-digest-codex.sh`는 기본적으로 pre-sync shortcut 실행을 지원합니다.
+`run-digest-codex.sh`와 `run-digest-claude.sh`는 기본적으로 pre-sync shortcut 실행을 지원합니다.
 
 - 기본 shortcut 이름: `digest`
 - 기본 지연: `0`초
@@ -50,7 +50,7 @@ claude auth login
 
 1. `shortcuts run "digest"`
 2. 로컬 inbox 상태 확인 (비어 있으면 종료)
-3. (선택) 지연 후 Codex digest 실행
+3. (선택) 지연 후 선택한 엔진의 digest 실행
 4. 커밋/푸시
 
 이 모드가 활성화되면 해당 실행에서는 스크립트의 직접 iCloud inbox sync/clear를 건너뜁니다.
@@ -59,8 +59,8 @@ claude auth login
 중요:
 
 - `digest` shortcut은 **iCloud inbox -> repo inbox 복사 + iCloud 원본 inbox 비움**만 해야 합니다.
-- digest 스킬 실행은 shortcut이 아니라 `run-digest-codex.sh`가 담당해야 합니다.
-- `run-digest-codex.sh`를 shortcut 내부에서 다시 호출하면 중복 실행/재귀가 발생할 수 있습니다.
+- digest 스킬 실행은 shortcut이 아니라 `run-digest-codex.sh` 또는 `run-digest-claude.sh`가 담당해야 합니다.
+- 엔진 실행 스크립트를 shortcut 내부에서 다시 호출하면 중복 실행/재귀가 발생할 수 있습니다.
 - shortcut 이름/지연/타임아웃은 환경변수로 조정할 수 있습니다.
   - `DIGEST_PRE_SYNC_SHORTCUT_NAME`
   - `DIGEST_PRE_SYNC_DELAY_SECONDS`
@@ -134,6 +134,11 @@ DIGEST_PUSH_REMOTE=origin DIGEST_PUSH_BRANCH=main ./scripts/automation/run-diges
   - `DIGEST_CODEX_BYPASS_APPROVALS_AND_SANDBOX` (기본 `true`)
   - `DIGEST_CODEX_RETRY_MAX_ATTEMPTS` (기본 `3`)
   - `DIGEST_CODEX_RETRY_INTERVAL_SECONDS` (기본 `600`)
+- Claude Code 작업 추가:
+  - `DIGEST_CLAUDE_TIMEOUT_SECONDS` (기본 `10800`)
+  - `DIGEST_CLAUDE_RETRY_MAX_ATTEMPTS` (기본 `3`)
+  - `DIGEST_CLAUDE_RETRY_INTERVAL_SECONDS` (기본 `600`)
+- pre-sync shortcut 모드:
   - `DIGEST_PRE_SYNC_SHORTCUT_NAME` (기본 `digest`)
   - `DIGEST_PRE_SYNC_DELAY_SECONDS` (기본 `0`)
   - `DIGEST_PRE_SYNC_SHORTCUT_TIMEOUT_SECONDS` (기본 `300`)
@@ -157,6 +162,6 @@ DIGEST_PUSH_REMOTE=origin DIGEST_PUSH_BRANCH=main ./scripts/automation/run-diges
   - 심링크 타겟 파일 권한/접근 가능 여부를 확인하세요.
 - macOS iCloud/TCC 권한:
   - 레포 설정만으로는 부여할 수 없습니다(앱/프로세스 단위 권한).
-  - launchd가 실행하는 체인(쉘/codex)이 iCloud 경로에 접근 가능하도록 최초 1회 선허용이 필요합니다.
+  - launchd가 실행하는 체인(쉘/shortcuts/codex/claude)이 iCloud 경로에 접근 가능하도록 최초 1회 선허용이 필요합니다.
 - Git 인증:
   - 자동 푸시를 쓰면 keychain/ssh 인증도 비대화식으로 미리 완료되어 있어야 합니다.
