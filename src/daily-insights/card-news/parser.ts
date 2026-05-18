@@ -6,7 +6,7 @@ const KO_START = '<!-- LANG:KO:START -->';
 const KO_END = '<!-- LANG:KO:END -->';
 
 export function parseDigest(datePath: string): DigestData {
-  const contentDir = resolve(import.meta.dirname, '../../content');
+  const contentDir = resolve(import.meta.dirname, '../content');
   const filePath = resolve(contentDir, `${datePath}.md`);
   const raw = readFileSync(filePath, 'utf-8');
 
@@ -42,6 +42,7 @@ function parseCover(ko: string, datePath: string): CoverData {
 function parseArticles(ko: string): ArticleData[] {
   const summarySection = extractSection(ko, '## 📋 간단 요약', '## 📝');
   const summaryBlocks = splitByH3(summarySection);
+  const detailBlocks = splitDetailedByH3(extractSection(ko, '## 📝 상세 정리', null));
 
   return summaryBlocks.map((block, i) => {
     const title = block.title;
@@ -51,7 +52,14 @@ function parseArticles(ko: string): ArticleData[] {
       .filter((l) => l.startsWith('- '))
       .map((l) => l.slice(2).trim());
 
-    return { index: i + 1, title, source, category, bullets };
+    return {
+      index: i + 1,
+      title,
+      source,
+      category,
+      bullets,
+      detailSections: parseDetailSections(detailBlocks[i]?.body ?? ''),
+    };
   });
 }
 
@@ -86,6 +94,47 @@ function splitByH3(section: string): { title: string; body: string }[] {
   if (current) blocks.push({ title: current.title, body: current.lines.join('\n') });
 
   return blocks;
+}
+
+function splitDetailedByH3(section: string): { title: string; body: string }[] {
+  const blocks: { title: string; body: string }[] = [];
+  const lines = section.split('\n');
+  let current: { title: string; lines: string[] } | null = null;
+
+  for (const line of lines) {
+    const heading = line.match(/^###\s+(?:\d+\.\s*)?(.+)$/);
+    if (heading) {
+      if (current) blocks.push({ title: current.title, body: current.lines.join('\n') });
+      current = { title: heading[1].trim(), lines: [] };
+    } else if (current) {
+      current.lines.push(line);
+    }
+  }
+  if (current) blocks.push({ title: current.title, body: current.lines.join('\n') });
+
+  return blocks;
+}
+
+function parseDetailSections(body: string): { header: string; body: string[] }[] {
+  const sections: { header: string; body: string[] }[] = [];
+  let current: { header: string; body: string[] } | null = null;
+
+  for (const line of body.split('\n')) {
+    const topLevel = line.match(/^(\d+)\.\s+(.+)$/);
+    if (topLevel) {
+      if (current) sections.push(current);
+      current = { header: topLevel[2].trim(), body: [] };
+      continue;
+    }
+
+    const detail = line.match(/^\s+-\s+(.+)$/);
+    if (detail && current) {
+      current.body.push(detail[1].trim());
+    }
+  }
+
+  if (current) sections.push(current);
+  return sections;
 }
 
 function parseMetaLine(body: string): { source: string; category: string } {

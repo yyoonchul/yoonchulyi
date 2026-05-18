@@ -6,6 +6,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/common.sh"
 
 acquire_lock "cardnews-claude"
+run_log_init "cardnews" "claude"
 require_command claude
 
 CLAUDE_TIMEOUT_SECONDS="${CARDNEWS_CLAUDE_TIMEOUT_SECONDS:-3600}"
@@ -22,8 +23,10 @@ fi
 digest_path="${REPO_ROOT}/${DIGEST_RELATIVE_PATH}"
 if [[ ! -f "${digest_path}" ]]; then
   print_header "Today's digest not found (${DIGEST_RELATIVE_PATH}). Skip card news run."
+  run_log_finish_success "Today's digest was not found at \`${DIGEST_RELATIVE_PATH}\`; skipped card news skill."
   exit 0
 fi
+run_log_event "Digest found for card news" "Path: \`${DIGEST_RELATIVE_PATH}\`."
 
 if ! claude_login_ok; then
   echo "ERROR: Claude Code is not logged in. Run: claude auth login" >&2
@@ -37,14 +40,15 @@ Use the repository skill at \`.claude/skills/card-news/SKILL.md\` and execute it
 
 Constraints:
 - Today's digest already exists at \`content/${DATE_PATH}.md\`. Do not regenerate it.
-- Follow the skill end-to-end: parse digest KO section, generate \`meta/card-news/headers/${DATE_PATH}.json\`, generate \`meta/card-news/queries/${DATE_PATH}.json\`, and run the renderer.
-- Renderer execution is hard-coded in this repository. Do not run \`node\`, \`npm\`, \`npx\`, or \`tsx\` directly for rendering. To render, execute exactly: \`scripts/automation/render-cardnews.sh ${DATE_PATH}\`.
+- Follow the skill end-to-end: parse digest KO section by article, generate \`card-news/article-headers/${DATE_PATH}.json\`, generate \`card-news/queries/${DATE_PATH}.json\`, and run the article renderer.
+- Renderer execution is hard-coded in this repository. Do not run \`node\`, \`npm\`, \`npx\`, or \`tsx\` directly for rendering. To render, execute exactly: \`scripts/automation/render-cardnews-article.sh ${DATE_PATH}\`.
 - Do not run any git commands.
 EOF
 
 attempt=1
 while true; do
   print_header "Running card news with Claude Code skill (attempt ${attempt}/${CLAUDE_RETRY_MAX_ATTEMPTS})"
+  run_log_event "Running card news skill" "Engine: \`claude\`"$'\n'"Attempt: \`${attempt}/${CLAUDE_RETRY_MAX_ATTEMPTS}\`"$'\n'"Date path: \`${DATE_PATH}\`."
 
   set +e
   run_with_timeout "${CLAUDE_TIMEOUT_SECONDS}" \
@@ -57,10 +61,12 @@ while true; do
   set -e
 
   if [[ "${run_status}" -eq 0 ]]; then
+    run_log_event "Card news skill completed" "Attempt: \`${attempt}\`."
     break
   fi
 
   if [[ "${attempt}" -ge "${CLAUDE_RETRY_MAX_ATTEMPTS}" ]]; then
+    run_log_event "Card news skill failed" "Final attempt: \`${attempt}/${CLAUDE_RETRY_MAX_ATTEMPTS}\`"$'\n'"Exit status: \`${run_status}\`."
     if [[ "${run_status}" -eq 124 ]]; then
       echo "ERROR: claude run timed out after ${CLAUDE_TIMEOUT_SECONDS}s (attempt ${attempt}/${CLAUDE_RETRY_MAX_ATTEMPTS})." >&2
       exit 124
@@ -70,8 +76,10 @@ while true; do
   fi
 
   if [[ "${run_status}" -eq 124 ]]; then
+    run_log_event "Card news skill attempt timed out" "Attempt: \`${attempt}/${CLAUDE_RETRY_MAX_ATTEMPTS}\`"$'\n'"Retry in: \`${CLAUDE_RETRY_INTERVAL_SECONDS}s\`."
     print_header "Claude run timed out after ${CLAUDE_TIMEOUT_SECONDS}s. Retrying in ${CLAUDE_RETRY_INTERVAL_SECONDS}s."
   else
+    run_log_event "Card news skill attempt failed" "Attempt: \`${attempt}/${CLAUDE_RETRY_MAX_ATTEMPTS}\`"$'\n'"Exit status: \`${run_status}\`"$'\n'"Retry in: \`${CLAUDE_RETRY_INTERVAL_SECONDS}s\`."
     print_header "Claude run failed with exit code ${run_status}. Retrying in ${CLAUDE_RETRY_INTERVAL_SECONDS}s."
   fi
 
@@ -82,6 +90,8 @@ while true; do
 done
 
 print_header "Verifying card news render output"
-"${SCRIPT_DIR}/render-cardnews.sh" "${DATE_PATH}"
+run_log_event "Verifying card news render output" "Running \`scripts/automation/render-cardnews-article.sh ${DATE_PATH}\`."
+"${SCRIPT_DIR}/render-cardnews-article.sh" "${DATE_PATH}"
 
-print_header "Card news complete. Output: meta/card-news/output/${DATE_PATH}/"
+print_header "Card news complete. Output: card-news/output/${DATE_PATH}/"
+run_log_finish_success "Card news automation completed. Output: \`card-news/output/${DATE_PATH}/\`."

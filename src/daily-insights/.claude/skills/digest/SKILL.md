@@ -12,7 +12,6 @@ Korean is the source of truth: write the digest in Korean first, then translate 
 
 - `content/YYYY/MM/DD.md`: bilingual digest (EN then KO).
 - `content/index.json`: latest-first date list.
-- `content/inbox.md`: cleared after processing.
 
 ## Workflow
 
@@ -37,8 +36,13 @@ Korean is the source of truth: write the digest in Korean first, then translate 
    - `<!-- LANG:EN:END -->`
    - `<!-- LANG:KO:START -->`
    - `<!-- LANG:KO:END -->`
-6. Update index and clear inbox.
+6. Update index.
 7. Report processed count/output path/failures.
+
+## Inbox ownership
+
+Do not clear or modify `content/inbox.md`. Automation scripts own inbox lifecycle:
+they keep it on digest failure and clear it only after a successful digest run.
 
 ## References
 

@@ -6,6 +6,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/common.sh"
 
 acquire_lock "digest-codex"
+run_log_init "digest" "codex"
 require_command codex
 
 CODEX_SANDBOX_MODE="${DIGEST_CODEX_SANDBOX_MODE:-danger-full-access}"
@@ -33,6 +34,7 @@ if [[ -n "${PRE_SYNC_SHORTCUT_NAME}" ]]; then
   require_command shortcuts
 
   print_header "Running pre-sync shortcut: ${PRE_SYNC_SHORTCUT_NAME}"
+  run_log_event "Running pre-sync shortcut" "Shortcut: \`${PRE_SYNC_SHORTCUT_NAME}\`"$'\n'"Expected action: move links from the iCloud inbox into \`${LOCAL_INBOX_RELATIVE_PATH}\`."
   set +e
   run_with_timeout "${PRE_SYNC_SHORTCUT_TIMEOUT_SECONDS}" \
     shortcuts run "${PRE_SYNC_SHORTCUT_NAME}"
@@ -40,13 +42,16 @@ if [[ -n "${PRE_SYNC_SHORTCUT_NAME}" ]]; then
   set -e
 
   if [[ "${pre_sync_status}" -eq 124 ]]; then
+    run_log_event "Pre-sync shortcut timed out" "Timeout seconds: \`${PRE_SYNC_SHORTCUT_TIMEOUT_SECONDS}\`."
     echo "ERROR: pre-sync shortcut timed out after ${PRE_SYNC_SHORTCUT_TIMEOUT_SECONDS}s." >&2
     exit 124
   fi
   if [[ "${pre_sync_status}" -ne 0 ]]; then
+    run_log_event "Pre-sync shortcut failed" "Exit status: \`${pre_sync_status}\`."
     echo "ERROR: pre-sync shortcut failed with exit code ${pre_sync_status}." >&2
     exit "${pre_sync_status}"
   fi
+  run_log_event "Pre-sync shortcut completed" "Exit status: \`${pre_sync_status}\`."
 
   if [[ "${PRE_SYNC_DELAY_SECONDS}" =~ ^[0-9]+$ ]] && [[ "${PRE_SYNC_DELAY_SECONDS}" -gt 0 ]]; then
     print_header "Waiting ${PRE_SYNC_DELAY_SECONDS}s after pre-sync shortcut"
@@ -65,14 +70,19 @@ Use the `$digest` skill in this repository and execute the full workflow now.
 Constraints:
 - Read URLs from `content/inbox.md`.
 - Write/update `content/YYYY/MM/DD.md` and `content/index.json`.
+- Do not clear or modify `content/inbox.md`; the automation script owns inbox clearing.
 - If inbox has no valid URLs, respond exactly: `📭 Inbox is empty.`
 - Do not run any git commands.
 EOF
 
 local_inbox_path="${REPO_ROOT}/${LOCAL_INBOX_RELATIVE_PATH}"
 ensure_local_inbox_file
-if [[ ! -s "${local_inbox_path}" ]]; then
+run_log_file_snapshot "Repo inbox content after sync" "${local_inbox_path}"
+valid_url_count="$(count_valid_inbox_urls "${local_inbox_path}")"
+run_log_event "Repo inbox URL check" "Valid URL lines: \`${valid_url_count}\`."
+if [[ "${valid_url_count}" -eq 0 ]]; then
   print_header "Local inbox is empty. Skip digest run."
+  run_log_finish_success "No valid URLs found in \`${LOCAL_INBOX_RELATIVE_PATH}\`; skipped digest skill."
   exit 0
 fi
 
@@ -85,6 +95,7 @@ fi
 attempt=1
 while true; do
   print_header "Running digest with Codex skill (attempt ${attempt}/${CODEX_RETRY_MAX_ATTEMPTS})"
+  run_log_event "Running digest skill" "Engine: \`codex\`"$'\n'"Attempt: \`${attempt}/${CODEX_RETRY_MAX_ATTEMPTS}\`."
 
   if [[ "${CODEX_BYPASS_APPROVALS_AND_SANDBOX}" == "true" ]]; then
     set +e
@@ -109,10 +120,12 @@ while true; do
   fi
 
   if [[ "${run_status}" -eq 0 ]]; then
+    run_log_event "Digest skill completed" "Attempt: \`${attempt}\`."
     break
   fi
 
   if [[ "${attempt}" -ge "${CODEX_RETRY_MAX_ATTEMPTS}" ]]; then
+    run_log_event "Digest skill failed" "Final attempt: \`${attempt}/${CODEX_RETRY_MAX_ATTEMPTS}\`"$'\n'"Exit status: \`${run_status}\`."
     if [[ "${run_status}" -eq 124 ]]; then
       echo "ERROR: codex run timed out after ${CODEX_TIMEOUT_SECONDS}s (attempt ${attempt}/${CODEX_RETRY_MAX_ATTEMPTS})." >&2
       exit 124
@@ -122,8 +135,10 @@ while true; do
   fi
 
   if [[ "${run_status}" -eq 124 ]]; then
+    run_log_event "Digest skill attempt timed out" "Attempt: \`${attempt}/${CODEX_RETRY_MAX_ATTEMPTS}\`"$'\n'"Retry in: \`${CODEX_RETRY_INTERVAL_SECONDS}s\`."
     print_header "Codex run timed out after ${CODEX_TIMEOUT_SECONDS}s. Retrying in ${CODEX_RETRY_INTERVAL_SECONDS}s."
   else
+    run_log_event "Digest skill attempt failed" "Attempt: \`${attempt}/${CODEX_RETRY_MAX_ATTEMPTS}\`"$'\n'"Exit status: \`${run_status}\`"$'\n'"Retry in: \`${CODEX_RETRY_INTERVAL_SECONDS}s\`."
     print_header "Codex run failed with exit code ${run_status}. Retrying in ${CODEX_RETRY_INTERVAL_SECONDS}s."
   fi
 
@@ -133,4 +148,22 @@ while true; do
   attempt="$((attempt + 1))"
 done
 
+print_header "Digest succeeded. Clearing local inbox."
+: > "${local_inbox_path}"
+run_log_event "Repo inbox cleared by automation" "\`${LOCAL_INBOX_RELATIVE_PATH}\` was cleared after successful digest processing."
+
+run_log_file_snapshot "Repo inbox content after digest skill" "${local_inbox_path}"
+if inbox_is_effectively_empty "${local_inbox_path}"; then
+  run_log_event "Repo inbox cleared" "\`${LOCAL_INBOX_RELATIVE_PATH}\` is empty after digest processing."
+else
+  run_log_event "Repo inbox not empty after digest" "\`${LOCAL_INBOX_RELATIVE_PATH}\` still has non-whitespace content after digest processing."
+fi
+
+if [[ "${DIGEST_SKIP_GIT_COMMIT_AND_PUSH:-false}" == "true" ]]; then
+  print_header "DIGEST_SKIP_GIT_COMMIT_AND_PUSH=true. Skip digest commit/push."
+  run_log_finish_success "Digest automation completed; git commit/push was skipped by caller."
+  exit 0
+fi
+
 run_git_commit_and_push
+run_log_finish_success "Digest automation completed and git commit/push step finished."

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350">
+  <defs>
+    <linearGradient id="editorialBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1B1B1D"/>
+      <stop offset="55%" stop-color="#121214"/>
+      <stop offset="100%" stop-color="#050506"/>
+    </linearGradient>
+    <radialGradient id="editorialBacklight" cx="50%" cy="32%" r="48%">
+      <stop offset="0%" stop-color="#6A6A70" stop-opacity="0.85"/>
+      <stop offset="55%" stop-color="#2A2A2E" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="editorialFigure" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#050506" stop-opacity="0.95"/>
+      <stop offset="70%" stop-color="#050506" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#050506" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="editorialTextBackdrop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="38%" stop-color="#000" stop-opacity="0.72"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.96"/>
+    </linearGradient>
+    <filter id="editorialGrain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" stitchTiles="stitch"/>
+      <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.1 0"/>
+    </filter>
+    <filter id="editorialBlur" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+  </defs>
+
+  <rect width="1080" height="1350" fill="url(#editorialBg)"/>
+  <rect width="1080" height="1350" fill="url(#editorialBacklight)"/>
+  <g filter="url(#editorialBlur)" opacity="0.9">
+    <ellipse cx="570" cy="430" rx="180" ry="230" fill="url(#editorialFigure)"/>
+  </g>
+
+  <rect width="1080" height="1350" filter="url(#editorialGrain)" opacity="0.8"/>
+  <rect x="0" y="610" width="1080" height="740" fill="url(#editorialTextBackdrop)"/>
+
+  <!-- Detail header -->
+  <text x="80" y="610"
+          font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="88" font-weight="700" fill="#FFFFFF" letter-spacing="-1">마찰은 유용한 신호다</text>
+
+  <!-- Detail body -->
+  <text x="80" y="762"
+          font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="27" fill="#A8A8AD">어려운 엔지니어링 작업은 과거에는 엔지니어가 머릿속에 모델을 만들도록</text>
+  <text x="80" y="805"
+          font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="27" fill="#A8A8AD">강제했다. AI는 대안, 실패 모드, 2차 효과와 씨름하는 어려운 구간을 제거할</text>
+  <text x="80" y="848"
+          font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="27" fill="#A8A8AD">수 있다. 그 결과 산출물은 유창하고 구조화되어 있어 이해한 것처럼</text>
+  <text x="80" y="891"
+          font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="27" fill="#A8A8AD">느껴지지만, 실제 사고 근육은 생기지 않을 수 있다.</text>
+</svg>

@@ -38,15 +38,14 @@
   <rect width="1080" height="1350" filter="url(#editorialGrain)" opacity="0.8"/>
 
   <!-- Headline -->
-  <text x="80" y="577" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="120" font-weight="700" fill="#FFFFFF" letter-spacing="-1">AI 비서 실전</text>
-  <text x="80" y="715" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="120" font-weight="700" fill="#FFFFFF" letter-spacing="-1">구축법, 반도체</text>
-  <text x="80" y="853" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="120" font-weight="700" fill="#FFFFFF" letter-spacing="-1">판도 재편</text>
+  <text x="80" y="617" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="176" font-weight="700" fill="#FFFFFF" letter-spacing="-1">AI 시대의</text>
+  <text x="80" y="813" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="176" font-weight="700" fill="#FFFFFF" letter-spacing="-1">사고 검증</text>
 
-  <!-- Date -->
-  <text x="80" y="1180"
-        font-family="'IBM Plex Mono', monospace" font-size="18" fill="#F26B1F" letter-spacing="4">2026.04.13 MON</text>
+  <!-- Original source title -->
+  <text x="80" y="887"
+        font-family="'IBM Plex Mono', monospace" font-size="24" fill="#F26B1F" letter-spacing="4">Will Hackett의 "How do you tell who's thinking?"</text>
 
   <!-- Subtitle -->
-  <text x="80" y="1228"
-        font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="28" fill="#A8A8AD">이윤철이 오늘 읽은 인사이트</text>
+  <text x="540" y="1228" text-anchor="middle"
+        font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="22" fill="#A8A8AD">이윤철이 오늘 읽은 아티클</text>
 </svg>

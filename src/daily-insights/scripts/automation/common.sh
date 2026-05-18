@@ -8,8 +8,9 @@ export TZ="${DIGEST_TIMEZONE:-Asia/Seoul}"
 
 LOG_ROOT="${DIGEST_LOG_ROOT:-${HOME}/Library/Logs/daily-insights}"
 STATE_ROOT="${DIGEST_STATE_ROOT:-${HOME}/Library/Application Support/daily-insights}"
+RUN_LOG_ROOT="${DIGEST_RUN_LOG_ROOT:-${REPO_ROOT}/automation-logs/run-logs}"
 
-mkdir -p "${LOG_ROOT}" "${STATE_ROOT}"
+mkdir -p "${LOG_ROOT}" "${STATE_ROOT}" "${RUN_LOG_ROOT}"
 
 DIGEST_DATE="$(date +%F)"
 DIGEST_RELATIVE_PATH="content/$(date +%Y/%m/%d).md"
@@ -19,6 +20,9 @@ DIGEST_LOCK_MAX_AGE_SECONDS="${DIGEST_LOCK_MAX_AGE_SECONDS:-43200}"
 DIGEST_LOCK_KILL_GRACE_SECONDS="${DIGEST_LOCK_KILL_GRACE_SECONDS:-15}"
 DIGEST_DISABLE_ICLOUD_ON_PERMISSION_ERROR="${DIGEST_DISABLE_ICLOUD_ON_PERMISSION_ERROR:-true}"
 DIGEST_ICLOUD_AVAILABLE="1"
+RUN_LOG_PATH=""
+RUN_LOG_FINALIZED="0"
+ACTIVE_LOCK_PATH=""
 ICLOUD_INBOX_PATH_DEFAULT="${HOME}/Library/Mobile Documents/com~apple~CloudDocs/Shortcuts/daily-insights/inbox.md"
 ICLOUD_INBOX_PATH_WORKFLOW="${HOME}/Library/Mobile Documents/iCloud~is~workflow~my~workflows/Documents/daily-insights/inbox.md"
 # Prefer explicit override, then the Shortcuts "My Workflows" container path
@@ -40,6 +44,110 @@ DIGEST_PUSH_BRANCH="${DIGEST_PUSH_BRANCH:-${DEFAULT_BRANCH}}"
 print_header() {
   local message="$1"
   printf "\n[%s] %s\n" "$(date '+%F %T %Z')" "${message}"
+}
+
+run_log_prune() {
+  if command -v find >/dev/null 2>&1; then
+    find "${RUN_LOG_ROOT}" -type f -name '*.md' -mtime +6 -delete 2>/dev/null || true
+  fi
+}
+
+run_log_init() {
+  local workflow="$1"
+  local engine="$2"
+  local run_id
+
+  run_log_prune
+  run_id="$(date '+%Y%m%d-%H%M%S')-${workflow}-${engine}-$$"
+  RUN_LOG_PATH="${RUN_LOG_ROOT}/${run_id}.md"
+  RUN_LOG_FINALIZED="0"
+
+  {
+    printf '# Daily Insights Automation Run\n\n'
+    printf -- '- workflow: `%s`\n' "${workflow}"
+    printf -- '- engine: `%s`\n' "${engine}"
+    printf -- '- started_at: `%s`\n' "$(date '+%F %T %Z')"
+    printf -- '- repo: `%s`\n' "${REPO_ROOT}"
+    printf -- '- log_file: `%s`\n' "${RUN_LOG_PATH}"
+    printf '\n'
+  } > "${RUN_LOG_PATH}"
+}
+
+run_log_event() {
+  local title="$1"
+  local body="${2:-}"
+
+  [[ -n "${RUN_LOG_PATH:-}" ]] || return 0
+  {
+    printf '## %s\n\n' "${title}"
+    printf -- '- time: `%s`\n' "$(date '+%F %T %Z')"
+    if [[ -n "${body}" ]]; then
+      printf '\n%s\n' "${body}"
+    fi
+    printf '\n'
+  } >> "${RUN_LOG_PATH}"
+}
+
+run_log_file_snapshot() {
+  local title="$1"
+  local file_path="$2"
+
+  [[ -n "${RUN_LOG_PATH:-}" ]] || return 0
+  {
+    printf '## %s\n\n' "${title}"
+    printf -- '- time: `%s`\n' "$(date '+%F %T %Z')"
+    printf -- '- path: `%s`\n\n' "${file_path}"
+    printf '~~~text\n'
+    if [[ -f "${file_path}" ]]; then
+      if [[ -s "${file_path}" ]]; then
+        sed -n '1,$p' "${file_path}" 2>/dev/null || true
+      else
+        printf '[empty file]\n'
+      fi
+    else
+      printf '[missing file]\n'
+    fi
+    printf '\n~~~\n\n'
+  } >> "${RUN_LOG_PATH}"
+}
+
+count_valid_inbox_urls() {
+  local inbox_path="$1"
+  awk '
+    /^[[:space:]]*https?:\/\// { count += 1 }
+    END { print count + 0 }
+  ' "${inbox_path}" 2>/dev/null || printf '0\n'
+}
+
+inbox_is_effectively_empty() {
+  local inbox_path="$1"
+  [[ -f "${inbox_path}" ]] || return 0
+  ! grep -Eq '[^[:space:]]' "${inbox_path}" 2>/dev/null
+}
+
+run_log_finish_success() {
+  local message="${1:-Run completed successfully.}"
+
+  [[ -n "${RUN_LOG_PATH:-}" ]] || return 0
+  run_log_event "Run completed" "${message}"
+  RUN_LOG_FINALIZED="1"
+}
+
+automation_on_exit() {
+  local status="$1"
+
+  if [[ -n "${RUN_LOG_PATH:-}" && "${RUN_LOG_FINALIZED:-0}" != "1" ]]; then
+    if [[ "${status}" -eq 0 ]]; then
+      run_log_event "Run completed" "Process exited successfully."
+    else
+      run_log_event "Run failed" "Exit status: \`${status}\`."
+    fi
+    RUN_LOG_FINALIZED="1"
+  fi
+
+  if [[ -n "${ACTIVE_LOCK_PATH:-}" ]]; then
+    release_lock "${ACTIVE_LOCK_PATH}"
+  fi
 }
 
 require_command() {
@@ -85,7 +193,8 @@ acquire_lock() {
   if mkdir "${lock_path}" 2>/dev/null; then
     printf '%s\n' "$$" > "${lock_path}/pid"
     date +%s > "${lock_path}/started_at"
-    trap 'release_lock "'"${lock_path}"'"' EXIT
+    ACTIVE_LOCK_PATH="${lock_path}"
+    trap 'status=$?; automation_on_exit "${status}"; exit "${status}"' EXIT
     return 0
   fi
 
@@ -133,7 +242,8 @@ acquire_lock() {
 
   printf '%s\n' "$$" > "${lock_path}/pid"
   date +%s > "${lock_path}/started_at"
-  trap 'release_lock "'"${lock_path}"'"' EXIT
+  ACTIVE_LOCK_PATH="${lock_path}"
+  trap 'status=$?; automation_on_exit "${status}"; exit "${status}"' EXIT
 }
 
 run_with_timeout() {
@@ -185,6 +295,12 @@ sync_inbox_from_icloud() {
 
   ensure_local_inbox_file
 
+  if [[ "${DIGEST_SKIP_INBOX_SYNC:-false}" == "true" ]]; then
+    print_header "DIGEST_SKIP_INBOX_SYNC=true. Skip iCloud inbox sync."
+    run_log_event "iCloud inbox sync skipped" "The caller already prepared \`${LOCAL_INBOX_RELATIVE_PATH}\` for this run."
+    return 0
+  fi
+
   if [[ -z "${source_path}" ]]; then
     print_header "DIGEST_ICLOUD_INBOX_PATH is empty. Skip iCloud inbox sync."
     return 0
@@ -192,6 +308,7 @@ sync_inbox_from_icloud() {
 
   if [[ "${DIGEST_ICLOUD_AVAILABLE}" != "1" ]]; then
     print_header "iCloud inbox sync disabled for this run. Using local inbox."
+    run_log_event "iCloud inbox sync skipped" "Pre-sync shortcut mode is active, so the script is using the local repo inbox."
     return 0
   fi
 
@@ -211,6 +328,8 @@ sync_inbox_from_icloud() {
 
   print_header "Using iCloud inbox path: ${source_path}"
   print_header "Moving iCloud inbox into repo (append), then clearing iCloud"
+  run_log_event "Moving iCloud inbox into repo inbox" "Source: \`${source_path}\`"$'\n'"Destination: \`${local_inbox_path}\`"
+  run_log_file_snapshot "iCloud inbox content before move" "${source_path}"
   local tmp_inbox_path
   tmp_inbox_path="$(mktemp "${local_inbox_path}.icloud.XXXXXX")"
   if ! cat "${source_path}" > "${tmp_inbox_path}"; then
@@ -233,13 +352,21 @@ sync_inbox_from_icloud() {
 
   if [[ ! -w "${source_path}" ]]; then
     print_header "iCloud inbox is not writable (${source_path}). Skip iCloud clear after move."
+    if [[ "${DIGEST_FAIL_ON_ICLOUD_CLEAR_ERROR:-false}" == "true" ]]; then
+      return 1
+    fi
     return 0
   fi
 
   if ! : > "${source_path}"; then
     print_header "Failed to clear iCloud inbox (${source_path})."
+    run_log_event "iCloud inbox clear failed" "Path: \`${source_path}\`"
+    if [[ "${DIGEST_FAIL_ON_ICLOUD_CLEAR_ERROR:-false}" == "true" ]]; then
+      return 1
+    fi
     return 0
   fi
+  run_log_event "iCloud inbox cleared" "Path: \`${source_path}\`"
 }
 
 run_git_commit_and_push() {

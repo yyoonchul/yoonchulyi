@@ -10,6 +10,8 @@ import { writeFileSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { renderCover } from './templates/cover.js';
 import { renderContent } from './templates/content.js';
+import { renderArticleCover } from './templates/article-cover.js';
+import { renderArticleContent } from './templates/article-content.js';
 import type { CoverData, ArticleData } from './types.js';
 
 const sampleCover: CoverData = {
@@ -35,6 +37,16 @@ const sampleArticle: ArticleData = {
     '마크다운 메모리 두 층',
     '주간 개선 루프 핵심',
   ],
+  detailSections: [
+    {
+      header: '마찰은 유용한 신호다',
+      body: [
+        '어려운 엔지니어링 작업은 과거에는 엔지니어가 머릿속에 모델을 만들도록 강제했다.',
+        'AI는 대안, 실패 모드, 2차 효과와 씨름하는 어려운 구간을 제거할 수 있다.',
+        '그 결과 산출물은 유창하고 구조화되어 있어 이해한 것처럼 느껴지지만, 실제 사고 근육은 생기지 않을 수 있다.',
+      ],
+    },
+  ],
 };
 
 const totalPages = 1 + sampleArticle.bullets.length;
@@ -53,6 +65,19 @@ const contentSvg = renderContent(
 );
 writeFileSync(resolve(templatesDir, 'content.example.svg'), contentSvg, 'utf-8');
 
+const articleCoverSvg = renderArticleCover(
+  sampleArticle,
+  'AI 시대의 사고 검증',
+);
+writeFileSync(resolve(templatesDir, 'article-cover.example.svg'), articleCoverSvg, 'utf-8');
+
+const articleContentSvg = renderArticleContent(
+  sampleArticle.detailSections![0],
+  2,
+  1 + sampleArticle.detailSections!.length,
+);
+writeFileSync(resolve(templatesDir, 'article-content.example.svg'), articleContentSvg, 'utf-8');
+
 // 구 템플릿 잔해 청소
 for (const stale of ['summary.example.svg', 'insight.example.svg']) {
   try {
@@ -65,3 +90,5 @@ for (const stale of ['summary.example.svg', 'insight.example.svg']) {
 console.log('Example SVGs generated in templates/');
 console.log('  cover.example.svg');
 console.log('  content.example.svg');
+console.log('  article-cover.example.svg');
+console.log('  article-content.example.svg');

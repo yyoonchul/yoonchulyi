@@ -1,0 +1,45 @@
+{
+  "cover": "Google Gemini",
+  "articles": [
+    {
+      "cover": "Google Gemini",
+      "sections": [
+        "OpenAI",
+        "dense attention",
+        "Gemini 3.1 Flash Lite",
+        "GPT-5.4 Mini",
+        "Anthropic"
+      ]
+    },
+    {
+      "cover": "Will Hackett",
+      "sections": [
+        "Will Hackett",
+        "AI",
+        "GitHub",
+        "METR",
+        "Will Hackett"
+      ]
+    },
+    {
+      "cover": "Recursive Superintelligence",
+      "sections": [
+        "Richard Socher",
+        "Recursive Superintelligence",
+        "Google DeepMind",
+        "rainbow teaming",
+        "compute"
+      ]
+    },
+    {
+      "cover": "Anthropic",
+      "sections": [
+        "Ramp",
+        "OpenAI",
+        "Anthropic",
+        "SpaceX",
+        "OpenAI Codex"
+      ]
+    }
+  ]
+}

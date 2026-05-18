@@ -1,10 +1,9 @@
-# Summarization Prompt Guide (KO -> EN)
+# Summarization Prompt Guide
 
-## Language Policy
+## Language Order
 
-1. Create the digest in **Korean** first.
-2. Translate the full KO digest into **English**.
-3. Keep KO and EN sections semantically aligned.
+- Write **Korean** digest first.
+- Then produce **English** translation from that Korean version.
 
 ## Korean Style
 
@@ -12,15 +11,14 @@
   - Example: `발표했다`, `제공한다`, `~로 보인다` (○) / `발표했습니다`, `제공합니다` (✗).
 - Apply this consistently across quick summary, detailed notes, and any prose lines.
 
-## Tone and Quality
+## Tone
 
-- Fact-based, concise, and specific.
-- No fabricated claims.
-- Preserve numbers, names, and links.
+- Accurate, concise, and factual.
+- No invented facts.
 
-## Allowed Categories
+## Categories
 
-Choose one per article:
+Choose one:
 
 - AI
 - DevTools
@@ -33,16 +31,15 @@ Choose one per article:
 - HN
 - Misc
 
-## Quick Summary (3 bullets)
+## Quick Summary
 
-- Exactly 3 bullets per article.
-- Each bullet should capture one concrete takeaway.
-- Include metrics/numbers when available.
+- 3 bullets per article.
+- Include concrete facts or numbers where possible.
 
 ## Detailed Notes
 
 - Do not output one flat bullet list.
-- Keep article order consistent with quick summary order.
+- Keep article order consistent with quick summary.
 - Write detailed notes in 20-30 lines per article.
 - 기사별 상세 정리는 20-30줄로 작성한다.
 
@@ -75,27 +72,12 @@ When the source is an `x.com` or `twitter.com` URL:
 
 - **Source**: `X`
 - **Metadata line**: `**Source:** X · **Author:** {Author or @handle} · **Category:** {Category} · **Link:** [Original]({URL})`
-- A plain fetch on a status URL only returns OG meta. For short tweets that is enough; for X long-form Articles (`x.com/i/article/...` chains) it is not — fall back to `api.fxtwitter.com/<user>/status/<id>` as described in `SKILL.md` step 2.
+- A plain WebFetch on a status URL only returns OG meta. For short tweets that is enough; for X long-form Articles (`x.com/i/article/...` chains) it is not — fall back to `api.fxtwitter.com/<user>/status/<id>` as described in `SKILL.md` step 2.
 - Do not follow an embedded `t.co` link to `x.com/i/article/...` and try to fetch that destination directly: it is auth-walled and returns "Page not found" to bots. Always run the fallback against the original status URL.
 - When fxtwitter returns only `article.{title, preview_text}`, summarize from that and label the article `⚠️ Article preview only — body not retrievable`. Reserve `⚠️ Fetch failed` for the case where even fxtwitter returns nothing.
 
-## Failure Handling
+## Exceptions
 
-If source cannot be fetched:
-
-- Keep title/source/link.
-- Add `⚠️ Fetch failed` in quick summary.
-- Omit detailed notes for that article.
-
-If YouTube transcript cannot be extracted:
-
-- Keep title/source/link.
-- Add `⚠️ Transcript unavailable` in quick summary.
-- Omit detailed notes for that article.
-
-## summary-only Memo
-
-If memo contains `summary-only`:
-
-- Keep quick summary.
-- Omit detailed notes for that article.
+- If fetch fails: mark `⚠️ Fetch failed`, skip detailed notes.
+- If YouTube transcript unavailable: mark `⚠️ Transcript unavailable`, skip detailed notes.
+- If memo contains `summary-only`: skip detailed notes for that item.

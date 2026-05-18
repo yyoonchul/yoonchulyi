@@ -43,12 +43,12 @@ print_header "Image API env: unsplash=$([[ -n "${UNSPLASH_ACCESS_KEY:-}" ]] && e
 
 cd "${REPO_ROOT}"
 if command -v npx >/dev/null 2>&1; then
-  npx --yes tsx "meta/card-news/generate.ts" "${DATE_PATH}"
+  npx --yes tsx "card-news/generate.ts" "${DATE_PATH}"
 else
-  npm exec --yes -- tsx "meta/card-news/generate.ts" "${DATE_PATH}"
+  npm exec --yes -- tsx "card-news/generate.ts" "${DATE_PATH}"
 fi
 
-credits_path="${REPO_ROOT}/meta/card-news/output/${DATE_PATH}/credits.json"
+credits_path="${REPO_ROOT}/card-news/output/${DATE_PATH}/credits.json"
 if [[ ! -f "${credits_path}" ]]; then
   echo "ERROR: renderer did not write credits.json: ${credits_path}" >&2
   exit 1
@@ -74,4 +74,4 @@ if (missing.length > 0 && failOnMissing === 'true') {
 }
 NODE
 
-print_header "Card news render complete: meta/card-news/output/${DATE_PATH}/"
+print_header "Card news render complete: card-news/output/${DATE_PATH}/"

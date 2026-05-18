@@ -1,12 +1,19 @@
-# Daily Digest 자동 스케줄 가이드 (Codex / Claude Code)
+# Daily Insights 자동 스케줄 가이드 (Codex / Claude Code)
 
-이 폴더는 macOS `launchd` 기반으로 `digest` 스킬을 매일 자동 실행하기 위한 스크립트를 제공합니다.
+이 폴더는 macOS `launchd` 기반으로 daily insights 작업을 매일 자동 실행하기 위한 스크립트를 제공합니다.
+
+권장 방식은 `daily-flow-launchd.sh`로 **하나의 스케줄**만 등록하는 것입니다. daily flow는 기본적으로 `Digest` shortcut을 먼저 실행해 iCloud inbox를 repo inbox로 옮긴 뒤, digest가 성공하고 오늘 digest가 실제로 생성/변경된 경우에만 card news를 실행합니다.
 
 ## 포함된 스크립트
 
+- `run-daily-flow-codex.sh`: Codex로 iCloud inbox move + digest + card news 순차 실행
+- `run-daily-flow-claude.sh`: Claude Code로 iCloud inbox move + digest + card news 순차 실행
+- `run-daily-flow.sh`: daily flow 공통 구현. 직접 실행보다 위 엔진별 래퍼 사용을 권장합니다.
+- `daily-flow-launchd.sh`: daily flow 스케줄 설정/켜기/끄기/상태/즉시실행
 - `run-digest-codex.sh`: Codex 스킬 버전 실행 + 커밋/푸시
 - `run-digest-claude.sh`: Claude Code 스킬 버전 실행 + 커밋/푸시
 - `digest-launchd.sh`: 스케줄 설정/켜기/끄기/상태/즉시실행
+- `cardnews-launchd.sh`: card news 개별 스케줄 설정/켜기/끄기/상태/즉시실행
 - `setup-digest-schedule.sh`: 빠른 설정 래퍼
 - `disable-digest-schedule.sh`: 빠른 끄기 래퍼
 
@@ -26,29 +33,39 @@ claude auth login
 
 ## 빠른 시작
 
-### 1) Codex 버전 스케줄 설정 (기본 08:30)
+### 1) Codex daily flow 스케줄 설정 (기본 08:30)
 ```bash
-./scripts/automation/setup-digest-schedule.sh codex 08:30
+./scripts/automation/daily-flow-launchd.sh setup codex 08:30
 ```
 
-### 2) Claude Code 버전 스케줄 설정 (기본 08:30)
+### 2) Claude Code daily flow 스케줄 설정 (기본 08:30)
 ```bash
-./scripts/automation/setup-digest-schedule.sh claude 08:30
+./scripts/automation/daily-flow-launchd.sh setup claude 08:30
 ```
 
-주의: 두 스케줄을 동시에 켜면 같은 인박스를 중복 처리할 수 있습니다. 보통 하나만 활성화하세요.
+주의: `daily-flow`, `digest`, `cardnews` 스케줄을 동시에 켜면 같은 인박스를 중복 처리하거나 stale digest로 card news를 만들 수 있습니다. 보통 `daily-flow` 하나만 활성화하세요.
+
+## Daily Flow 실행 순서
+
+1. `Digest` shortcut을 실행해 iCloud inbox를 `content/inbox.md`로 옮기고 iCloud inbox를 비웁니다.
+2. local inbox를 백업합니다.
+3. digest 스킬을 실행합니다.
+4. digest 실패 시 local inbox를 백업 상태로 복원하고 card news를 실행하지 않습니다.
+5. digest 성공 시 local inbox를 명시적으로 비웁니다.
+6. 오늘 digest 파일이 새로 생성되었거나 변경된 것을 검증한 뒤 digest 변경분을 커밋/푸시합니다.
+7. 검증과 커밋이 성공한 경우에만 card news 스킬을 실행합니다.
 
 ## Shortcut 선행 동기화 모드 (Codex / Claude Code)
 
-`run-digest-codex.sh`와 `run-digest-claude.sh`는 기본적으로 pre-sync shortcut 실행을 지원합니다.
+`run-daily-flow.sh`, `run-digest-codex.sh`, `run-digest-claude.sh`는 기본적으로 pre-sync shortcut 실행을 지원합니다. launchd로 등록한 daily flow는 이 모드가 기본으로 켜집니다.
 
-- 기본 shortcut 이름: `digest`
+- daily-flow launchd 기본 shortcut 이름: `Digest`
 - 기본 지연: `0`초
 - 기본 shortcut 타임아웃: `300`초
 
 실행 순서:
 
-1. `shortcuts run "digest"`
+1. `shortcuts run "Digest"`
 2. 로컬 inbox 상태 확인 (비어 있으면 종료)
 3. (선택) 지연 후 선택한 엔진의 digest 실행
 4. 커밋/푸시
@@ -58,13 +75,14 @@ claude auth login
 
 중요:
 
-- `digest` shortcut은 **iCloud inbox -> repo inbox 복사 + iCloud 원본 inbox 비움**만 해야 합니다.
+- pre-sync shortcut은 **iCloud inbox -> repo inbox 복사 + iCloud 원본 inbox 비움**만 해야 합니다.
 - digest 스킬 실행은 shortcut이 아니라 `run-digest-codex.sh` 또는 `run-digest-claude.sh`가 담당해야 합니다.
 - 엔진 실행 스크립트를 shortcut 내부에서 다시 호출하면 중복 실행/재귀가 발생할 수 있습니다.
 - shortcut 이름/지연/타임아웃은 환경변수로 조정할 수 있습니다.
   - `DIGEST_PRE_SYNC_SHORTCUT_NAME`
   - `DIGEST_PRE_SYNC_DELAY_SECONDS`
   - `DIGEST_PRE_SYNC_SHORTCUT_TIMEOUT_SECONDS`
+  - daily-flow launchd plist 생성 시 기본값을 바꾸려면 각각 `DAILY_FLOW_LAUNCHD_PRE_SYNC_SHORTCUT_NAME`, `DAILY_FLOW_LAUNCHD_PRE_SYNC_DELAY_SECONDS`, `DAILY_FLOW_LAUNCHD_PRE_SYNC_SHORTCUT_TIMEOUT_SECONDS`를 사용하세요.
 
 ## 켜기 / 끄기
 
@@ -82,13 +100,13 @@ claude auth login
 
 ### 상태 확인
 ```bash
-./scripts/automation/digest-launchd.sh status all
+./scripts/automation/daily-flow-launchd.sh status all
 ```
 
 ### 즉시 1회 실행
 ```bash
-./scripts/automation/digest-launchd.sh run-now codex
-./scripts/automation/digest-launchd.sh run-now claude
+./scripts/automation/daily-flow-launchd.sh run-now codex
+./scripts/automation/daily-flow-launchd.sh run-now claude
 ```
 
 ## 기본 동작
@@ -129,6 +147,9 @@ DIGEST_PUSH_REMOTE=origin DIGEST_PUSH_BRANCH=main ./scripts/automation/run-diges
   - `DIGEST_TIMEZONE` (기본 `Asia/Seoul`)
   - `DIGEST_ICLOUD_INBOX_PATH`  
     기본값: `~/Library/Mobile Documents/iCloud~is~workflow~my~workflows/Documents/daily-insights/inbox.md`
+  - `DIGEST_PRE_SYNC_SHORTCUT_NAME` (daily-flow 기본 `Digest`)
+  - `DIGEST_PRE_SYNC_DELAY_SECONDS` (daily-flow 기본 `0`)
+  - `DIGEST_PRE_SYNC_SHORTCUT_TIMEOUT_SECONDS` (daily-flow 기본 `300`)
 - Codex 작업 추가:
   - `DIGEST_CODEX_SANDBOX_MODE` (기본 `danger-full-access`)
   - `DIGEST_CODEX_BYPASS_APPROVALS_AND_SANDBOX` (기본 `true`)
@@ -139,7 +160,7 @@ DIGEST_PUSH_REMOTE=origin DIGEST_PUSH_BRANCH=main ./scripts/automation/run-diges
   - `DIGEST_CLAUDE_RETRY_MAX_ATTEMPTS` (기본 `3`)
   - `DIGEST_CLAUDE_RETRY_INTERVAL_SECONDS` (기본 `600`)
 - pre-sync shortcut 모드:
-  - `DIGEST_PRE_SYNC_SHORTCUT_NAME` (기본 `digest`)
+  - `DIGEST_PRE_SYNC_SHORTCUT_NAME` (기본 `Digest`)
   - `DIGEST_PRE_SYNC_DELAY_SECONDS` (기본 `0`)
   - `DIGEST_PRE_SYNC_SHORTCUT_TIMEOUT_SECONDS` (기본 `300`)
 

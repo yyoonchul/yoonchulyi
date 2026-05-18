@@ -1,0 +1,48 @@
+{
+  "articles": [
+    {
+      "cover": "소형 모델의 지연 반전",
+      "source": "0xmmo의 \"Small Model Forensics\"",
+      "sections": [
+        "제공사별 지연 측정",
+        "완만한 프리필 곡선",
+        "제미니의 장문 속도",
+        "디코드 비용의 차이",
+        "컨텍스트가 바꾼 비용"
+      ]
+    },
+    {
+      "cover": "AI 시대의 사고 검증",
+      "source": "Will Hackett의 \"How do you tell who's thinking?\"",
+      "sections": [
+        "산출물이 숨긴 사고",
+        "마찰이라는 신호",
+        "약해진 평가 연결",
+        "속도 착각의 구조",
+        "더 깊은 질문법"
+      ]
+    },
+    {
+      "cover": "스스로를 짓는 AI",
+      "source": "TechCrunch의 \"What happens when AI starts building itself?\"",
+      "sections": [
+        "새 AI 연구 스타트업",
+        "재귀적 자기 개선",
+        "개방형 진화 접근",
+        "공진화하는 안전성",
+        "제품과 컴퓨트 배분"
+      ]
+    },
+    {
+      "cover": "기업 AI 도입의 역전",
+      "source": "Ramp Economics Lab의 \"Anthropic beats OpenAI on business adoption\"",
+      "sections": [
+        "바뀐 기업 도입률",
+        "일시적 왕관의 의미",
+        "토큰 인센티브 문제",
+        "품질과 비용 압박",
+        "저가 플랫폼의 압력"
+      ]
+    }
+  ]
+}
