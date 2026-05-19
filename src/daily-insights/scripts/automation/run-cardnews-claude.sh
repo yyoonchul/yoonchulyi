@@ -93,5 +93,9 @@ print_header "Verifying card news render output"
 run_log_event "Verifying card news render output" "Running \`scripts/automation/render-cardnews-article.sh ${DATE_PATH}\`."
 "${SCRIPT_DIR}/render-cardnews-article.sh" "${DATE_PATH}"
 
+print_header "Sending card news to Discord"
+run_log_event "Sending card news to Discord" "Running \`scripts/automation/send-cardnews-discord.sh ${DATE_PATH}\`."
+"${SCRIPT_DIR}/send-cardnews-discord.sh" "${DATE_PATH}"
+
 print_header "Card news complete. Output: card-news/output/${DATE_PATH}/"
 run_log_finish_success "Card news automation completed. Output: \`card-news/output/${DATE_PATH}/\`."

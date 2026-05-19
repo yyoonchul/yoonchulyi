@@ -22,9 +22,13 @@ cardnews_runner="${SCRIPT_DIR}/run-cardnews-${ENGINE}.sh"
 local_inbox_path="${REPO_ROOT}/${LOCAL_INBOX_RELATIVE_PATH}"
 digest_path="${REPO_ROOT}/${DIGEST_RELATIVE_PATH}"
 date_path="$(date +%Y/%m/%d)"
-PRE_SYNC_SHORTCUT_NAME="${DIGEST_PRE_SYNC_SHORTCUT_NAME:-}"
-PRE_SYNC_DELAY_SECONDS="${DIGEST_PRE_SYNC_DELAY_SECONDS:-0}"
-PRE_SYNC_SHORTCUT_TIMEOUT_SECONDS="${DIGEST_PRE_SYNC_SHORTCUT_TIMEOUT_SECONDS:-300}"
+
+set -a
+if [[ -f "${REPO_ROOT}/.env" ]]; then
+  # shellcheck source=/dev/null
+  source "${REPO_ROOT}/.env"
+fi
+set +a
 
 [[ -x "${digest_runner}" ]] || {
   echo "ERROR: digest runner is not executable: ${digest_runner}" >&2
@@ -54,56 +58,25 @@ restore_local_inbox() {
 
 print_header "Preparing inbox for daily flow"
 run_log_event "Daily flow started" "Engine: \`${ENGINE}\`"$'\n'"Date path: \`${date_path}\`."
-pre_sync_existing_inbox_path=""
-if [[ -n "${PRE_SYNC_SHORTCUT_NAME}" ]]; then
-  require_command shortcuts
-  ensure_local_inbox_file
-
-  if [[ "$(count_valid_inbox_urls "${local_inbox_path}")" -gt 0 ]]; then
-    pre_sync_existing_inbox_path="$(mktemp "${local_inbox_path}.pre-sync.XXXXXX")"
-    cp "${local_inbox_path}" "${pre_sync_existing_inbox_path}"
-  fi
-
-  print_header "Running pre-sync shortcut: ${PRE_SYNC_SHORTCUT_NAME}"
-  run_log_event "Running pre-sync shortcut" "Shortcut: \`${PRE_SYNC_SHORTCUT_NAME}\`"$'\n'"Expected action: move links from the iCloud inbox into \`${LOCAL_INBOX_RELATIVE_PATH}\`."
-  set +e
-  run_with_timeout "${PRE_SYNC_SHORTCUT_TIMEOUT_SECONDS}" \
-    shortcuts run "${PRE_SYNC_SHORTCUT_NAME}"
-  pre_sync_status="$?"
-  set -e
-
-  if [[ "${pre_sync_status}" -eq 124 ]]; then
-    run_log_event "Pre-sync shortcut timed out" "Timeout seconds: \`${PRE_SYNC_SHORTCUT_TIMEOUT_SECONDS}\`."
-    echo "ERROR: pre-sync shortcut timed out after ${PRE_SYNC_SHORTCUT_TIMEOUT_SECONDS}s." >&2
-    exit 124
-  fi
-  if [[ "${pre_sync_status}" -ne 0 ]]; then
-    run_log_event "Pre-sync shortcut failed" "Exit status: \`${pre_sync_status}\`."
-    echo "ERROR: pre-sync shortcut failed with exit code ${pre_sync_status}." >&2
-    exit "${pre_sync_status}"
-  fi
-  run_log_event "Pre-sync shortcut completed" "Exit status: \`${pre_sync_status}\`."
-
-  if [[ "${PRE_SYNC_DELAY_SECONDS}" =~ ^[0-9]+$ ]] && [[ "${PRE_SYNC_DELAY_SECONDS}" -gt 0 ]]; then
-    print_header "Waiting ${PRE_SYNC_DELAY_SECONDS}s after pre-sync shortcut"
-    sleep "${PRE_SYNC_DELAY_SECONDS}"
-  fi
-
-  print_header "Pre-sync mode enabled. Skipping direct iCloud sync/clear in this run."
-  DIGEST_ICLOUD_AVAILABLE="0"
-fi
-
-DIGEST_FAIL_ON_ICLOUD_CLEAR_ERROR=true
-sync_inbox_from_icloud
 ensure_local_inbox_file
-if [[ -n "${pre_sync_existing_inbox_path}" && -f "${pre_sync_existing_inbox_path}" ]]; then
-  tmp_merged_inbox_path="$(mktemp "${local_inbox_path}.merged.XXXXXX")"
-  awk 'seen[$0]++ == 0' "${pre_sync_existing_inbox_path}" "${local_inbox_path}" > "${tmp_merged_inbox_path}"
-  mv "${tmp_merged_inbox_path}" "${local_inbox_path}"
-  rm -f "${pre_sync_existing_inbox_path}"
-  run_log_event "Repo inbox preserved across pre-sync" "Existing local inbox URLs were merged back after shortcut pre-sync."
+run_log_file_snapshot "Repo inbox before Discord sync" "${local_inbox_path}"
+
+print_header "Syncing Discord inbox"
+run_log_event "Syncing Discord inbox" "Running \`scripts/automation/sync-discord-inbox.sh\`."
+set +e
+"${SCRIPT_DIR}/sync-discord-inbox.sh"
+discord_sync_status="$?"
+set -e
+if [[ "${discord_sync_status}" -ne 0 ]]; then
+  run_log_event "Discord inbox sync failed" "Exit status: \`${discord_sync_status}\`."
+  if [[ "${DISCORD_INBOX_SYNC_FAIL_FAST:-false}" == "true" ]]; then
+    exit "${discord_sync_status}"
+  fi
+  print_header "Discord inbox sync failed. Continuing with existing local inbox."
+else
+  run_log_event "Discord inbox sync completed" "Exit status: \`0\`."
 fi
-run_log_file_snapshot "Repo inbox after iCloud move" "${local_inbox_path}"
+run_log_file_snapshot "Repo inbox after Discord sync" "${local_inbox_path}"
 
 inbox_backup_path="$(mktemp "${local_inbox_path}.daily-flow.XXXXXX")"
 cp "${local_inbox_path}" "${inbox_backup_path}"
