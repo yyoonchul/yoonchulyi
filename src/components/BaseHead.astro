@@ -5,6 +5,9 @@ interface Props {
 }
 
 const { title, description = 'Yoonchul Yi - Personal Website' } = Astro.props;
+const siteUrl = Astro.site ?? new URL('https://yoonchulyi.com');
+const canonicalUrl = new URL(Astro.url.pathname, siteUrl);
+const ogImageUrl = new URL('/og-image.png', siteUrl);
 ---
 
 <head>
@@ -12,6 +15,22 @@ const { title, description = 'Yoonchul Yi - Personal Website' } = Astro.props;
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content={description} />
   <meta name="generator" content={Astro.generator} />
+  <link rel="canonical" href={canonicalUrl} />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Yoonchul Yi" />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonicalUrl} />
+  <meta property="og:image" content={ogImageUrl} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Yoonchul Yi logo and yoonchulyi.com" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={ogImageUrl} />
   
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="/로고.png" />
