@@ -1,0 +1,25 @@
+{
+  "cover": "GenCAD",
+  "articles": [
+    {
+      "cover": "Claude",
+      "sections": [
+        "Claude",
+        "content workflow",
+        "SEO",
+        "context window",
+        "X"
+      ]
+    },
+    {
+      "cover": "GenCAD",
+      "sections": [
+        "computer aided design",
+        "CAD command sequence",
+        "latent diffusion model",
+        "CAD model rendering",
+        "MIT"
+      ]
+    }
+  ]
+}

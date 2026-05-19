@@ -1,0 +1,37 @@
+{
+  "articles": [
+    {
+      "cover": "AI 버그 제보의 역효과",
+      "source": "The Register 기사 \"Linus Torvalds says AI-powered bug hunters have made Linux security mailing list ‘almost entirely unmanageable’\"",
+      "sections": [
+        "중복 제보의 폭증",
+        "유지보수자의 부담",
+        "비공개 리스트의 한계",
+        "얕은 AI 사용 비판",
+        "오픈소스의 워크플로 논쟁"
+      ]
+    },
+    {
+      "cover": "TPU 성공이 만든 병목",
+      "source": "TNW 기사 \"Google has sold so much TPU capacity that its own researchers are queueing for the rest\"",
+      "sections": [
+        "내부 배분의 압박",
+        "Anthropic 수요",
+        "물리적·조직적 부족",
+        "하나의 인프라 세 목표",
+        "증설 속도의 시험대"
+      ]
+    },
+    {
+      "cover": "대형 코드베이스의 하네스",
+      "source": "Claude 블로그 \"How Claude Code works in large codebases: Best practices and where to start\"",
+      "sections": [
+        "탐색 가능성이 성능",
+        "모델 주변의 하네스",
+        "계층형 컨텍스트 전략",
+        "규칙은 도구로 강제",
+        "도입을 이끄는 소유권"
+      ]
+    }
+  ]
+}

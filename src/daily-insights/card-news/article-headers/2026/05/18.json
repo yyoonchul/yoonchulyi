@@ -1,0 +1,26 @@
+{
+  "articles": [
+    {
+      "cover": "콘텐츠 5에이전트 파이프라인",
+      "source": "Rahul의 \"5-Agent Content Pipeline That Replaces a $300K Creative Team\"",
+      "sections": [
+        "단일 채팅의 한계",
+        "다섯 역할의 체인",
+        "게시 단계의 분리",
+        "컨텍스트 분리",
+        "핸드오프 가드레일"
+      ]
+    },
+    {
+      "cover": "이미지에서 CAD 프로그램으로",
+      "source": "GenCAD 프로젝트 \"GenCAD: Image-Conditioned Computer-Aided Design Generation with Transformer-Based Contrastive Representation and Diffusion Priors\"",
+      "sections": [
+        "CAD 제작의 간극",
+        "명령 이력 생성",
+        "네 단계 생성 구조",
+        "생성과 검색 시연",
+        "MIT 연구 성과"
+      ]
+    }
+  ]
+}

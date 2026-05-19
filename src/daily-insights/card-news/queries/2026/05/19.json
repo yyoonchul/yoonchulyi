@@ -1,0 +1,35 @@
+{
+  "cover": "Linus Torvalds",
+  "articles": [
+    {
+      "cover": "Linus Torvalds",
+      "sections": [
+        "Linux kernel",
+        "Linux kernel maintainers",
+        "Linux security mailing list",
+        "Linus Torvalds",
+        "Greg Kroah-Hartman"
+      ]
+    },
+    {
+      "cover": "Google TPU",
+      "sections": [
+        "Google Cloud TPU",
+        "Anthropic",
+        "High-bandwidth memory",
+        "Google Gemini",
+        "Alphabet"
+      ]
+    },
+    {
+      "cover": "Claude Code",
+      "sections": [
+        "large codebase",
+        "Anthropic Claude",
+        "CLAUDE.md",
+        "language server protocol",
+        "software engineering governance"
+      ]
+    }
+  ]
+}
