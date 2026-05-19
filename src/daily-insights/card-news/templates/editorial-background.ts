@@ -14,8 +14,6 @@ export const editorialColors = {
 export const editorialSansStack =
   "'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif";
 
-const TEXT_BACKDROP_Y = 610;
-
 const BACKGROUND_CANDIDATES = [
   'background.png',
   'background.jpg',
@@ -48,9 +46,9 @@ export function renderEditorialBackground(overridePath?: string | null): string 
       <stop offset="100%" stop-color="#050506" stop-opacity="0"/>
     </radialGradient>
     <linearGradient id="editorialTextBackdrop" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#000" stop-opacity="0"/>
-      <stop offset="38%" stop-color="#000" stop-opacity="0.72"/>
-      <stop offset="100%" stop-color="#000" stop-opacity="0.96"/>
+      <stop offset="0%" stop-color="#000" stop-opacity="0.54"/>
+      <stop offset="52%" stop-color="#000" stop-opacity="0.62"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.7"/>
     </linearGradient>
     <filter id="editorialGrain" x="0" y="0" width="100%" height="100%">
       <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" stitchTiles="stitch"/>
@@ -74,7 +72,7 @@ export function renderEditorialBackground(overridePath?: string | null): string 
 }
 
 export function renderEditorialTextBackdrop(): string {
-  return `<rect x="0" y="${TEXT_BACKDROP_Y}" width="${WIDTH}" height="${HEIGHT - TEXT_BACKDROP_Y}" fill="url(#editorialTextBackdrop)"/>`;
+  return `<rect x="0" y="0" width="${WIDTH}" height="${HEIGHT}" fill="url(#editorialTextBackdrop)"/>`;
 }
 
 function getBackgroundImageHref(): string | null {

@@ -68,6 +68,7 @@ writeFileSync(resolve(templatesDir, 'content.example.svg'), contentSvg, 'utf-8')
 const articleCoverSvg = renderArticleCover(
   sampleArticle,
   'AI 시대의 사고 검증',
+  'Ryan Sarver의 "OpenClaw 기반 AI 비서를 만들어 인간 비서보다 낫게 만든 방법"',
 );
 writeFileSync(resolve(templatesDir, 'article-cover.example.svg'), articleCoverSvg, 'utf-8');
 

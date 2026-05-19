@@ -25,16 +25,25 @@ export function renderArticleCover(
     })
     .join('\n  ');
 
-  const sourceTitleLines = clampLines(wrapByWidth(sourceLine.trim() || article.title, 56), 3);
+  const sourceTitleFont = 24;
+  const sourceTitleLetterSpacing = 4;
+  const sourceTitleRightMargin = 128;
+  const sourceTitleMaxWidth = WIDTH - spacing.page - sourceTitleRightMargin;
+  const sourceTitleLines = clampLines(
+    wrapByPixelWidth(sourceLine.trim() || article.title, sourceTitleMaxWidth, sourceTitleFont, sourceTitleLetterSpacing),
+    3,
+    sourceTitleMaxWidth,
+    sourceTitleFont,
+    sourceTitleLetterSpacing,
+  );
   const sourceTitleGap = Math.round(headlineLines.font * 0.42);
   const sourceTitleY = headlineBottomY + sourceTitleGap;
-  const sourceTitleFont = 24;
   const sourceTitleLineHeight = 38;
   const sourceTitleSvg = sourceTitleLines
     .map(
       (line, i) =>
         `<text x="${spacing.page}" y="${sourceTitleY + i * sourceTitleLineHeight}"
-        font-family="${fontFamily.mono}" font-size="${sourceTitleFont}" fill="${cover.accent}" letter-spacing="4">${escSvg(line)}</text>`,
+        font-family="${fontFamily.mono}" font-size="${sourceTitleFont}" fill="${cover.accent}" letter-spacing="${sourceTitleLetterSpacing}">${escSvg(line)}</text>`,
     )
     .join('\n  ');
   const subtitleY = HEIGHT - 92;
@@ -120,10 +129,87 @@ function wrapByWidth(text: string, budget: number): string[] {
   return lines;
 }
 
-function clampLines(lines: string[], maxLines: number): string[] {
+function charPixelWidth(ch: string, fontSize: number, letterSpacing: number): number {
+  return charWeight(ch) * fontSize + letterSpacing;
+}
+
+function textPixelWidth(text: string, fontSize: number, letterSpacing: number): number {
+  let width = 0;
+  for (const ch of text) {
+    width += charPixelWidth(ch, fontSize, letterSpacing);
+  }
+  return Math.max(0, width - letterSpacing);
+}
+
+function wrapByPixelWidth(
+  text: string,
+  maxWidth: number,
+  fontSize: number,
+  letterSpacing: number,
+): string[] {
+  const lines: string[] = [];
+  let remaining = text.trim();
+
+  while (remaining.length > 0) {
+    let width = 0;
+    let cutAt = -1;
+    const chars = Array.from(remaining);
+
+    for (let i = 0; i < chars.length; i++) {
+      const w = charPixelWidth(chars[i], fontSize, letterSpacing);
+      if (width + w > maxWidth) {
+        cutAt = i;
+        break;
+      }
+      width += w;
+    }
+
+    if (cutAt === -1) {
+      lines.push(remaining);
+      break;
+    }
+
+    const prefix = chars.slice(0, cutAt).join('');
+    const commaIdx = prefix.lastIndexOf(', ');
+    const spaceIdx = prefix.lastIndexOf(' ');
+    const slashIdx = prefix.lastIndexOf(' / ');
+    const quoteIdx = prefix.lastIndexOf('" ');
+    const commaBreak = commaIdx > 0 ? commaIdx + 2 : -1;
+    const spaceBreak = spaceIdx > 0 ? spaceIdx + 1 : -1;
+    const slashBreak = slashIdx > 0 ? slashIdx + 3 : -1;
+    const quoteBreak = quoteIdx > 0 ? quoteIdx + 2 : -1;
+    let breakAt = Math.max(commaBreak, spaceBreak, slashBreak, quoteBreak);
+    if (breakAt <= 0) breakAt = prefix.length;
+
+    lines.push(remaining.slice(0, breakAt).trimEnd());
+    remaining = remaining.slice(breakAt).trimStart();
+  }
+
+  return lines;
+}
+
+function clampLines(
+  lines: string[],
+  maxLines: number,
+  maxWidth?: number,
+  fontSize?: number,
+  letterSpacing?: number,
+): string[] {
   if (lines.length <= maxLines) return lines;
   const kept = lines.slice(0, maxLines);
-  kept[maxLines - 1] = `${kept[maxLines - 1].replace(/[.…]+$/g, '')}...`;
+  const ellipsis = '...';
+  let lastLine = kept[maxLines - 1].replace(/[.…]+$/g, '');
+
+  if (maxWidth !== undefined && fontSize !== undefined && letterSpacing !== undefined) {
+    while (
+      lastLine.length > 0 &&
+      textPixelWidth(`${lastLine}${ellipsis}`, fontSize, letterSpacing) > maxWidth
+    ) {
+      lastLine = lastLine.slice(0, -1).trimEnd();
+    }
+  }
+
+  kept[maxLines - 1] = `${lastLine}${ellipsis}`;
   return kept;
 }
 
