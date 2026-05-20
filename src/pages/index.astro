@@ -1,8 +1,18 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import {
+  createPersonSchema,
+  createWebsiteSchema,
+} from '../lib/schema';
+import { DEFAULT_DESCRIPTION } from '../lib/seo';
 ---
 
-<BaseLayout title="Yoonchul Yi">
+<BaseLayout
+  title="Yoonchul Yi - AI Product Builder"
+  description={DEFAULT_DESCRIPTION}
+  canonicalPath="/"
+  jsonLd={[createWebsiteSchema(), createPersonSchema()]}
+>
   <!-- About Section -->
   <section class="py-8">
     <p class="font-serif text-lg leading-relaxed text-text">

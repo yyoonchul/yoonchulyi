@@ -2,11 +2,22 @@
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import {
+  formatDateForSchema,
   formatBlogDate,
-  getBlogHrefFromTitle,
+  getBlogDescription,
+  getBlogHref,
+  getBlogKeywords,
+  getBlogModifiedDate,
+  getBlogPublishedDate,
+  getBlogSeoTitle,
+  isBlogIndexable,
   type BlogBilingualContent,
 } from '../lib/blog';
 import { getBlogMarkdownProcessor } from '../lib/markdown';
+import {
+  createBlogPostingSchema,
+  createBreadcrumbSchema,
+} from '../../lib/schema';
 
 interface Props {
   post: CollectionEntry<'blog'>;
@@ -29,10 +40,39 @@ const koRendered = koHasContent
   ? await markdownProcessor.render(content.koMarkdown)
   : null;
 
-const postRelativeUrl = getBlogHrefFromTitle(title);
+const postRelativeUrl = getBlogHref(post);
+const seoTitle = getBlogSeoTitle(post);
+const description = getBlogDescription(post, content);
+const keywords = getBlogKeywords(post);
+const datePublished = formatDateForSchema(getBlogPublishedDate(post));
+const dateModified = formatDateForSchema(getBlogModifiedDate(post));
+const canonicalPath = postRelativeUrl;
+const robots = isBlogIndexable(post) ? undefined : 'noindex,follow';
 ---
 
-<BaseLayout title={`${title} - Blog - Yoonchul Yi`}>
+<BaseLayout
+  title={seoTitle}
+  description={description}
+  canonicalPath={canonicalPath}
+  lang={post.data.language ?? defaultLang}
+  ogType="article"
+  robots={robots}
+  jsonLd={[
+    createBlogPostingSchema({
+      path: canonicalPath,
+      headline: post.data.seoTitle ?? title,
+      description,
+      datePublished,
+      dateModified,
+      keywords,
+    }),
+    createBreadcrumbSchema([
+      { name: 'Home', path: '/' },
+      { name: 'Blog', path: '/blog/' },
+      { name: title, path: canonicalPath },
+    ]),
+  ]}
+>
   <article class="py-8">
     <a
       href="/blog"

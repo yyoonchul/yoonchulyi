@@ -2,14 +2,43 @@
 import { getCollection } from 'astro:content';
 import ListItem from '../../components/ListItem.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { formatBlogDate, getBlogHrefFromTitle } from '../lib/blog';
+import {
+  formatBlogDate,
+  getBlogDescription,
+  getBlogHref,
+} from '../lib/blog';
+import {
+  createBreadcrumbSchema,
+  createItemListSchema,
+} from '../../lib/schema';
 
 const posts = (await getCollection('blog')).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
 );
+const description =
+  'Long-form essays by Yoonchul Yi on AI-native productivity, local-first notes, Claude Code workflows, startups, and personal operating systems.';
 ---
 
-<BaseLayout title="Blog - Yoonchul Yi">
+<BaseLayout
+  title="Essays by Yoonchul Yi on AI, Productivity, Startups, and Notes"
+  description={description}
+  canonicalPath="/blog/"
+  jsonLd={[
+    createBreadcrumbSchema([
+      { name: 'Home', path: '/' },
+      { name: 'Blog', path: '/blog/' },
+    ]),
+    createItemListSchema(
+      'Essays by Yoonchul Yi',
+      '/blog/',
+      posts.map((post) => ({
+        name: post.data.seoTitle ?? post.data.title,
+        path: getBlogHref(post),
+        description: getBlogDescription(post),
+      })),
+    ),
+  ]}
+>
   <section class="py-8">
     <h1 class="font-serif text-2xl mb-2">Blog</h1>
 
@@ -20,7 +49,7 @@ const posts = (await getCollection('blog')).sort(
           <ListItem
             title={title}
             date={formatBlogDate(post.data.date)}
-            href={getBlogHrefFromTitle(title)}
+            href={getBlogHref(post)}
           />
         );
       })}

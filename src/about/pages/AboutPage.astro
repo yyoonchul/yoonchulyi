@@ -2,12 +2,32 @@
 import AboutSection from '../components/AboutSection.astro';
 import { getAboutExperiences, getAboutProjects } from '../lib/about';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import {
+  createBreadcrumbSchema,
+  createPersonSchema,
+  createProfilePageSchema,
+} from '../../lib/schema';
 
 const experiences = await getAboutExperiences();
 const projects = await getAboutProjects();
+const description =
+  'Portfolio and resume of Yoonchul Yi: MaekNote, Mynovel, Storybook4me, Notion templates, AI product research, and SNU Mechanical Engineering.';
 ---
 
-<BaseLayout title="About - Yoonchul Yi">
+<BaseLayout
+  title="About Yoonchul Yi - Projects, Experience, Resume"
+  description={description}
+  canonicalPath="/about/"
+  ogType="profile"
+  jsonLd={[
+    createPersonSchema(),
+    createProfilePageSchema('/about/'),
+    createBreadcrumbSchema([
+      { name: 'Home', path: '/' },
+      { name: 'About', path: '/about/' },
+    ]),
+  ]}
+>
   <main class="py-8 space-y-12">
     <AboutSection title="Experiences">
       {experiences.map(({ entry, Content }) => (

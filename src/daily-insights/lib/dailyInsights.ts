@@ -1,5 +1,6 @@
 import type { CollectionEntry } from 'astro:content';
 import { getCollection } from 'astro:content';
+import { getExcerptFromMarkdown, stripMarkdown } from '../../lib/seo';
 
 const DAILY_INSIGHT_ID_PATTERN = /^(\d{4})\/(\d{2})\/(\d{2})(?:\.md)?$/;
 const EN_START_MARKER = '<!-- LANG:EN:START -->';
@@ -25,6 +26,36 @@ export interface DailyInsightPageProps {
 export interface DailyInsightBilingualContent {
   enMarkdown: string;
   koMarkdown: string;
+}
+
+export function getDailyInsightTitle(
+  meta: DailyInsightMeta,
+  content?: DailyInsightBilingualContent,
+): string {
+  if (!content) {
+    return `Daily Insights - ${meta.isoDate} - Yoonchul Yi`;
+  }
+
+  const firstHeading = /^#\s+(.+)$/m.exec(content.enMarkdown)?.[1];
+  if (firstHeading) {
+    return `${stripMarkdown(firstHeading)} - Yoonchul Yi`;
+  }
+
+  return `Daily Insights - ${meta.isoDate} - Yoonchul Yi`;
+}
+
+export function getDailyInsightDescription(
+  meta: DailyInsightMeta,
+  content?: DailyInsightBilingualContent,
+): string {
+  if (!content) {
+    return `Daily curated notes on AI, DevTools, startups, productivity, and technology from ${meta.isoDate}.`;
+  }
+
+  return getExcerptFromMarkdown(
+    content.enMarkdown,
+    `Daily curated notes on AI, DevTools, startups, productivity, and technology from ${meta.isoDate}.`,
+  );
 }
 
 export function getDailyInsightHref(meta: Pick<DailyInsightMeta, 'year' | 'month' | 'day'>): string {

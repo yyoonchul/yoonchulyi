@@ -1,16 +1,47 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import type { DailyInsightPageProps } from '../lib/dailyInsights';
+import {
+  getDailyInsightDescription,
+  getDailyInsightTitle,
+  type DailyInsightPageProps,
+} from '../lib/dailyInsights';
 import { getDailyInsightsMarkdownProcessor } from '../lib/markdown';
+import {
+  createBlogPostingSchema,
+  createBreadcrumbSchema,
+} from '../../lib/schema';
 
 const { meta, content } = Astro.props as DailyInsightPageProps;
 
 const markdownProcessor = await getDailyInsightsMarkdownProcessor();
 const enRendered = await markdownProcessor.render(content.enMarkdown);
 const koRendered = await markdownProcessor.render(content.koMarkdown);
+const title = getDailyInsightTitle(meta, content);
+const headline = title.replace(/ - Yoonchul Yi$/, '');
+const description = getDailyInsightDescription(meta, content);
 ---
 
-<BaseLayout title={`${meta.isoDate} - Daily Insights - Yoonchul Yi`}>
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath={meta.href}
+  ogType="article"
+  jsonLd={[
+    createBlogPostingSchema({
+      path: meta.href,
+      headline,
+      description,
+      datePublished: meta.isoDate,
+      dateModified: meta.isoDate,
+      keywords: ['Daily Insights', 'AI', 'DevTools', 'Startups'],
+    }),
+    createBreadcrumbSchema([
+      { name: 'Home', path: '/' },
+      { name: 'Daily Insights', path: '/daily-insights/' },
+      { name: meta.isoDate, path: meta.href },
+    ]),
+  ]}
+>
   <article class="py-8">
     <a
       href="/daily-insights"

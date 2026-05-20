@@ -1,0 +1,24 @@
+# Yoonchul Yi
+
+> Personal site of Yoonchul Yi, an AI product builder based in Seoul. He builds local-first productivity tools and writes about AI-native notes, Claude Code workflows, startups, and daily AI/devtools insights.
+
+## Core pages
+
+- [Home](https://yoonchulyi.com/): Overview of Yoonchul Yi, projects, writing, and links.
+- [About](https://yoonchulyi.com/about/): Experience, projects, resume, and contact information.
+- [Blog](https://yoonchulyi.com/blog/): Long-form essays on AI, productivity, startups, notes, and personal operating systems.
+- [Daily Insights](https://yoonchulyi.com/daily-insights/): Daily curated notes on AI, DevTools, productivity, startups, and robotics.
+
+## Key writing
+
+- [MaekNote Manifesto](https://yoonchulyi.com/blog/MaekNote-Manifesto/): Why Yoonchul left Notion for local Markdown and Claude Code workflows.
+
+## Main topics
+
+- AI-native productivity
+- Local-first notes
+- Claude Code workflows
+- AI agents
+- DevTools
+- Startups
+- Robotics

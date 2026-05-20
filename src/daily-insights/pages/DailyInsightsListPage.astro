@@ -1,11 +1,45 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getDailyInsightEntriesSorted } from '../lib/dailyInsights';
+import {
+  getDailyInsightDescription,
+  getDailyInsightEntriesSorted,
+  getDailyInsightTitle,
+  parseDailyInsightBilingualContent,
+} from '../lib/dailyInsights';
+import {
+  createBreadcrumbSchema,
+  createItemListSchema,
+} from '../../lib/schema';
 
 const dailyInsights = await getDailyInsightEntriesSorted();
+const description =
+  'Daily curated notes on AI, DevTools, productivity, startups, robotics, and vertical software by Yoonchul Yi.';
+const itemList = dailyInsights.map(({ entry, meta }) => {
+  const content = parseDailyInsightBilingualContent(entry);
+  return {
+    name: getDailyInsightTitle(meta, content).replace(/ - Yoonchul Yi$/, ''),
+    path: meta.href,
+    description: getDailyInsightDescription(meta, content),
+  };
+});
 ---
 
-<BaseLayout title="Daily Insights - Yoonchul Yi">
+<BaseLayout
+  title="Daily AI, DevTools, and Startup Insights - Yoonchul Yi"
+  description={description}
+  canonicalPath="/daily-insights/"
+  jsonLd={[
+    createBreadcrumbSchema([
+      { name: 'Home', path: '/' },
+      { name: 'Daily Insights', path: '/daily-insights/' },
+    ]),
+    createItemListSchema(
+      'Daily AI, DevTools, and Startup Insights',
+      '/daily-insights/',
+      itemList,
+    ),
+  ]}
+>
   <section class="py-8">
     <h1 class="font-serif text-2xl mb-8">Daily Insights</h1>
 

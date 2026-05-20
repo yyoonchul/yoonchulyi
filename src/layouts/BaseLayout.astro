@@ -7,14 +7,38 @@ import '../styles/global.css';
 interface Props {
   title: string;
   description?: string;
+  canonicalPath?: string;
+  image?: string;
+  lang?: string;
+  ogType?: 'website' | 'article' | 'profile';
+  robots?: string;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
-const { title, description } = Astro.props;
+const {
+  title,
+  description,
+  canonicalPath,
+  image,
+  lang = 'en',
+  ogType,
+  robots,
+  jsonLd,
+} = Astro.props;
 ---
 
 <!doctype html>
-<html lang="ko">
-  <BaseHead title={title} description={description} />
+<html lang={lang}>
+  <BaseHead
+    title={title}
+    description={description}
+    canonicalPath={canonicalPath}
+    image={image}
+    lang={lang}
+    ogType={ogType}
+    robots={robots}
+    jsonLd={jsonLd}
+  />
   <body class="flex flex-col min-h-screen max-w-2xl mx-auto px-6">
     <Header />
     <main class="flex-1">

@@ -1,5 +1,6 @@
 import type { CollectionEntry } from 'astro:content';
 import { getCollection } from 'astro:content';
+import { getExcerptFromMarkdown, uniqueStrings } from '../../lib/seo';
 
 const WHITESPACE_PATTERN = /\s+/g;
 
@@ -12,9 +13,20 @@ export function getBlogSlugFromTitle(title: string): string {
   return title.trim().replace(WHITESPACE_PATTERN, '-');
 }
 
-export function getBlogHrefFromTitle(title: string): string {
-  const slug = getBlogSlugFromTitle(title);
+export function getBlogSlug(post: CollectionEntry<'blog'>): string {
+  return post.data.slug ?? getBlogSlugFromTitle(post.data.title);
+}
+
+export function getBlogHrefFromSlug(slug: string): string {
   return `/blog/${encodeURIComponent(slug)}/`;
+}
+
+export function getBlogHrefFromTitle(title: string): string {
+  return getBlogHrefFromSlug(getBlogSlugFromTitle(title));
+}
+
+export function getBlogHref(post: CollectionEntry<'blog'>): string {
+  return getBlogHrefFromSlug(getBlogSlug(post));
 }
 
 export function formatBlogDate(date: Date): string {
@@ -23,6 +35,48 @@ export function formatBlogDate(date: Date): string {
     month: 'short',
     day: 'numeric',
   });
+}
+
+export function getBlogPublishedDate(post: CollectionEntry<'blog'>): Date {
+  return post.data.datePublished ?? post.data.date;
+}
+
+export function getBlogModifiedDate(post: CollectionEntry<'blog'>): Date {
+  return post.data.dateModified ?? getBlogPublishedDate(post);
+}
+
+export function isBlogIndexable(post: CollectionEntry<'blog'>): boolean {
+  return post.data.index !== false;
+}
+
+export function formatDateForSchema(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+export function getBlogSeoTitle(post: CollectionEntry<'blog'>): string {
+  return post.data.seoTitle ?? `${post.data.title} - Blog - Yoonchul Yi`;
+}
+
+export function getBlogDescription(
+  post: CollectionEntry<'blog'>,
+  content?: BlogBilingualContent,
+): string {
+  if (post.data.description) {
+    return post.data.description;
+  }
+
+  const parsedContent = content ?? parseBlogBilingualContent(post);
+  const markdown = (parsedContent.enMarkdown || parsedContent.koMarkdown)
+    .replace(/^#{1,3}\s+.+$/m, '')
+    .trim();
+  return getExcerptFromMarkdown(markdown);
+}
+
+export function getBlogKeywords(post: CollectionEntry<'blog'>): string[] {
+  return uniqueStrings([
+    ...(post.data.tags ?? []),
+    ...(post.data.topics ?? []),
+  ]);
 }
 
 export interface BlogBilingualContent {
@@ -42,7 +96,7 @@ export async function getBlogPostStaticPaths() {
 
   return posts.map((post) => {
     const title = post.data.title;
-    const slug = getBlogSlugFromTitle(title);
+    const slug = getBlogSlug(post);
 
     return {
       params: { slug },
