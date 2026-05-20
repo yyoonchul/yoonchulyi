@@ -69,14 +69,14 @@ if [[ "${#png_files[@]}" -eq 0 ]]; then
 fi
 
 MAX_FILE_BYTES="${DISCORD_MAX_FILE_BYTES:-10485760}"
-BATCH_SIZE="${DISCORD_WEBHOOK_BATCH_SIZE:-5}"
+BATCH_SIZE="${DISCORD_WEBHOOK_BATCH_SIZE:-10}"
 RETRY_MAX_ATTEMPTS="${DISCORD_WEBHOOK_RETRY_MAX_ATTEMPTS:-3}"
 
 if [[ ! "${MAX_FILE_BYTES}" =~ ^[1-9][0-9]*$ ]]; then
   MAX_FILE_BYTES="10485760"
 fi
 if [[ ! "${BATCH_SIZE}" =~ ^[1-9][0-9]*$ ]]; then
-  BATCH_SIZE="5"
+  BATCH_SIZE="10"
 fi
 if [[ "${BATCH_SIZE}" -gt 10 ]]; then
   BATCH_SIZE="10"
@@ -95,16 +95,66 @@ done
 
 date_label="$(echo "${DATE_PATH}" | tr '/' '-')"
 total_count="${#png_files[@]}"
-total_batches="$(((total_count + BATCH_SIZE - 1) / BATCH_SIZE))"
+declare -a batch_start_indices=()
+declare -a batch_end_indices=()
+declare -a batch_labels=()
+
+add_batch_ranges() {
+  local start_index="$1"
+  local end_index="$2"
+  local label="$3"
+  local chunk_start chunk_end
+
+  for ((chunk_start = start_index; chunk_start < end_index; chunk_start += BATCH_SIZE)); do
+    chunk_end="$((chunk_start + BATCH_SIZE))"
+    if [[ "${chunk_end}" -gt "${end_index}" ]]; then
+      chunk_end="${end_index}"
+    fi
+
+    batch_start_indices+=("${chunk_start}")
+    batch_end_indices+=("${chunk_end}")
+    batch_labels+=("${label}")
+  done
+}
+
+current_article_key=""
+current_article_label=""
+current_start_index=0
+for ((file_index = 0; file_index < total_count; file_index++)); do
+  file_name="$(basename "${png_files[${file_index}]}")"
+  article_key=""
+  article_label="card news"
+  if [[ "${file_name}" =~ ^([0-9]+)-[0-9]+\.png$ ]]; then
+    article_key="${BASH_REMATCH[1]}"
+    article_label="article ${article_key}"
+  fi
+
+  if [[ "${file_index}" -eq 0 ]]; then
+    current_article_key="${article_key}"
+    current_article_label="${article_label}"
+    current_start_index=0
+    continue
+  fi
+
+  if [[ "${article_key}" != "${current_article_key}" ]]; then
+    add_batch_ranges "${current_start_index}" "${file_index}" "${current_article_label}"
+    current_article_key="${article_key}"
+    current_article_label="${article_label}"
+    current_start_index="${file_index}"
+  fi
+done
+add_batch_ranges "${current_start_index}" "${total_count}" "${current_article_label}"
+total_batches="${#batch_start_indices[@]}"
 
 send_batch() {
   local batch_index="$1"
   local start_index="$2"
   local end_index="$3"
+  local batch_label="$4"
   local headers_path body_path http_code retry_after attempt payload
   local -a curl_args=()
 
-  payload="{\"content\":\"Daily Insights card news ${date_label} (${batch_index}/${total_batches})\"}"
+  payload="{\"content\":\"Daily Insights ${batch_label} ${date_label} (${batch_index}/${total_batches})\"}"
 
   attempt=1
   while true; do
@@ -152,14 +202,13 @@ send_batch() {
 }
 
 print_header "Sending ${total_count} card news PNG(s) to Discord for ${DATE_PATH}"
-batch_index=1
-for ((start_index = 0; start_index < total_count; start_index += BATCH_SIZE)); do
-  end_index="$((start_index + BATCH_SIZE))"
-  if [[ "${end_index}" -gt "${total_count}" ]]; then
-    end_index="${total_count}"
-  fi
-  send_batch "${batch_index}" "${start_index}" "${end_index}"
-  batch_index="$((batch_index + 1))"
+for ((batch_index = 1; batch_index <= total_batches; batch_index++)); do
+  batch_array_index="$((batch_index - 1))"
+  send_batch \
+    "${batch_index}" \
+    "${batch_start_indices[${batch_array_index}]}" \
+    "${batch_end_indices[${batch_array_index}]}" \
+    "${batch_labels[${batch_array_index}]}"
 done
 
 mkdir -p "${STATE_DIR}"
