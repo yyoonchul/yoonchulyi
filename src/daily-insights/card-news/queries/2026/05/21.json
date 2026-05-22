@@ -1,0 +1,45 @@
+{
+  "cover": "OpenAI",
+  "articles": [
+    {
+      "cover": "Claude AI",
+      "sections": [
+        "Claude AI",
+        "Anthropic Claude",
+        "AI assistant",
+        "ChatGPT",
+        "large language model"
+      ]
+    },
+    {
+      "cover": "OpenAI",
+      "sections": [
+        "Paul Erdős",
+        "discrete geometry",
+        "OpenAI",
+        "algebraic number theory",
+        "Princeton University"
+      ]
+    },
+    {
+      "cover": "Kevin Kelly",
+      "sections": [
+        "Kevin Kelly",
+        "entropy",
+        "evolution",
+        "technology innovation",
+        "artificial intelligence creativity"
+      ]
+    },
+    {
+      "cover": "Y Combinator",
+      "sections": [
+        "Y Combinator",
+        "startup financing",
+        "SAFE investment",
+        "OpenAI",
+        "AI tokens"
+      ]
+    }
+  ]
+}

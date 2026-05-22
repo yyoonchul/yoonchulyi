@@ -1,0 +1,37 @@
+{
+  "articles": [
+    {
+      "cover": "AI 검색의 새 기본값",
+      "source": "Google 블로그 \"A new era for AI Search\"",
+      "sections": [
+        "검색의 에이전트화",
+        "AI Mode의 확장",
+        "멀티모달 검색창",
+        "정보 에이전트",
+        "개인화된 생성 UI"
+      ]
+    },
+    {
+      "cover": "오디오 스마트 안경 복귀",
+      "source": "TechCrunch 기사 \"Google takes a page out of Meta’s book, announces new audio-powered smart glasses at IO 2026\"",
+      "sections": [
+        "파트너십으로 복귀",
+        "오디오 중심 경험",
+        "양대 OS 연결",
+        "Google Glass 이후",
+        "달라진 시장 구도"
+      ]
+    },
+    {
+      "cover": "Karpathy의 Anthropic 합류",
+      "source": "TechCrunch 기사 \"OpenAI co-founder Andrej Karpathy joins Anthropic’s pre-training team\"",
+      "sections": [
+        "프리트레이닝 역할",
+        "AI 지원 연구",
+        "OpenAI와 Tesla 경험",
+        "교육 작업의 여지",
+        "안전 인재 강화"
+      ]
+    }
+  ]
+}

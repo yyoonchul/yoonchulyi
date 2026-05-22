@@ -1,0 +1,48 @@
+{
+  "articles": [
+    {
+      "cover": "인간형 Claude와 도구형 ChatGPT",
+      "source": "Olivia Moore의 \"Claude is built to be a human, while ChatGPT is built to be a tool\"",
+      "sections": [
+        "페르소나의 차이",
+        "맥락을 만드는 Claude",
+        "친밀함의 권력관계",
+        "명시적인 도구 ChatGPT",
+        "보통 사용자의 영향"
+      ]
+    },
+    {
+      "cover": "AI가 깬 이산기하 추측",
+      "source": "OpenAI 글 \"An OpenAI model has disproved a central conjecture in discrete geometry\"",
+      "sections": [
+        "단위거리 문제",
+        "깨진 최적성 믿음",
+        "범용 모델의 발견",
+        "예상 밖 수학 도구",
+        "인간 검토와 의미"
+      ]
+    },
+    {
+      "cover": "예측 불가능한 삶의 가치",
+      "source": "Kevin Kelly의 \"Your Most Improbable Life\"",
+      "sections": [
+        "고유성으로 이동하기",
+        "엔트로피와 예외",
+        "생명이 만드는 희소성",
+        "기술이 넓힌 가능성",
+        "AI 시대의 비예측성"
+      ]
+    },
+    {
+      "cover": "YC 전체를 겨눈 OpenAI 제안",
+      "source": "TechCrunch 기사 \"Sam Altman makes ‘mic drop’ offer to every Y Combinator startup\"",
+      "sections": [
+        "YC 배치 전체 제안",
+        "토큰과 지분 구조",
+        "밸류에이션의 변수",
+        "투자와 배포 leverage",
+        "낮아지는 토큰 비용"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "cover": "Google Gemini",
+  "articles": [
+    {
+      "cover": "Google Search",
+      "sections": [
+        "Google Search",
+        "Gemini 3.5 Flash",
+        "Google Chrome",
+        "Google AI Pro",
+        "Google AI Mode"
+      ]
+    },
+    {
+      "cover": "Google Glass",
+      "sections": [
+        "Warby Parker",
+        "Google Gemini",
+        "Android",
+        "Google Glass",
+        "Ray-Ban Meta"
+      ]
+    },
+    {
+      "cover": "Andrej Karpathy",
+      "sections": [
+        "Anthropic",
+        "Claude AI",
+        "Tesla Autopilot",
+        "Eureka Labs",
+        "Chris Rohlf"
+      ]
+    }
+  ]
+}
