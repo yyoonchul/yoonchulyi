@@ -16,6 +16,12 @@
 - Accurate, concise, and factual.
 - No invented facts.
 
+## Person References
+
+- When referring to authors, speakers, founders, executives, researchers, or other people, repeat the person's name, public handle, role title, or organization label instead of using gendered pronouns.
+- Avoid Korean and English gendered pronouns such as `그`, `그녀`, `he`, `she`, `him`, and `her` unless they are part of a direct quote or official title.
+- Prefer clear repetitions such as `Karpathy는`, `Altman은`, `the CEO`, or `the researcher` over pronoun-based references.
+
 ## Categories
 
 Choose one:

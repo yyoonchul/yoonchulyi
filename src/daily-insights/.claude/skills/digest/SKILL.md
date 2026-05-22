@@ -26,6 +26,7 @@ Korean is the source of truth: write the digest in Korean first, then translate 
    - If YouTube transcript extraction fails: mark `⚠️ Transcript unavailable`, skip detailed notes.
 3. Create digest in Korean first (summary + detail).
    - Use plain declarative form (`-다` 체), not polite form (`-ㅂ니다`/`-습니다` 체). See `prompt-summarize.md` → "Korean Style".
+   - When referring to authors, speakers, founders, executives, researchers, or other people, use the person's name or public handle instead of gendered pronouns (`그`, `그녀`, `he`, `she`, `him`, `her`) wherever possible.
    - Detailed notes: 20-30 lines per article.
    - 상세 정리: 기사별 20-30줄.
    - Use numbered major points, and under each major point add indented bullet lists for detailed notes.

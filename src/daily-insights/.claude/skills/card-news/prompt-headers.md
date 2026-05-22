@@ -40,6 +40,7 @@ Style:
 - Plain declarative noun phrase, not a full sentence.
 - Strong nouns + minimal modifier. Cut adjectives, hedge words, possessive `～의 ～`.
 - Keep one concrete signal per header: a company, a product, a number, an action, a mechanism.
+- When a header names or refers to a person, use the person's name, public handle, role title, or organization label instead of gendered pronouns. Avoid `그`, `그녀`, `he`, `she`, `him`, and `her`.
 - **Each bullet on the same article must get a clearly different header** — they should distinguish the three (or N) angles of the article, not paraphrase the article title three times.
 - No emoji, no quotes, no leading bullets.
 

@@ -45,6 +45,7 @@ One JSON object written to `card-news/queries/YYYY/MM/DD.json`:
 8. **Fallback only when no useful proper noun exists.** Then use a concrete general query of 2-4 English words: `data center servers`, `chip wafer`, `whiteboard system design`, `market share chart`.
 9. **Use general queries for risky negative portrayals of private individuals.** Public figures, companies, publications, models, places, and organizations are allowed as queries; if the only proper noun is a non-public individual in a negative context, fallback to the concrete scene.
 10. **Avoid descriptive sentence fragments.** Output a search term, not a caption.
+11. **No person pronouns.** If a query needs a person, use the person's name, public handle, role title, or organization label; never use `he`, `she`, `him`, or `her`.
 
 ## Deriving the query
 

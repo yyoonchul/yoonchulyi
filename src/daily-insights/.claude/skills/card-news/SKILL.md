@@ -23,6 +23,7 @@ Each article deck is **1 cover + one content slide per top-level detailed note i
 3. **Generate Korean article headers.** Follow `prompt-article-headers.md`.
    - Use the LLM only for the article cover title (`articles[i].cover`), the orange original-title/source line (`articles[i].source`), and each content-page header (`articles[i].sections[j]`), shortened from that numbered detail item's main title.
    - `articles[i].source` must keep the original digest title exactly inside straight double quotes and add a short modifier naming the source, author, site, format, or public figure where useful.
+   - When a header/source line names or refers to a person, use the person's name, public handle, role title, or organization label instead of gendered pronouns (`그`, `그녀`, `he`, `she`, `him`, `her`).
    - Do not use the LLM to rewrite detailed body content. The renderer uses the detail bullets from the digest as-is.
    - Save to `card-news/article-headers/<datePath>.json`.
    - `articles.length` must equal the article count exactly. Each `sections.length` must equal that article's top-level detailed item count exactly.

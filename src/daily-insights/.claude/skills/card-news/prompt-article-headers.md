@@ -36,6 +36,7 @@ Write one JSON object to `card-news/article-headers/YYYY/MM/DD.json`:
 ## Rules
 
 - Korean framing text only, except the exact original title inside `source` may remain in its original language.
+- When naming or referring to people, use the person's name, public handle, role title, or organization label instead of gendered pronouns. Avoid `그`, `그녀`, `he`, `she`, `him`, and `her` unless they are part of the exact original title.
 - Cover title: prefer 10-20 Korean characters. Summarize the article's main signal, not the whole day's theme.
 - Source line:
   - Must include the original title from the digest exactly, wrapped in straight double quotes.
