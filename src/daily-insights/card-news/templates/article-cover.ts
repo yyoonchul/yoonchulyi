@@ -1,8 +1,9 @@
-import { WIDTH, HEIGHT, fontFamily, font, spacing } from './styles.js';
+import { WIDTH, HEIGHT, fontFamily, spacing } from './styles.js';
 import {
   editorialColors as cover,
   editorialSansStack as sansStack,
   renderEditorialBackground,
+  renderEditorialProgressiveBlurBackdrop,
 } from './editorial-background.js';
 import type { ArticleData } from '../types.js';
 
@@ -17,15 +18,15 @@ export function renderArticleCover(
   const headlineBlockHeight = (headlineLines.lines.length - 1) * headlineLines.gap;
   const headlineCenterY = HEIGHT / 2 + 40;
   const headlineStartY = headlineCenterY - headlineBlockHeight / 2;
-  const headlineBottomY = headlineStartY + headlineBlockHeight;
   const headlineSvg = headlineLines.lines
     .map((line, i) => {
       const y = headlineStartY + i * headlineLines.gap;
-      return `<text x="${spacing.page}" y="${y}" font-family="${sansStack}" font-size="${headlineLines.font}" font-weight="700" fill="${cover.text}" letter-spacing="-1">${escSvg(line)}</text>`;
+      return `<text x="${spacing.page}" y="${y}" text-anchor="start" font-family="${sansStack}" font-size="${headlineLines.font}" font-weight="700" fill="${cover.text}" letter-spacing="-1">${escSvg(line)}</text>`;
     })
     .join('\n  ');
 
-  const sourceTitleFont = 24;
+  const footerLabelFont = 26;
+  const sourceTitleFont = 22;
   const sourceTitleLetterSpacing = 4;
   const sourceTitleRightMargin = 128;
   const sourceTitleMaxWidth = WIDTH - spacing.page - sourceTitleRightMargin;
@@ -36,30 +37,32 @@ export function renderArticleCover(
     sourceTitleFont,
     sourceTitleLetterSpacing,
   );
-  const sourceTitleGap = Math.round(headlineLines.font * 0.42);
-  const sourceTitleY = headlineBottomY + sourceTitleGap;
-  const sourceTitleLineHeight = 38;
+  const sourceTitleLineHeight = 34;
+  const sourceTitleBottomMargin = 96;
+  const sourceTitleY =
+    HEIGHT - sourceTitleBottomMargin - (sourceTitleLines.length - 1) * sourceTitleLineHeight;
+  const subtitleY = sourceTitleY - 40;
   const sourceTitleSvg = sourceTitleLines
     .map(
       (line, i) =>
-        `<text x="${spacing.page}" y="${sourceTitleY + i * sourceTitleLineHeight}"
+        `<text x="${spacing.page}" y="${sourceTitleY + i * sourceTitleLineHeight}" text-anchor="start"
         font-family="${fontFamily.mono}" font-size="${sourceTitleFont}" fill="${cover.accent}" letter-spacing="${sourceTitleLetterSpacing}">${escSvg(line)}</text>`,
     )
     .join('\n  ');
-  const subtitleY = HEIGHT - 92;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}">
   ${renderEditorialBackground(backgroundPath)}
+  ${renderEditorialProgressiveBlurBackdrop(backgroundPath)}
 
   <!-- Headline -->
   ${headlineSvg}
 
+  <!-- Subtitle -->
+  <text x="${spacing.page}" y="${subtitleY}" text-anchor="start"
+        font-family="${sansStack}" font-size="${footerLabelFont}" fill="${cover.sub}">이윤철이 오늘 읽은 아티클</text>
+
   <!-- Original source title -->
   ${sourceTitleSvg}
-
-  <!-- Subtitle -->
-  <text x="${WIDTH / 2}" y="${subtitleY}" text-anchor="middle"
-        font-family="${sansStack}" font-size="22" fill="${cover.sub}">이윤철이 오늘 읽은 아티클</text>
 </svg>`;
 }
 

@@ -75,6 +75,77 @@ export function renderEditorialTextBackdrop(): string {
   return `<rect x="0" y="0" width="${WIDTH}" height="${HEIGHT}" fill="url(#editorialTextBackdrop)"/>`;
 }
 
+export function renderEditorialProgressiveBlurBackdrop(overridePath?: string | null): string {
+  const backgroundImageHref = overridePath
+    ? fileToDataUri(overridePath)
+    : getBackgroundImageHref();
+  const blurTop = Math.round(HEIGHT * 0.72);
+  const blurHeight = HEIGHT - blurTop;
+
+  return `<defs>
+    <filter id="editorialProgressiveBlurSoft" x="-12%" y="-12%" width="124%" height="124%">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+    <filter id="editorialProgressiveBlurMedium" x="-12%" y="-12%" width="124%" height="124%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+    <filter id="editorialProgressiveBlurHeavy" x="-12%" y="-12%" width="124%" height="124%">
+      <feGaussianBlur stdDeviation="34"/>
+    </filter>
+    <linearGradient id="editorialProgressiveBlurDim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="42%" stop-color="#000000" stop-opacity="0.2"/>
+      <stop offset="76%" stop-color="#000000" stop-opacity="0.54"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.82"/>
+    </linearGradient>
+    <mask id="editorialProgressiveBlurSoftMask">
+      <linearGradient id="editorialProgressiveBlurSoftMaskGradient" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#000000"/>
+        <stop offset="20%" stop-color="#333333"/>
+        <stop offset="66%" stop-color="#ffffff"/>
+        <stop offset="100%" stop-color="#ffffff"/>
+      </linearGradient>
+      <rect width="${WIDTH}" height="${HEIGHT}" fill="#000000"/>
+      <rect y="${blurTop}" width="${WIDTH}" height="${blurHeight}" fill="url(#editorialProgressiveBlurSoftMaskGradient)"/>
+    </mask>
+    <mask id="editorialProgressiveBlurMediumMask">
+      <linearGradient id="editorialProgressiveBlurMediumMaskGradient" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#000000"/>
+        <stop offset="36%" stop-color="#000000"/>
+        <stop offset="78%" stop-color="#ffffff"/>
+        <stop offset="100%" stop-color="#ffffff"/>
+      </linearGradient>
+      <rect width="${WIDTH}" height="${HEIGHT}" fill="#000000"/>
+      <rect y="${blurTop}" width="${WIDTH}" height="${blurHeight}" fill="url(#editorialProgressiveBlurMediumMaskGradient)"/>
+    </mask>
+    <mask id="editorialProgressiveBlurHeavyMask">
+      <linearGradient id="editorialProgressiveBlurHeavyMaskGradient" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#000000"/>
+        <stop offset="62%" stop-color="#000000"/>
+        <stop offset="92%" stop-color="#ffffff"/>
+        <stop offset="100%" stop-color="#ffffff"/>
+      </linearGradient>
+      <rect width="${WIDTH}" height="${HEIGHT}" fill="#000000"/>
+      <rect y="${blurTop}" width="${WIDTH}" height="${blurHeight}" fill="url(#editorialProgressiveBlurHeavyMaskGradient)"/>
+    </mask>
+  </defs>
+
+  ${backgroundImageHref
+    ? `<g mask="url(#editorialProgressiveBlurSoftMask)" filter="url(#editorialProgressiveBlurSoft)">
+    <image href="${backgroundImageHref}" x="-16" y="-16" width="${WIDTH + 32}" height="${HEIGHT + 32}" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+  <g mask="url(#editorialProgressiveBlurMediumMask)" filter="url(#editorialProgressiveBlurMedium)">
+    <image href="${backgroundImageHref}" x="-36" y="-36" width="${WIDTH + 72}" height="${HEIGHT + 72}" preserveAspectRatio="xMidYMid slice"/>
+  </g>
+  <g mask="url(#editorialProgressiveBlurHeavyMask)" filter="url(#editorialProgressiveBlurHeavy)">
+    <image href="${backgroundImageHref}" x="-64" y="-64" width="${WIDTH + 128}" height="${HEIGHT + 128}" preserveAspectRatio="xMidYMid slice"/>
+  </g>`
+    : `<g mask="url(#editorialProgressiveBlurMediumMask)" filter="url(#editorialProgressiveBlurMedium)" opacity="0.65">
+    <rect width="${WIDTH}" height="${HEIGHT}" fill="url(#editorialBacklight)"/>
+  </g>`}
+  <rect y="${blurTop}" width="${WIDTH}" height="${blurHeight}" fill="url(#editorialProgressiveBlurDim)"/>`;
+}
+
 function getBackgroundImageHref(): string | null {
   if (cachedBackgroundHref !== undefined) {
     return cachedBackgroundHref;
