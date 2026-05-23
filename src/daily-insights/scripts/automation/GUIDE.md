@@ -2,16 +2,17 @@
 
 이 폴더는 macOS `launchd` 기반으로 daily insights 작업을 매일 자동 실행하기 위한 스크립트를 제공합니다.
 
-권장 방식은 `daily-flow-launchd.sh`로 **하나의 스케줄**만 등록하는 것입니다. daily flow는 기본적으로 `Digest` shortcut을 먼저 실행해 iCloud inbox를 repo inbox로 옮긴 뒤, digest가 성공하고 오늘 digest가 실제로 생성/변경된 경우에만 card news를 실행합니다.
+권장 방식은 `daily-flow-launchd.sh`로 **하나의 스케줄**만 등록하는 것입니다. daily flow는 기본적으로 `Digest` shortcut을 먼저 실행해 iCloud inbox를 repo inbox로 옮긴 뒤, `digest -> card-news -> daily-insights-publish` 순서로 실행합니다.
 
 ## 포함된 스크립트
 
-- `run-daily-flow-codex.sh`: Codex로 iCloud inbox move + digest + card news 순차 실행
-- `run-daily-flow-claude.sh`: Claude Code로 iCloud inbox move + digest + card news 순차 실행
+- `run-daily-flow-codex.sh`: Codex로 iCloud inbox move + digest + card news + publish 순차 실행
+- `run-daily-flow-claude.sh`: Claude Code로 iCloud inbox move + digest + card news + publish 순차 실행
 - `run-daily-flow.sh`: daily flow 공통 구현. 직접 실행보다 위 엔진별 래퍼 사용을 권장합니다.
 - `daily-flow-launchd.sh`: daily flow 스케줄 설정/켜기/끄기/상태/즉시실행
-- `run-digest-codex.sh`: Codex 스킬 버전 실행 + 커밋/푸시
-- `run-digest-claude.sh`: Claude Code 스킬 버전 실행 + 커밋/푸시
+- `run-digest-codex.sh`: Codex digest 스킬 버전 실행. 커밋/푸시는 하지 않습니다.
+- `run-digest-claude.sh`: Claude Code digest 스킬 버전 실행. 커밋/푸시는 하지 않습니다.
+- `run-daily-insights-publish.sh`: digest/card news 산출물을 한 번에 커밋/푸시해 GitHub Pages 배포를 트리거합니다.
 - `digest-launchd.sh`: 스케줄 설정/켜기/끄기/상태/즉시실행
 - `cardnews-launchd.sh`: card news 개별 스케줄 설정/켜기/끄기/상태/즉시실행
 - `setup-digest-schedule.sh`: 빠른 설정 래퍼
@@ -52,8 +53,9 @@ claude auth login
 3. digest 스킬을 실행합니다.
 4. digest 실패 시 local inbox를 백업 상태로 복원하고 card news를 실행하지 않습니다.
 5. digest 성공 시 local inbox를 명시적으로 비웁니다.
-6. 오늘 digest 파일이 새로 생성되었거나 변경된 것을 검증한 뒤 digest 변경분을 커밋/푸시합니다.
-7. 검증과 커밋이 성공한 경우에만 card news 스킬을 실행합니다.
+6. 오늘 digest 파일이 새로 생성되었거나 변경된 것을 검증합니다.
+7. card news 스킬을 실행해 카드뉴스, sidecar JSON, public cardnews URL 자산을 생성합니다.
+8. `daily-insights-publish` 단계에서 digest와 card news 산출물을 한 번에 커밋/푸시합니다.
 
 ## Shortcut 선행 동기화 모드 (Codex / Claude Code)
 
@@ -68,7 +70,7 @@ claude auth login
 1. `shortcuts run "Digest"`
 2. 로컬 inbox 상태 확인 (비어 있으면 종료)
 3. (선택) 지연 후 선택한 엔진의 digest 실행
-4. 커밋/푸시
+4. digest 생성 후 daily flow가 card news와 publish 단계를 이어서 실행
 
 이 모드가 활성화되면 해당 실행에서는 스크립트의 직접 iCloud inbox sync/clear를 건너뜁니다.
 즉, iCloud 접근은 shortcut에 맡기고, digest 본 처리는 로컬 `content/inbox.md`를 사용합니다.
@@ -111,11 +113,14 @@ claude auth login
 
 ## 기본 동작
 
-- 스킬 실행 성공 후 아래 파일만 커밋 대상으로 추가합니다.
+- `daily-insights-publish` 실행 성공 후 아래 파일을 커밋 대상으로 추가합니다.
   - `content/YYYY/MM/DD.md` (오늘 날짜)
   - `content/index.json`
   - `content/inbox.md`
-- 커밋 메시지: `Add daily digest for YYYY-MM-DD`
+  - `card-news/article-headers/YYYY/MM/DD.json`
+  - `card-news/queries/YYYY/MM/DD.json`
+  - `public/daily-insights/YYYY/MM/DD/cardnews/`
+- 커밋 메시지: `Publish daily insight for YYYY-MM-DD`
 - 푸시: `origin`의 현재 브랜치(`HEAD:<current-branch>`)
 
 ## Codex 권한 기본값 (현재)

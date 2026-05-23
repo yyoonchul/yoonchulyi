@@ -19,6 +19,7 @@ run_log_init "daily-flow" "${ENGINE}"
 
 digest_runner="${SCRIPT_DIR}/run-digest-${ENGINE}.sh"
 cardnews_runner="${SCRIPT_DIR}/run-cardnews-${ENGINE}.sh"
+publish_runner="${SCRIPT_DIR}/run-daily-insights-publish.sh"
 local_inbox_path="${REPO_ROOT}/${LOCAL_INBOX_RELATIVE_PATH}"
 digest_path="${REPO_ROOT}/${DIGEST_RELATIVE_PATH}"
 date_path="$(date +%Y/%m/%d)"
@@ -48,6 +49,10 @@ fi
 }
 [[ -x "${cardnews_runner}" ]] || {
   echo "ERROR: card news runner is not executable: ${cardnews_runner}" >&2
+  exit 1
+}
+[[ -x "${publish_runner}" ]] || {
+  echo "ERROR: publish runner is not executable: ${publish_runner}" >&2
   exit 1
 }
 
@@ -107,7 +112,6 @@ print_header "Running digest step"
 set +e
 DIGEST_SKIP_INBOX_SYNC=true \
 DIGEST_PRE_SYNC_SHORTCUT_NAME="" \
-DIGEST_SKIP_GIT_COMMIT_AND_PUSH=true \
   "${digest_runner}"
 digest_status="$?"
 set -e
@@ -139,10 +143,6 @@ fi
 
 rm -f "${inbox_backup_path}"
 
-print_header "Digest changed successfully. Committing digest changes."
-run_log_event "Committing digest step" "Digest: \`${DIGEST_RELATIVE_PATH}\`."
-run_git_commit_and_push
-
 print_header "Digest changed successfully. Running card news step."
 run_log_event "Running card news step" "Digest: \`${DIGEST_RELATIVE_PATH}\`."
 set +e
@@ -155,5 +155,9 @@ if [[ "${cardnews_status}" -ne 0 ]]; then
   exit "${cardnews_status}"
 fi
 
+print_header "Digest and card news complete. Running publish step."
+run_log_event "Running publish step" "Digest: \`${DIGEST_RELATIVE_PATH}\`"$'\n'"Card news: \`card-news/output/${date_path}/\`."
+"${publish_runner}" "${date_path}"
+
 print_header "Daily flow complete."
-run_log_finish_success "Daily flow completed. Digest: \`${DIGEST_RELATIVE_PATH}\`; card news: \`card-news/output/${date_path}/\`."
+run_log_finish_success "Daily flow completed and publish step finished. Digest: \`${DIGEST_RELATIVE_PATH}\`; card news: \`card-news/output/${date_path}/\`."

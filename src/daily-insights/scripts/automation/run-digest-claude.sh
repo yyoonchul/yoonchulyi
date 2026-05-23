@@ -139,11 +139,5 @@ else
   run_log_event "Repo inbox not empty after digest" "\`${LOCAL_INBOX_RELATIVE_PATH}\` still has non-whitespace content after digest processing."
 fi
 
-if [[ "${DIGEST_SKIP_GIT_COMMIT_AND_PUSH:-false}" == "true" ]]; then
-  print_header "DIGEST_SKIP_GIT_COMMIT_AND_PUSH=true. Skip digest commit/push."
-  run_log_finish_success "Digest automation completed; git commit/push was skipped by caller."
-  exit 0
-fi
-
-run_git_commit_and_push
-run_log_finish_success "Digest automation completed and git commit/push step finished."
+print_header "Digest generation complete. Publish is handled by daily-insights-publish."
+run_log_finish_success "Digest automation completed without git commit/push."

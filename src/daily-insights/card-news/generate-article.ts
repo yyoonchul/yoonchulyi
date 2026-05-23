@@ -130,7 +130,14 @@ async function renderArticleDeck(
     'output',
     datePath,
   );
+  const publicOutDir = resolve(
+    import.meta.dirname,
+    '../../../public/daily-insights',
+    datePath,
+    'cardnews',
+  );
   mkdirSync(outDir, { recursive: true });
+  mkdirSync(publicOutDir, { recursive: true });
 
   const slides: { svg: string; credit: ResolvedImage | null; query: string }[] = [
     {
@@ -159,6 +166,8 @@ async function renderArticleDeck(
     const num = `${article.index}-${i + 1}`;
     const jpeg = await svgToJpeg(slides[i].svg);
     writeFileSync(join(outDir, `${num}.jpg`), jpeg);
+    writeFileSync(join(publicOutDir, num), jpeg);
+    writeFileSync(join(publicOutDir, `${num}.jpg`), jpeg);
   }
 
   const credits = slides.map((s, i) =>

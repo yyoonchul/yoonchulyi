@@ -44,6 +44,7 @@ Constraints:
 - Today's digest already exists at \`content/${DATE_PATH}.md\`. Do not regenerate it.
 - Follow the skill end-to-end: parse digest KO section by article, generate \`card-news/article-headers/${DATE_PATH}.json\`, generate \`card-news/queries/${DATE_PATH}.json\`, and run the article renderer.
 - Renderer execution is hard-coded in this repository. Do not run \`node\`, \`npm\`, \`npx\`, or \`tsx\` directly for rendering. To render, execute exactly: \`scripts/automation/render-cardnews-article.sh ${DATE_PATH}\`.
+- The renderer must leave public assets available under \`public/daily-insights/${DATE_PATH}/cardnews/\` for the publish step.
 - Do not run any git commands.
 EOF
 

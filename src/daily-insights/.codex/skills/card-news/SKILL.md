@@ -20,6 +20,7 @@ Each article deck is **1 cover + one content slide per top-level detailed note i
 - `card-news/queries/YYYY/MM/DD.json` — English image search queries (daily cover fallback + per-article cover + per-content-page queries).
 - `card-news/output/YYYY/MM/DD/A-B.jpg` — article-level deck slides, where `A` is the article index and `B` is the card number inside that article deck (`1-1.jpg`, `1-2.jpg`, `3-4.jpg`, etc.).
 - `card-news/output/YYYY/MM/DD/article-NN-credits.json` — per-slide resolved image metadata for article *NN*.
+- `public/daily-insights/YYYY/MM/DD/cardnews/A-B` and `A-B.jpg` — GitHub Pages public URL assets for Instagram automation.
 
 ## Workflow
 
@@ -67,7 +68,7 @@ Each article deck is **1 cover + one content slide per top-level detailed note i
    ```bash
    scripts/automation/render-cardnews-article.sh <datePath> [article-index]
    ```
-   Do **not** call `node`, `npm`, `npx`, or `tsx` directly for rendering. The wrapper owns Node PATH bootstrapping, `.env` loading, image API environment checks, and renderer execution. The renderer reads both sidecars (`article-headers/`, `queries/`), resolves images via Wikimedia (CC0/CC BY only) → Openverse → NASA Images → Unsplash → Pexels, and writes one cover + one content slide per detailed item as `A-B.jpg` files in `card-news/output/<datePath>/`.
+   Do **not** call `node`, `npm`, `npx`, or `tsx` directly for rendering. The wrapper owns Node PATH bootstrapping, `.env` loading, image API environment checks, and renderer execution. The renderer reads both sidecars (`article-headers/`, `queries/`), resolves images via Wikimedia (CC0/CC BY only) → Openverse → NASA Images → Unsplash → Pexels, and writes one cover + one content slide per detailed item as `A-B.jpg` files in `card-news/output/<datePath>/`. It also writes public copies to `public/daily-insights/<datePath>/cardnews/` so GitHub Pages can serve `/daily-insights/<datePath>/cardnews/A-B`.
 6. **Report.** Output JPEG count, output directory, and any slides with `status: "missing"` in credits.
 
 ## Article deck layout

@@ -391,3 +391,37 @@ run_git_commit_and_push() {
   print_header "Pushing to ${DIGEST_PUSH_REMOTE} ${DIGEST_PUSH_BRANCH}"
   git -C "${REPO_ROOT}" push "${DIGEST_PUSH_REMOTE}" "HEAD:${DIGEST_PUSH_BRANCH}"
 }
+
+run_daily_insights_publish_commit_and_push() {
+  local date_path="${1:-$(date +%Y/%m/%d)}"
+  local date_label="${date_path//\//-}"
+  local digest_relative_path="content/${date_path}.md"
+  local commit_message="${DAILY_INSIGHTS_PUBLISH_COMMIT_MESSAGE:-Publish daily insight for ${date_label}}"
+  local staged_any="0"
+
+  print_header "Staging daily insight publish files for ${date_path}"
+
+  for path in \
+    "${digest_relative_path}" \
+    "content/index.json" \
+    "content/inbox.md" \
+    "card-news/article-headers/${date_path}.json" \
+    "card-news/queries/${date_path}.json" \
+    "../../public/daily-insights/${date_path}/cardnews"; do
+    if [[ -e "${REPO_ROOT}/${path}" ]]; then
+      git -C "${REPO_ROOT}" add "${path}"
+      staged_any="1"
+    fi
+  done
+
+  if [[ "${staged_any}" != "1" ]] || git -C "${REPO_ROOT}" diff --cached --quiet; then
+    print_header "No staged publish changes. Skip commit/push."
+    return 0
+  fi
+
+  print_header "Committing daily insight publish changes"
+  git -C "${REPO_ROOT}" commit -m "${commit_message}"
+
+  print_header "Pushing to ${DIGEST_PUSH_REMOTE} ${DIGEST_PUSH_BRANCH}"
+  git -C "${REPO_ROOT}" push "${DIGEST_PUSH_REMOTE}" "HEAD:${DIGEST_PUSH_BRANCH}"
+}
