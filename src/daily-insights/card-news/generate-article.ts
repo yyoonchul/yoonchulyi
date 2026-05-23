@@ -53,10 +53,10 @@ function todayKST(): string {
   return `${y}/${m}/${d}`;
 }
 
-async function svgToPng(svg: string): Promise<Buffer> {
+async function svgToJpeg(svg: string): Promise<Buffer> {
   return sharp(Buffer.from(svg))
     .resize(1080, 1350)
-    .png()
+    .jpeg({ quality: 92, mozjpeg: true })
     .toBuffer();
 }
 
@@ -157,8 +157,8 @@ async function renderArticleDeck(
 
   for (let i = 0; i < slides.length; i++) {
     const num = `${article.index}-${i + 1}`;
-    const png = await svgToPng(slides[i].svg);
-    writeFileSync(join(outDir, `${num}.png`), png);
+    const jpeg = await svgToJpeg(slides[i].svg);
+    writeFileSync(join(outDir, `${num}.jpg`), jpeg);
   }
 
   const credits = slides.map((s, i) =>

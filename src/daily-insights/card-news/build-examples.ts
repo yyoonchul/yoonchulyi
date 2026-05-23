@@ -8,19 +8,9 @@
  */
 import { writeFileSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { renderCover } from './templates/cover.js';
-import { renderContent } from './templates/content.js';
 import { renderArticleCover } from './templates/article-cover.js';
 import { renderArticleContent } from './templates/article-content.js';
-import type { CoverData, ArticleData } from './types.js';
-
-const sampleCover: CoverData = {
-  date: '2026년 4월 13일',
-  articleCount: 2,
-  categories: ['DevTools', 'AI'],
-  // 커버 = 하루 전체를 관통하는 메인 제목 하나.
-  headlineLines: ['AI가 일하는 방식을 다시 쓴다'],
-};
+import type { ArticleData } from './types.js';
 
 const sampleArticle: ArticleData = {
   index: 1,
@@ -49,21 +39,7 @@ const sampleArticle: ArticleData = {
   ],
 };
 
-const totalPages = 1 + sampleArticle.bullets.length;
-
 const templatesDir = resolve(import.meta.dirname, 'templates');
-
-const coverSvg = renderCover(sampleCover).replace('{{totalPages}}', String(totalPages));
-writeFileSync(resolve(templatesDir, 'cover.example.svg'), coverSvg, 'utf-8');
-
-const contentSvg = renderContent(
-  sampleArticle,
-  sampleArticle.bulletHeaders![0],
-  sampleArticle.bullets[0],
-  2,
-  totalPages,
-);
-writeFileSync(resolve(templatesDir, 'content.example.svg'), contentSvg, 'utf-8');
 
 const articleCoverSvg = renderArticleCover(
   sampleArticle,
@@ -80,7 +56,7 @@ const articleContentSvg = renderArticleContent(
 writeFileSync(resolve(templatesDir, 'article-content.example.svg'), articleContentSvg, 'utf-8');
 
 // 구 템플릿 잔해 청소
-for (const stale of ['summary.example.svg', 'insight.example.svg']) {
+for (const stale of ['cover.example.svg', 'content.example.svg', 'summary.example.svg', 'insight.example.svg']) {
   try {
     rmSync(resolve(templatesDir, stale));
   } catch {
@@ -89,7 +65,5 @@ for (const stale of ['summary.example.svg', 'insight.example.svg']) {
 }
 
 console.log('Example SVGs generated in templates/');
-console.log('  cover.example.svg');
-console.log('  content.example.svg');
 console.log('  article-cover.example.svg');
 console.log('  article-content.example.svg');

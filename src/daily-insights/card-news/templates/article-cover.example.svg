@@ -97,12 +97,12 @@
   <text x="80" y="813" text-anchor="start" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="176" font-weight="700" fill="#FFFFFF" letter-spacing="-1">사고 검증</text>
 
   <!-- Subtitle -->
-  <text x="80" y="1180" text-anchor="start"
+  <text x="80" y="1228" text-anchor="start"
         font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Inter', system-ui, sans-serif" font-size="26" fill="#A8A8AD">이윤철이 오늘 읽은 아티클</text>
 
   <!-- Original source title -->
-  <text x="80" y="1220" text-anchor="start"
+  <text x="80" y="1268" text-anchor="start"
         font-family="'IBM Plex Mono', monospace" font-size="22" fill="#F26B1F" letter-spacing="4">Ryan Sarver의 "OpenClaw 기반 AI 비서를 만들어 인간 비서보다</text>
-  <text x="80" y="1254" text-anchor="start"
+  <text x="80" y="1302" text-anchor="start"
         font-family="'IBM Plex Mono', monospace" font-size="22" fill="#F26B1F" letter-spacing="4">낫게 만든 방법"</text>
 </svg>

@@ -58,13 +58,13 @@ if [[ -f "${STATE_FILE}" && "${DISCORD_FORCE_SEND:-false}" != "true" ]]; then
   exit 0
 fi
 
-declare -a png_files=()
+declare -a image_files=()
 while IFS= read -r file_path; do
-  png_files+=("${file_path}")
-done < <(find "${OUTPUT_DIR}" -maxdepth 1 -type f -name '*.png' | sort -V)
+  image_files+=("${file_path}")
+done < <(find "${OUTPUT_DIR}" -maxdepth 1 -type f -name '*.jpg' | sort -V)
 
-if [[ "${#png_files[@]}" -eq 0 ]]; then
-  echo "ERROR: no card news PNG files found in card-news/output/${DATE_PATH}" >&2
+if [[ "${#image_files[@]}" -eq 0 ]]; then
+  echo "ERROR: no card news JPEG files found in card-news/output/${DATE_PATH}" >&2
   exit 1
 fi
 
@@ -85,7 +85,7 @@ if [[ ! "${RETRY_MAX_ATTEMPTS}" =~ ^[1-9][0-9]*$ ]]; then
   RETRY_MAX_ATTEMPTS="3"
 fi
 
-for file_path in "${png_files[@]}"; do
+for file_path in "${image_files[@]}"; do
   file_size="$(wc -c < "${file_path}" | tr -d '[:space:]')"
   if [[ "${file_size}" -gt "${MAX_FILE_BYTES}" ]]; then
     echo "ERROR: $(basename "${file_path}") is larger than ${MAX_FILE_BYTES} bytes." >&2
@@ -94,7 +94,7 @@ for file_path in "${png_files[@]}"; do
 done
 
 date_label="$(echo "${DATE_PATH}" | tr '/' '-')"
-total_count="${#png_files[@]}"
+total_count="${#image_files[@]}"
 declare -a batch_start_indices=()
 declare -a batch_end_indices=()
 declare -a batch_labels=()
@@ -121,10 +121,10 @@ current_article_key=""
 current_article_label=""
 current_start_index=0
 for ((file_index = 0; file_index < total_count; file_index++)); do
-  file_name="$(basename "${png_files[${file_index}]}")"
+  file_name="$(basename "${image_files[${file_index}]}")"
   article_key=""
   article_label="card news"
-  if [[ "${file_name}" =~ ^([0-9]+)-[0-9]+\.png$ ]]; then
+  if [[ "${file_name}" =~ ^([0-9]+)-[0-9]+\.jpg$ ]]; then
     article_key="${BASH_REMATCH[1]}"
     article_label="article ${article_key}"
   fi
@@ -165,7 +165,7 @@ send_batch() {
     local file_slot=0
     local file_index
     for ((file_index = start_index; file_index < end_index; file_index++)); do
-      curl_args+=(-F "files[${file_slot}]=@${png_files[${file_index}]};type=image/png")
+      curl_args+=(-F "files[${file_slot}]=@${image_files[${file_index}]};type=image/jpeg")
       file_slot="$((file_slot + 1))"
     done
     curl_args+=("${DISCORD_WEBHOOK_URL}")
@@ -201,7 +201,7 @@ send_batch() {
   done
 }
 
-print_header "Sending ${total_count} card news PNG(s) to Discord for ${DATE_PATH}"
+print_header "Sending ${total_count} card news JPEG(s) to Discord for ${DATE_PATH}"
 for ((batch_index = 1; batch_index <= total_batches; batch_index++)); do
   batch_array_index="$((batch_index - 1))"
   send_batch \
@@ -215,7 +215,7 @@ mkdir -p "${STATE_DIR}"
 {
   printf 'date_path=%s\n' "${DATE_PATH}"
   printf 'sent_at=%s\n' "$(date '+%F %T %Z')"
-  printf 'png_count=%s\n' "${total_count}"
+  printf 'jpeg_count=%s\n' "${total_count}"
 } > "${STATE_FILE}"
 
 print_header "Discord card news send complete for ${DATE_PATH}"

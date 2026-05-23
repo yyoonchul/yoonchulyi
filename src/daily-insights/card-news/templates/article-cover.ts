@@ -38,7 +38,7 @@ export function renderArticleCover(
     sourceTitleLetterSpacing,
   );
   const sourceTitleLineHeight = 34;
-  const sourceTitleBottomMargin = 96;
+  const sourceTitleBottomMargin = 48;
   const sourceTitleY =
     HEIGHT - sourceTitleBottomMargin - (sourceTitleLines.length - 1) * sourceTitleLineHeight;
   const subtitleY = sourceTitleY - 40;
