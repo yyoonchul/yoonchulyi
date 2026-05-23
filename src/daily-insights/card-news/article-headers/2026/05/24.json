@@ -1,0 +1,26 @@
+{
+  "articles": [
+    {
+      "cover": "양자 칩에 들어간 정부 지분",
+      "source": "Gizmodo 기사 \"Trump Admin Takes Equity Stake in IBM and Other Quantum Computing Companies\"",
+      "sections": [
+        "지분형 양자 보조금",
+        "안보와 공급망 명분",
+        "IBM의 대형 배정",
+        "스타트업 병목 지원",
+        "전략 산업 개입 확대"
+      ]
+    },
+    {
+      "cover": "개발 일상에 자리 잡은 AI",
+      "source": "Devographics 리포트 \"State of AI 2026\"",
+      "sections": [
+        "표준이 된 개발 AI",
+        "절반을 넘은 AI 코드",
+        "코딩 에이전트 경쟁",
+        "개인 지출의 증가",
+        "AI 리스크의 확산"
+      ]
+    }
+  ]
+}

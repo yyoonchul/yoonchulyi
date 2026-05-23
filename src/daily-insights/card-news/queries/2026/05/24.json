@@ -1,0 +1,25 @@
+{
+  "cover": "IBM",
+  "articles": [
+    {
+      "cover": "IBM",
+      "sections": [
+        "United States Department of Commerce",
+        "quantum computer",
+        "GlobalFoundries",
+        "PsiQuantum",
+        "Intel"
+      ]
+    },
+    {
+      "cover": "Devographics",
+      "sections": [
+        "Devographics",
+        "AI code generation",
+        "Claude Code",
+        "AI subscription",
+        "data center energy"
+      ]
+    }
+  ]
+}
