@@ -1,0 +1,35 @@
+{
+  "cover": "SpaceX",
+  "articles": [
+    {
+      "cover": "Elena Verna",
+      "sections": [
+        "artificial intelligence workplace",
+        "Elena Verna",
+        "career development",
+        "independent work",
+        "AI organization"
+      ]
+    },
+    {
+      "cover": "large language model",
+      "sections": [
+        "AI advice economy",
+        "systems engineering",
+        "prompt engineering",
+        "retrieval augmented generation",
+        "tool schema halting condition audit trail"
+      ]
+    },
+    {
+      "cover": "SpaceX",
+      "sections": [
+        "Elon Musk",
+        "SpaceX",
+        "Gwynne Shotwell",
+        "DFJ Growth",
+        "PitchBook"
+      ]
+    }
+  ]
+}

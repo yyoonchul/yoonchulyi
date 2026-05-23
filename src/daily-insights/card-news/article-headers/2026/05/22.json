@@ -1,0 +1,37 @@
+{
+  "articles": [
+    {
+      "cover": "직함보다 빨리 바뀌는 일",
+      "source": "Elena Verna의 \"Your job Is Changing Faster Than You Think\"",
+      "sections": [
+        "직함보다 빠른 변화",
+        "역할이 달라진 경험",
+        "일의 적합성 재평가",
+        "선택지 미리 만들기",
+        "AI 시대의 명료함"
+      ]
+    },
+    {
+      "cover": "프롬프트 너머의 AI 설계",
+      "source": "Adam의 \"Navigating AI with paper maps\"",
+      "sections": [
+        "짧아진 조언의 수명",
+        "분해와 해법 설계",
+        "취약한 프롬프트",
+        "다시 해석되는 RAG",
+        "경계와 평가의 일"
+      ]
+    },
+    {
+      "cover": "스페이스X IPO의 승자들",
+      "source": "TechCrunch 기사 \"Who will benefit most from SpaceX IPO? Mostly Elon — and a few from his inner circle\"",
+      "sections": [
+        "머스크 지배력의 규모",
+        "소문난 IPO 숫자",
+        "오랜 측근과 운영자",
+        "작아도 큰 지분",
+        "초기 투자자의 상승분"
+      ]
+    }
+  ]
+}
