@@ -21,6 +21,17 @@
         "개인 지출의 증가",
         "AI 리스크의 확산"
       ]
+    },
+    {
+      "cover": "지상 태양광을 벗어난 머스크",
+      "source": "TechCrunch 기사 \"Elon Musk has given up on solar power (on Earth)\"",
+      "sections": [
+        "테슬라 태양광과 결별",
+        "xAI의 화석연료 의존",
+        "궤도 태양광 구상",
+        "남은 경제성 과제",
+        "AI 전력 수요 전제"
+      ]
     }
   ]
 }

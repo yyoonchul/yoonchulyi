@@ -18,6 +18,16 @@
         "AI code generation",
         "Claude Code",
         "AI subscription",
+        "AI hallucination"
+      ]
+    },
+    {
+      "cover": "SpaceX",
+      "sections": [
+        "Tesla",
+        "xAI",
+        "space-based solar power",
+        "Starlink",
         "data center energy"
       ]
     }
