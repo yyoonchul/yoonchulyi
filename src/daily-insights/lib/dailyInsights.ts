@@ -1,5 +1,7 @@
 import type { CollectionEntry } from 'astro:content';
 import { getCollection } from 'astro:content';
+import { access, readdir } from 'node:fs/promises';
+import path from 'node:path';
 import { getExcerptFromMarkdown, stripMarkdown } from '../../lib/seo';
 
 const DAILY_INSIGHT_ID_PATTERN = /^(\d{4})\/(\d{2})\/(\d{2})(?:\.md)?$/;
@@ -21,6 +23,10 @@ export interface DailyInsightPageProps {
   entry: CollectionEntry<'dailyInsights'>;
   meta: DailyInsightMeta;
   content: DailyInsightBilingualContent;
+}
+
+export interface DailyInsightCardNewsPageProps extends DailyInsightPageProps {
+  cardNewsImages: string[];
 }
 
 export interface DailyInsightBilingualContent {
@@ -60,6 +66,12 @@ export function getDailyInsightDescription(
 
 export function getDailyInsightHref(meta: Pick<DailyInsightMeta, 'year' | 'month' | 'day'>): string {
   return `/daily-insights/${meta.year}/${meta.month}/${meta.day}/`;
+}
+
+export function getDailyInsightCardNewsHref(
+  meta: Pick<DailyInsightMeta, 'year' | 'month' | 'day'>,
+): string {
+  return `${getDailyInsightHref(meta)}cardnews/`;
 }
 
 export function parseDailyInsightMetaFromId(entryId: string): DailyInsightMeta {
@@ -107,6 +119,99 @@ export async function getDailyInsightStaticPaths() {
       content: parseDailyInsightBilingualContent(entry),
     } satisfies DailyInsightPageProps,
   }));
+}
+
+function getDailyInsightCardNewsDirectory(meta: Pick<DailyInsightMeta, 'year' | 'month' | 'day'>) {
+  return path.join(
+    process.cwd(),
+    'public',
+    'daily-insights',
+    meta.year,
+    meta.month,
+    meta.day,
+    'cardnews',
+  );
+}
+
+function compareCardNewsImagePaths(firstPath: string, secondPath: string) {
+  const firstName = path.basename(firstPath, '.jpg');
+  const secondName = path.basename(secondPath, '.jpg');
+  const firstMatch = /^(\d+)-(\d+)$/.exec(firstName);
+  const secondMatch = /^(\d+)-(\d+)$/.exec(secondName);
+
+  if (firstMatch && secondMatch) {
+    const firstArticle = Number(firstMatch[1]);
+    const secondArticle = Number(secondMatch[1]);
+    const firstPage = Number(firstMatch[2]);
+    const secondPage = Number(secondMatch[2]);
+
+    return firstArticle - secondArticle || firstPage - secondPage;
+  }
+
+  return firstName.localeCompare(secondName, 'en', { numeric: true });
+}
+
+export async function getDailyInsightCardNewsImages(
+  meta: Pick<DailyInsightMeta, 'year' | 'month' | 'day'>,
+): Promise<string[]> {
+  const cardNewsDirectory = getDailyInsightCardNewsDirectory(meta);
+
+  try {
+    const filenames = await readdir(cardNewsDirectory);
+    return filenames
+      .filter((filename) => filename.endsWith('.jpg'))
+      .sort((firstFilename, secondFilename) =>
+        compareCardNewsImagePaths(firstFilename, secondFilename),
+      )
+      .map((filename) =>
+        `/daily-insights/${meta.year}/${meta.month}/${meta.day}/cardnews/${filename}`,
+      );
+  } catch {
+    return [];
+  }
+}
+
+export async function hasDailyInsightCardNews(
+  meta: Pick<DailyInsightMeta, 'year' | 'month' | 'day'>,
+): Promise<boolean> {
+  const cardNewsDirectory = getDailyInsightCardNewsDirectory(meta);
+
+  try {
+    await access(cardNewsDirectory);
+    const images = await getDailyInsightCardNewsImages(meta);
+    return images.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+export async function getDailyInsightCardNewsStaticPaths() {
+  const entries = await getDailyInsightEntriesSorted();
+  const paths = await Promise.all(
+    entries.map(async ({ entry, meta }) => {
+      const cardNewsImages = await getDailyInsightCardNewsImages(meta);
+
+      if (cardNewsImages.length === 0) {
+        return undefined;
+      }
+
+      return {
+        params: {
+          year: meta.year,
+          month: meta.month,
+          day: meta.day,
+        },
+        props: {
+          entry,
+          meta,
+          content: parseDailyInsightBilingualContent(entry),
+          cardNewsImages,
+        } satisfies DailyInsightCardNewsPageProps,
+      };
+    }),
+  );
+
+  return paths.filter((path): path is NonNullable<typeof path> => Boolean(path));
 }
 
 function getMarkerIndexOrThrow(

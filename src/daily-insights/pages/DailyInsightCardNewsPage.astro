@@ -1,0 +1,315 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import {
+  getDailyInsightDescription,
+  getDailyInsightTitle,
+  type DailyInsightCardNewsPageProps,
+} from '../lib/dailyInsights';
+import {
+  createBreadcrumbSchema,
+  createItemListSchema,
+} from '../../lib/schema';
+
+const { meta, content, cardNewsImages } = Astro.props as DailyInsightCardNewsPageProps;
+
+const insightTitle = getDailyInsightTitle(meta, content);
+const title = `Cardnews - ${insightTitle}`;
+const description = `Card news images for Daily Insights ${meta.isoDate}. ${getDailyInsightDescription(meta, content)}`;
+const cardNewsPath = `${meta.href}cardnews/`;
+const itemList = cardNewsImages.map((imagePath, index) => ({
+  name: `Daily Insights ${meta.isoDate} card news ${index + 1}`,
+  path: imagePath,
+  description: `Card news slide ${index + 1} for Daily Insights ${meta.isoDate}.`,
+}));
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath={cardNewsPath}
+  jsonLd={[
+    createBreadcrumbSchema([
+      { name: 'Home', path: '/' },
+      { name: 'Daily Insights', path: '/daily-insights/' },
+      { name: meta.isoDate, path: meta.href },
+      { name: 'Cardnews', path: cardNewsPath },
+    ]),
+    createItemListSchema(
+      `Daily Insights ${meta.isoDate} Cardnews`,
+      cardNewsPath,
+      itemList,
+    ),
+  ]}
+>
+  <section class="cardnews-page py-8">
+    <a
+      href={meta.href}
+      class="inline-block font-mono text-xs text-sub hover:text-accent transition-colors"
+    >
+      ← Back to insight
+    </a>
+
+    <header class="mt-4 mb-8 flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <p class="font-mono text-xs text-sub">Cardnews</p>
+        <h1 class="mt-1 font-serif text-2xl md:text-3xl text-text break-words">
+          {meta.isoDate}
+        </h1>
+      </div>
+
+      <p class="font-mono text-xs text-sub">
+        <span data-cardnews-current>1</span> / {cardNewsImages.length}
+      </p>
+    </header>
+
+    <div class="cardnews-shell" data-cardnews-carousel>
+      <button
+        type="button"
+        class="cardnews-nav cardnews-nav-prev"
+        data-cardnews-prev
+        aria-label="Previous card news image"
+      >
+        ‹
+      </button>
+
+      <div class="cardnews-track" data-cardnews-track tabindex="0">
+        {cardNewsImages.map((imagePath, index) => (
+          <figure
+            class:list={[
+              'cardnews-slide',
+              index === 0 && 'is-active',
+            ]}
+            data-cardnews-slide
+          >
+            <img
+              src={imagePath}
+              alt={`Daily Insights ${meta.isoDate} card news ${index + 1}`}
+              loading={index === 0 ? 'eager' : 'lazy'}
+              decoding="async"
+            />
+          </figure>
+        ))}
+      </div>
+
+      <button
+        type="button"
+        class="cardnews-nav cardnews-nav-next"
+        data-cardnews-next
+        aria-label="Next card news image"
+      >
+        ›
+      </button>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const track = document.querySelector('[data-cardnews-track]');
+  const slides = Array.from(document.querySelectorAll('[data-cardnews-slide]'));
+  const currentLabel = document.querySelector('[data-cardnews-current]');
+  const prevButton = document.querySelector('[data-cardnews-prev]');
+  const nextButton = document.querySelector('[data-cardnews-next]');
+
+  const setActiveSlide = (activeIndex) => {
+    slides.forEach((slide, index) => {
+      slide.classList.toggle('is-active', index === activeIndex);
+    });
+
+    if (currentLabel) {
+      currentLabel.textContent = String(activeIndex + 1);
+    }
+  };
+
+  const getClosestSlideIndex = () => {
+    if (!track || slides.length === 0) {
+      return 0;
+    }
+
+    const trackRect = track.getBoundingClientRect();
+    const trackCenter = trackRect.left + trackRect.width / 2;
+    let closestIndex = 0;
+    let closestDistance = Number.POSITIVE_INFINITY;
+
+    slides.forEach((slide, index) => {
+      const slideRect = slide.getBoundingClientRect();
+      const slideCenter = slideRect.left + slideRect.width / 2;
+      const distance = Math.abs(trackCenter - slideCenter);
+
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestIndex = index;
+      }
+    });
+
+    return closestIndex;
+  };
+
+  const scrollToSlide = (index) => {
+    const slide = slides[index];
+    if (!slide) {
+      return;
+    }
+
+    slide.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'center',
+    });
+    setActiveSlide(index);
+  };
+
+  if (track && slides.length > 0) {
+    let scrollFrame;
+
+    track.addEventListener('scroll', () => {
+      window.cancelAnimationFrame(scrollFrame);
+      scrollFrame = window.requestAnimationFrame(() => {
+        setActiveSlide(getClosestSlideIndex());
+      });
+    });
+
+    prevButton?.addEventListener('click', () => {
+      scrollToSlide(Math.max(getClosestSlideIndex() - 1, 0));
+    });
+
+    nextButton?.addEventListener('click', () => {
+      scrollToSlide(Math.min(getClosestSlideIndex() + 1, slides.length - 1));
+    });
+
+    track.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        scrollToSlide(Math.max(getClosestSlideIndex() - 1, 0));
+      }
+
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        scrollToSlide(Math.min(getClosestSlideIndex() + 1, slides.length - 1));
+      }
+    });
+  }
+</script>
+
+<style>
+  .cardnews-shell {
+    --cardnews-slide-width: min(78vw, 28rem);
+    position: relative;
+  }
+
+  .cardnews-track {
+    align-items: center;
+    display: flex;
+    gap: 1.5rem;
+    margin-inline: -1.5rem;
+    overflow-x: auto;
+    padding-block: 1.25rem 2rem;
+    padding-inline: max(1.5rem, calc((100% - var(--cardnews-slide-width)) / 2));
+    scroll-padding-inline: max(1.5rem, calc((100% - var(--cardnews-slide-width)) / 2));
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .cardnews-track:focus {
+    outline: none;
+  }
+
+  .cardnews-track:focus-visible {
+    outline: 1px solid #ea580c;
+    outline-offset: 0.25rem;
+  }
+
+  .cardnews-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cardnews-slide {
+    aspect-ratio: 4 / 5;
+    flex: 0 0 var(--cardnews-slide-width);
+    margin: 0;
+    opacity: 0.48;
+    scroll-snap-align: center;
+    transform: translateY(0) scale(0.9);
+    transform-origin: center bottom;
+    transition:
+      opacity 180ms ease,
+      transform 180ms ease;
+    z-index: 1;
+  }
+
+  .cardnews-slide.is-active {
+    opacity: 1;
+    transform: translateY(-0.75rem) scale(1);
+    z-index: 2;
+  }
+
+  .cardnews-slide img {
+    background: rgba(140, 140, 140, 0.12);
+    border: 1px solid rgba(140, 140, 140, 0.2);
+    display: block;
+    height: 100%;
+    object-fit: contain;
+    width: 100%;
+  }
+
+  .cardnews-nav {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    color: #8c8c8c;
+    display: flex;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 2rem;
+    height: 3rem;
+    justify-content: center;
+    opacity: 0.55;
+    padding: 0;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    transition:
+      color 160ms ease,
+      opacity 160ms ease;
+    width: 3rem;
+    z-index: 3;
+  }
+
+  .cardnews-nav:hover {
+    color: #ea580c;
+    opacity: 0.85;
+  }
+
+  .cardnews-nav-prev {
+    left: -1.75rem;
+  }
+
+  .cardnews-nav-next {
+    right: -1.75rem;
+  }
+
+  @media (max-width: 640px) {
+    .cardnews-shell {
+      --cardnews-slide-width: 82vw;
+    }
+
+    .cardnews-track {
+      gap: 1rem;
+      margin-inline: -1rem;
+      padding-inline: max(1rem, calc((100% - var(--cardnews-slide-width)) / 2));
+      scroll-padding-inline: max(1rem, calc((100% - var(--cardnews-slide-width)) / 2));
+    }
+
+    .cardnews-nav {
+      top: auto;
+      bottom: -2.75rem;
+      transform: none;
+    }
+
+    .cardnews-nav-prev {
+      left: 0;
+    }
+
+    .cardnews-nav-next {
+      right: 0;
+    }
+  }
+</style>

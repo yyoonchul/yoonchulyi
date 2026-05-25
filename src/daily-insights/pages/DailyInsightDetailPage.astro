@@ -1,8 +1,10 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import {
+  getDailyInsightCardNewsHref,
   getDailyInsightDescription,
   getDailyInsightTitle,
+  hasDailyInsightCardNews,
   type DailyInsightPageProps,
 } from '../lib/dailyInsights';
 import { getDailyInsightsMarkdownProcessor } from '../lib/markdown';
@@ -19,6 +21,8 @@ const koRendered = await markdownProcessor.render(content.koMarkdown);
 const title = getDailyInsightTitle(meta, content);
 const headline = title.replace(/ - Yoonchul Yi$/, '');
 const description = getDailyInsightDescription(meta, content);
+const cardNewsHref = getDailyInsightCardNewsHref(meta);
+const showCardNewsLink = await hasDailyInsightCardNews(meta);
 ---
 
 <BaseLayout
@@ -80,6 +84,18 @@ const description = getDailyInsightDescription(meta, content);
           >
             Ko
           </button>
+          {showCardNewsLink && (
+            <>
+              <span>/</span>
+              <a
+                href={cardNewsHref}
+                class="daily-lang-button"
+                aria-label={`View card news for ${meta.isoDate}`}
+              >
+                Cardnews
+              </a>
+            </>
+          )}
         </div>
 
         <button
