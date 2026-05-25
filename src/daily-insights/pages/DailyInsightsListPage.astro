@@ -22,6 +22,60 @@ const itemList = dailyInsights.map(({ entry, meta }) => {
     description: getDailyInsightDescription(meta, content),
   };
 });
+
+const nowInSeoul = new Date();
+const currentYear = new Intl.DateTimeFormat('en', {
+  timeZone: 'Asia/Seoul',
+  year: 'numeric',
+}).format(nowInSeoul);
+const currentMonth = new Intl.DateTimeFormat('en', {
+  timeZone: 'Asia/Seoul',
+  month: '2-digit',
+}).format(nowInSeoul);
+const monthNameFormatter = new Intl.DateTimeFormat('en', {
+  month: 'long',
+  timeZone: 'UTC',
+});
+
+const groupedDailyInsights = dailyInsights.reduce(
+  (years, dailyInsight) => {
+    const { year, month } = dailyInsight.meta;
+    let yearGroup = years.find((group) => group.year === year);
+
+    if (!yearGroup) {
+      yearGroup = {
+        year,
+        months: [],
+      };
+      years.push(yearGroup);
+    }
+
+    let monthGroup = yearGroup.months.find((group) => group.month === month);
+
+    if (!monthGroup) {
+      monthGroup = {
+        month,
+        monthName: monthNameFormatter.format(
+          new Date(Date.UTC(Number(year), Number(month) - 1, 1)),
+        ),
+        entries: [],
+      };
+      yearGroup.months.push(monthGroup);
+    }
+
+    monthGroup.entries.push(dailyInsight);
+
+    return years;
+  },
+  [] as {
+    year: string;
+    months: {
+      month: string;
+      monthName: string;
+      entries: typeof dailyInsights;
+    }[];
+  }[],
+);
 ---
 
 <BaseLayout
@@ -43,15 +97,99 @@ const itemList = dailyInsights.map(({ entry, meta }) => {
   <section class="py-8">
     <h1 class="font-serif text-2xl mb-8">Daily Insights</h1>
 
-    <div class="space-y-3">
-      {dailyInsights.map(({ meta }) => (
-        <a
-          href={meta.href}
-          class="block font-mono text-sm text-sub hover:text-accent transition-colors"
-        >
-          {meta.isoDate}
-        </a>
+    <div class="space-y-4">
+      {groupedDailyInsights.map(({ year, months }) => (
+        <details class="daily-insights-toggle" open={year === currentYear}>
+          <summary class="daily-insights-summary daily-insights-year-summary">
+            <span>{year}</span>
+            <span class="daily-insights-count">
+              {months.reduce((count, month) => count + month.entries.length, 0)}
+            </span>
+          </summary>
+
+          <div class="mt-3 space-y-3 border-l border-sub/20 pl-4">
+            {months.map(({ month, monthName, entries }) => (
+              <details
+                class="daily-insights-toggle"
+                open={year === currentYear && month === currentMonth}
+              >
+                <summary class="daily-insights-summary daily-insights-month-summary">
+                  <span>{monthName}</span>
+                  <span class="daily-insights-count">{entries.length}</span>
+                </summary>
+
+                <div class="mt-3 space-y-3 pl-4">
+                  {entries.map(({ meta }) => (
+                    <a
+                      href={meta.href}
+                      class="block font-mono text-sm text-sub hover:text-accent transition-colors"
+                    >
+                      {meta.isoDate}
+                    </a>
+                  ))}
+                </div>
+              </details>
+            ))}
+          </div>
+        </details>
       ))}
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  .daily-insights-toggle {
+    color: #191919;
+  }
+
+  .daily-insights-summary {
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-start;
+    list-style: none;
+    text-align: left;
+    transition: color 160ms ease;
+  }
+
+  .daily-insights-summary:hover {
+    color: #ea580c;
+  }
+
+  .daily-insights-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .daily-insights-summary::before {
+    color: #8c8c8c;
+    content: '+';
+    flex: 0 0 auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    line-height: 1;
+    width: 0.75rem;
+  }
+
+  .daily-insights-toggle[open] > .daily-insights-summary::before {
+    content: '-';
+  }
+
+  .daily-insights-year-summary {
+    font-family: Newsreader, serif;
+    font-size: 1.125rem;
+  }
+
+  .daily-insights-month-summary {
+    color: #8c8c8c;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.875rem;
+  }
+
+  .daily-insights-count {
+    color: #8c8c8c;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    margin-left: 0.25rem;
+  }
+</style>
