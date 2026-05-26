@@ -1,0 +1,26 @@
+{
+  "articles": [
+    {
+      "cover": "중국 로봇 신분증",
+      "source": "Digital Trends 기사 \"China will put a unique ID code on humanoid robots, just like citizen ID for us humans\"",
+      "sections": [
+        "국가 인프라 된 ID",
+        "29자리 로봇 코드",
+        "공급망 전체 추적",
+        "중국 로봇 시장 속도",
+        "로봇 거버넌스 쟁점"
+      ]
+    },
+    {
+      "cover": "교황의 AI 윤리 선언",
+      "source": "CNET 기사 \"Pope Leo's AI Encyclical Has Landed. It Offers Wisdom for Big Tech, Governments and You\"",
+      "sections": [
+        "AI 논쟁의 도덕 개입",
+        "기술 낙관론의 한계",
+        "AI 거버넌스 장치",
+        "일과 진실의 위험",
+        "무장 AI의 경고"
+      ]
+    }
+  ]
+}

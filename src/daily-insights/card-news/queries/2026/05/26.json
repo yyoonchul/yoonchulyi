@@ -1,0 +1,25 @@
+{
+  "cover": "Pope Leo XIV",
+  "articles": [
+    {
+      "cover": "humanoid robot",
+      "sections": [
+        "humanoid robot",
+        "robot barcode",
+        "industrial robot maintenance",
+        "IDC",
+        "China Electronics Standardization Institute"
+      ]
+    },
+    {
+      "cover": "Pope Leo XIV",
+      "sections": [
+        "Magnifica Humanitas",
+        "Pope Leo XIV",
+        "AI policy",
+        "digital literacy",
+        "autonomous weapons"
+      ]
+    }
+  ]
+}
