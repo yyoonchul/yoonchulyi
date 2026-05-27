@@ -1,0 +1,59 @@
+{
+  "articles": [
+    {
+      "cover": "열린 모델의 에이전트 공백",
+      "source": "Interconnects AI 글 \"Some ideas for what comes next, May 2026\"",
+      "sections": [
+        "아직 없는 에이전트 돌파",
+        "Gemini가 드러낸 격차",
+        "Mythos와 미국 우위",
+        "되살아난 미국 오픈 모델",
+        "기술 경쟁의 정치 충돌"
+      ]
+    },
+    {
+      "cover": "투자자를 설득한 피치덱 진화",
+      "source": "a16z speedrun 사례 \"Case Study: The Evolution of a Pitch Deck\"",
+      "sections": [
+        "액셀러레이터 안의 개선",
+        "더 큰 포지셔닝",
+        "증거가 된 팀 슬라이드",
+        "미션에서 투자 논리로",
+        "트랙션과 강한 마무리"
+      ]
+    },
+    {
+      "cover": "초보 빌더의 5주 매출",
+      "source": "Dominik Sobe의 \"Dominik Sobe: First mobile app reached $800 MRR in five weeks\"",
+      "sections": [
+        "빠른 초기 매출",
+        "기초부터 시작한 학습",
+        "이후에 붙은 AI 도구",
+        "결정적이었던 유통",
+        "낮아진 창업 진입선"
+      ]
+    },
+    {
+      "cover": "비개발자의 빠른 매출 역전",
+      "source": "@levelsio의 \"@levelsio: Non-technical builders can now outship technical side-project builders\"",
+      "sections": [
+        "누가 더 빨리 이기는가",
+        "성공과 기술 정체성 분리",
+        "멘토링이 포함된 맥락",
+        "엔지니어에게 불편한 신호",
+        "시장 신호로 읽기"
+      ]
+    },
+    {
+      "cover": "Claude Code 운영법의 핵심",
+      "source": "Arpan Patel 글 \"Beyond the Prompt: Claude Code\"",
+      "sections": [
+        "엔지니어링 운영체제",
+        "누적되는 CLAUDE.md",
+        "재사용을 만드는 스킬",
+        "로컬 편집을 넘는 확장",
+        "증거가 있는 위임"
+      ]
+    }
+  ]
+}

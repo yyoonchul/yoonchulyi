@@ -1,0 +1,55 @@
+{
+  "cover": "Claude Code",
+  "articles": [
+    {
+      "cover": "Interconnects AI",
+      "sections": [
+        "Claude Code",
+        "Google Gemini",
+        "Mythos",
+        "Google Gemma",
+        "OpenAI"
+      ]
+    },
+    {
+      "cover": "Concorda",
+      "sections": [
+        "a16z speedrun",
+        "Concorda",
+        "Andrew Chen",
+        "legal AI",
+        "Demo Day"
+      ]
+    },
+    {
+      "cover": "Dominik Sobe",
+      "sections": [
+        "mobile app revenue",
+        "Swift Playgrounds",
+        "Cursor",
+        "TikTok",
+        "React Native"
+      ]
+    },
+    {
+      "cover": "levelsio",
+      "sections": [
+        "levelsio",
+        "software entrepreneurship",
+        "Claude Code",
+        "AI coding tools",
+        "startup metrics"
+      ]
+    },
+    {
+      "cover": "Claude Code",
+      "sections": [
+        "Claude Code",
+        "CLAUDE.md",
+        "agent skills",
+        "Model Context Protocol",
+        "software engineering workflow"
+      ]
+    }
+  ]
+}
