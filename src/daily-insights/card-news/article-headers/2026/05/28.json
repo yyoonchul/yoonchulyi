@@ -1,0 +1,15 @@
+{
+  "articles": [
+    {
+      "cover": "에이전트 수익화의 전환",
+      "source": "Simon Willison의 \"I think Anthropic and OpenAI have found product-market fit\"",
+      "sections": [
+        "코딩 에이전트의 수익성",
+        "구독료와 토큰 원가",
+        "기업 요금제의 전환",
+        "월 수백 달러 사용자",
+        "채용과 컴퓨트 신호"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "cover": "OpenAI",
+  "articles": [
+    {
+      "cover": "Anthropic Claude",
+      "sections": [
+        "OpenAI Codex",
+        "Anthropic Max",
+        "ChatGPT Enterprise",
+        "ChatGPT",
+        "SpaceX"
+      ]
+    }
+  ]
+}
