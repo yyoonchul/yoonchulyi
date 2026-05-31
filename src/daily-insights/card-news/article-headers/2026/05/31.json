@@ -1,0 +1,26 @@
+{
+  "articles": [
+    {
+      "cover": "AI 토큰 선물시장",
+      "source": "TechCrunch 기사 \"Just like gold and oil, we'll soon be able to trade AI token futures\"",
+      "sections": [
+        "AI 토큰의 금융화",
+        "거래소의 파생상품",
+        "GPU 가격 발견",
+        "토큰 가격의 비용화",
+        "헤지 수요의 확대"
+      ]
+    },
+    {
+      "cover": "도메인 지식의 해자",
+      "source": "Aaron Brethorst의 \"Domain Expertise Has Always Been the Real Moat\"",
+      "sections": [
+        "도메인 이해의 우위",
+        "검증으로 옮겨간 병목",
+        "전문가와 코딩 에이전트",
+        "제너럴리스트의 약점",
+        "두 층을 검증하는 사람"
+      ]
+    }
+  ]
+}
