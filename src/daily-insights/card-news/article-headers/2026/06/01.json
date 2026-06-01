@@ -1,0 +1,26 @@
+{
+  "articles": [
+    {
+      "cover": "스스로 진화하는 스킬",
+      "source": "논문 \"SkillOpt: Executive Strategy for Self-Evolving Agent Skills\"",
+      "sections": [
+        "스킬 파일의 학습화",
+        "텍스트 공간의 최적화",
+        "넓은 실험 매트릭스",
+        "절차 과제의 큰 개선",
+        "설계를 지지한 검증"
+      ]
+    },
+    {
+      "cover": "스스로 조직하는 과학팀",
+      "source": "논문 \"AutoScientists: Self-Organizing Agent Teams for Long-Running Scientific Experimentation\"",
+      "sections": [
+        "장기 과학탐색 조율",
+        "공유상태와 역할분화",
+        "바이오 벤치의 개선",
+        "강한 기준선의 지속개선",
+        "조율 장치의 상호보완"
+      ]
+    }
+  ]
+}

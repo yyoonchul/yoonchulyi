@@ -1,0 +1,25 @@
+{
+  "cover": "SkillOpt",
+  "articles": [
+    {
+      "cover": "SkillOpt",
+      "sections": [
+        "AI agent",
+        "machine learning optimization",
+        "Qwen",
+        "OpenAI Codex",
+        "OlympiadBench"
+      ]
+    },
+    {
+      "cover": "AutoScientists",
+      "sections": [
+        "computational science",
+        "research laboratory",
+        "BioML-Bench",
+        "nanoGPT",
+        "ProteinGym"
+      ]
+    }
+  ]
+}
