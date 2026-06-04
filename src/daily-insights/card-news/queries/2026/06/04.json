@@ -1,0 +1,26 @@
+{
+  "cover": "Claude Code",
+  "articles": [
+    {
+      "cover": "Andreessen Horowitz",
+      "sections": [
+        "Product Hunt",
+        "Pencil AI",
+        "Gainsight",
+        "Spellbook",
+        "startup founders"
+      ]
+    },
+    {
+      "cover": "Claude Code",
+      "sections": [
+        "Claude Code",
+        "agent workflow diagram",
+        "Claude Agent SDK",
+        "adversarial verification",
+        "software worktree",
+        "Claude workflows"
+      ]
+    }
+  ]
+}

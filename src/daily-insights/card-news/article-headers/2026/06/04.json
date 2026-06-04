@@ -1,0 +1,27 @@
+{
+  "articles": [
+    {
+      "cover": "공개 빌딩의 새 기준",
+      "source": "a16z speedrun의 \"Three ways founders are building in public\"",
+      "sections": [
+        "낡아진 공개 빌딩",
+        "프런티어 기능 출시",
+        "전략 베팅 공개",
+        "비전통 채용 신호",
+        "볼거리보다 실체"
+      ]
+    },
+    {
+      "cover": "Claude 워크플로 하네스",
+      "source": "Thariq의 \"A harness for every task: dynamic workflows in Claude Code\"",
+      "sections": [
+        "작업별 하네스 생성",
+        "장기 작업 실패 대응",
+        "동적 오케스트레이션",
+        "재사용 패턴",
+        "코딩 밖 사용 사례",
+        "워크플로 사용 기준"
+      ]
+    }
+  ]
+}
