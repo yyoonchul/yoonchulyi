@@ -1,0 +1,36 @@
+{
+  "cover": "Anthropic",
+  "articles": [
+    {
+      "cover": "Anthropic Claude",
+      "sections": [
+        "Claude",
+        "data warehouse",
+        "semantic layer",
+        "Claude Skills",
+        "data provenance"
+      ]
+    },
+    {
+      "cover": "World Labs",
+      "sections": [
+        "Fei-Fei Li",
+        "POMDP",
+        "Vision-Language-Action models",
+        "digital twin",
+        "World Labs Marble"
+      ]
+    },
+    {
+      "cover": "Superhuman",
+      "sections": [
+        "Rahul Vohra",
+        "Sean Ellis",
+        "Julie Supan",
+        "Superhuman email",
+        "product roadmap",
+        "product-market fit"
+      ]
+    }
+  ]
+}

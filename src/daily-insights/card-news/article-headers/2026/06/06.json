@@ -1,0 +1,38 @@
+{
+  "articles": [
+    {
+      "cover": "Claude 분석 자동화의 조건",
+      "source": "Anthropic 블로그 \"How Anthropic enables self-service data analytics with Claude\"",
+      "sections": [
+        "과신하기 쉬운 분석 에이전트",
+        "오답의 세 가지 원인",
+        "질문 전 검색공간 축소",
+        "제품으로 다루는 측정",
+        "온라인 검증의 역할"
+      ]
+    },
+    {
+      "cover": "월드모델을 다시 나누기",
+      "source": "Dr. Fei-Fei Li의 \"A Functional Taxonomy of World Models\"",
+      "sections": [
+        "월드모델 정의의 혼선",
+        "에이전트 루프 위의 분류",
+        "세 기능의 다른 출력",
+        "시뮬레이션 병목",
+        "수렴하는 장기 방향"
+      ]
+    },
+    {
+      "cover": "제품시장적합성의 운영법",
+      "source": "First Round Review 기사 \"How Superhuman Built an Engine to Find Product Market Fit\"",
+      "sections": [
+        "출시 전 선행지표 찾기",
+        "Sean Ellis 설문의 힘",
+        "집중 고객 프로필 만들기",
+        "사랑에 가까운 피드백",
+        "강화와 장벽 제거",
+        "58퍼센트까지의 변화"
+      ]
+    }
+  ]
+}
