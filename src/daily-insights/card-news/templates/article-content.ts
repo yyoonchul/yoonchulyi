@@ -68,10 +68,10 @@ function fitHeader(text: string): { lines: string[]; font: number; gap: number }
 
 function fitBody(text: string, maxHeight: number): { lines: string[]; font: number; lineHeight: number } {
   const tiers: { font: number; budget: number; lineHeight: number }[] = [
+    { font: 31, budget: 32, lineHeight: 49 },
+    { font: 29, budget: 34, lineHeight: 46 },
     { font: 27, budget: 36, lineHeight: 43 },
     { font: 25, budget: 39, lineHeight: 40 },
-    { font: 23, budget: 42, lineHeight: 37 },
-    { font: 21, budget: 46, lineHeight: 34 },
   ];
 
   for (const tier of tiers) {
