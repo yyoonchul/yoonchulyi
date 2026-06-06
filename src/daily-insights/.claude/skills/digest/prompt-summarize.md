@@ -2,14 +2,28 @@
 
 ## Language Order
 
-- Write **Korean** digest first.
-- Then produce **English** translation from that Korean version.
+- Write the **English** digest first.
+- Then produce the **Korean** translation from that English version.
 
 ## Korean Style
 
 - Use plain declarative form (`-다` 체), not polite form (`-ㅂ니다`/`-습니다` 체).
   - Example: `발표했다`, `제공한다`, `~로 보인다` (○) / `발표했습니다`, `제공합니다` (✗).
 - Apply this consistently across quick summary, detailed notes, and any prose lines.
+
+## Korean Terminology Policy
+
+- Korean output should read as natural Korean, not English-heavy translated prose.
+- Preserve English for proper nouns, company names, product names, project names, library/framework names, protocol names, model names, commands, APIs, file names, and specific technology names.
+  - Examples to preserve: `OpenAI`, `Claude Code`, `GitHub Actions`, `React`, `Kubernetes`, `MCP`, `RAG`, `API`, `SDK`, `CLI`.
+- Translate general conceptual phrases into Korean when the Korean version is natural and precise.
+  - Prefer: `에이전트 작업 흐름`, `개발자 도구`, `배포 파이프라인`, `평가 기준`, `추론 비용`, `맥락 관리`.
+  - Avoid: `agent workflow`, `developer tool`, `deployment pipeline`, `evaluation criteria`, `inference cost`, `context management` in Korean prose unless used as an official product or quoted term.
+- Do not keep English merely because the source article used English.
+- For important abbreviations, keep the abbreviation itself and add Korean context around it.
+  - Prefer: `RAG 기반 검색`, `MCP 서버`, `API 호출`, `SDK 통합`.
+  - Avoid forcing unnatural full translations of specific technology names such as `MCP` or `RAG`.
+- Avoid excessive mixed-language noun phrases. If only one part is a proper noun or specific technology name, keep that part in English and translate the surrounding concept.
 
 ## Tone
 

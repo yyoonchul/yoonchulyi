@@ -1,13 +1,13 @@
 ---
 name: digest
-description: Generate or update one bilingual daily digest from content/inbox.md, using Korean as the source of truth before English translation.
+description: Generate or update one bilingual daily digest from content/inbox.md, using English as the source of truth before Korean translation.
 ---
 
-# Daily Digest Skill (KO -> EN)
+# Daily Digest Skill (EN -> KO)
 
 Generate or update one daily digest file from `content/inbox.md`.
 
-Korean is the source of truth: write the digest in Korean first, then translate it into English.
+English is the source of truth: write the digest in English first, then translate it into Korean.
 
 ## Inputs
 
@@ -29,13 +29,15 @@ Korean is the source of truth: write the digest in Korean first, then translate 
      3. If only `article.{title, preview_text}` is available, summarize from title + preview and add a `⚠️ Article preview only — body not retrievable` note. Only mark `⚠️ Fetch failed` when fxtwitter also returns nothing usable.
    - **Other URLs**: Fetch via standard web fetch.
    - If YouTube transcript extraction fails: mark `⚠️ Transcript unavailable`, skip detailed notes.
-3. Create digest in Korean first (summary + detail).
-   - Use plain declarative form (`-다` 체), not polite form (`-ㅂ니다`/`-습니다` 체). See `references/prompt-summarize.md` → "Korean Style".
-   - When referring to authors, speakers, founders, executives, researchers, or other people, use the person's name or public handle instead of gendered pronouns (`그`, `그녀`, `he`, `she`, `him`, `her`) wherever possible.
+3. Create digest in English first (summary + detail).
+   - Most source materials are in English; summarize directly from the source instead of translating into Korean first.
    - Detailed notes: 20-30 lines per article.
-   - 상세 정리: 기사별 20-30줄.
    - Use numbered major points, and under each major point add indented bullet lists for detailed notes.
-4. Translate that Korean digest into English.
+4. Translate that English digest into Korean.
+   - Use plain declarative form (`-다` 체), not polite form (`-ㅂ니다`/`-습니다` 체). See `references/prompt-summarize.md` → "Korean Style".
+   - Apply the Korean terminology policy in `references/prompt-summarize.md`: preserve proper nouns and specific technology names, but translate general English phrases into natural Korean.
+   - When referring to authors, speakers, founders, executives, researchers, or other people, use the person's name or public handle instead of gendered pronouns (`그`, `그녀`, `he`, `she`, `him`, `her`) wherever possible.
+   - 상세 정리: 기사별 20-30줄.
    - Preserve structure, order, numbering, and links.
 5. Write one file with fixed markers:
    - `<!-- LANG:EN:START -->`
