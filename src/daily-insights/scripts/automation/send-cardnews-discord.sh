@@ -53,10 +53,6 @@ fi
 
 STATE_DIR="${DISCORD_STATE_DIR:-${STATE_ROOT}/discord-cardnews-sent}"
 STATE_FILE="${STATE_DIR}/$(echo "${DATE_PATH}" | tr '/' '-').ok"
-if [[ -f "${STATE_FILE}" && "${DISCORD_FORCE_SEND:-false}" != "true" ]]; then
-  print_header "Discord card news already sent for ${DATE_PATH}. Set DISCORD_FORCE_SEND=true to resend."
-  exit 0
-fi
 
 declare -a image_files=()
 while IFS= read -r file_path; do
@@ -66,6 +62,47 @@ done < <(find "${OUTPUT_DIR}" -maxdepth 1 -type f -name '*.jpg' | sort -V)
 if [[ "${#image_files[@]}" -eq 0 ]]; then
   echo "ERROR: no card news JPEG files found in card-news/output/${DATE_PATH}" >&2
   exit 1
+fi
+
+declare -a send_image_files=("${image_files[@]}")
+if [[ -f "${STATE_FILE}" && "${DISCORD_FORCE_SEND:-false}" != "true" ]]; then
+  declare -a sent_file_names=()
+  while IFS= read -r sent_file_name; do
+    [[ -n "${sent_file_name}" ]] && sent_file_names+=("${sent_file_name}")
+  done < <(awk -F= '$1 == "file" { print $2 }' "${STATE_FILE}")
+
+  if [[ "${#sent_file_names[@]}" -eq 0 ]]; then
+    sent_count="$(awk -F= '$1 == "jpeg_count" { print $2; exit }' "${STATE_FILE}")"
+    if [[ "${sent_count}" =~ ^[0-9]+$ && "${sent_count}" -gt 0 ]]; then
+      for ((file_index = 0; file_index < sent_count && file_index < ${#image_files[@]}; file_index++)); do
+        sent_file_names+=("$(basename "${image_files[${file_index}]}")")
+      done
+    fi
+  fi
+
+  has_sent_file_name() {
+    local needle="$1"
+    local sent_file_name
+    for sent_file_name in "${sent_file_names[@]}"; do
+      if [[ "${sent_file_name}" == "${needle}" ]]; then
+        return 0
+      fi
+    done
+    return 1
+  }
+
+  send_image_files=()
+  for file_path in "${image_files[@]}"; do
+    file_name="$(basename "${file_path}")"
+    if ! has_sent_file_name "${file_name}"; then
+      send_image_files+=("${file_path}")
+    fi
+  done
+
+  if [[ "${#send_image_files[@]}" -eq 0 ]]; then
+    print_header "Discord card news already sent for ${DATE_PATH}; no new JPEGs to send."
+    exit 0
+  fi
 fi
 
 MAX_FILE_BYTES="${DISCORD_MAX_FILE_BYTES:-10485760}"
@@ -85,7 +122,7 @@ if [[ ! "${RETRY_MAX_ATTEMPTS}" =~ ^[1-9][0-9]*$ ]]; then
   RETRY_MAX_ATTEMPTS="3"
 fi
 
-for file_path in "${image_files[@]}"; do
+for file_path in "${send_image_files[@]}"; do
   file_size="$(wc -c < "${file_path}" | tr -d '[:space:]')"
   if [[ "${file_size}" -gt "${MAX_FILE_BYTES}" ]]; then
     echo "ERROR: $(basename "${file_path}") is larger than ${MAX_FILE_BYTES} bytes." >&2
@@ -94,7 +131,7 @@ for file_path in "${image_files[@]}"; do
 done
 
 date_label="$(echo "${DATE_PATH}" | tr '/' '-')"
-total_count="${#image_files[@]}"
+total_count="${#send_image_files[@]}"
 declare -a batch_start_indices=()
 declare -a batch_end_indices=()
 declare -a batch_labels=()
@@ -121,7 +158,7 @@ current_article_key=""
 current_article_label=""
 current_start_index=0
 for ((file_index = 0; file_index < total_count; file_index++)); do
-  file_name="$(basename "${image_files[${file_index}]}")"
+  file_name="$(basename "${send_image_files[${file_index}]}")"
   article_key=""
   article_label="card news"
   if [[ "${file_name}" =~ ^([0-9]+)-[0-9]+\.jpg$ ]]; then
@@ -165,7 +202,7 @@ send_batch() {
     local file_slot=0
     local file_index
     for ((file_index = start_index; file_index < end_index; file_index++)); do
-      curl_args+=(-F "files[${file_slot}]=@${image_files[${file_index}]};type=image/jpeg")
+      curl_args+=(-F "files[${file_slot}]=@${send_image_files[${file_index}]};type=image/jpeg")
       file_slot="$((file_slot + 1))"
     done
     curl_args+=("${DISCORD_WEBHOOK_URL}")
@@ -215,7 +252,10 @@ mkdir -p "${STATE_DIR}"
 {
   printf 'date_path=%s\n' "${DATE_PATH}"
   printf 'sent_at=%s\n' "$(date '+%F %T %Z')"
-  printf 'jpeg_count=%s\n' "${total_count}"
+  printf 'jpeg_count=%s\n' "${#image_files[@]}"
+  for file_path in "${image_files[@]}"; do
+    printf 'file=%s\n' "$(basename "${file_path}")"
+  done
 } > "${STATE_FILE}"
 
 print_header "Discord card news send complete for ${DATE_PATH}"

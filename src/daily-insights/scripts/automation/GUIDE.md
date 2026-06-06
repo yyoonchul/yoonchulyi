@@ -49,13 +49,14 @@ claude auth login
 ## Daily Flow 실행 순서
 
 1. `Digest` shortcut을 실행해 iCloud inbox를 `content/inbox.md`로 옮기고 iCloud inbox를 비웁니다.
-2. local inbox를 백업합니다.
-3. digest 스킬을 실행합니다.
-4. digest 실패 시 local inbox를 백업 상태로 복원하고 card news를 실행하지 않습니다.
-5. digest 성공 시 local inbox를 명시적으로 비웁니다.
-6. 오늘 digest 파일이 새로 생성되었거나 변경된 것을 검증합니다.
-7. card news 스킬을 실행해 카드뉴스, sidecar JSON, public cardnews URL 자산을 생성합니다.
-8. `daily-insights-publish` 단계에서 digest와 card news 산출물을 한 번에 커밋/푸시합니다.
+2. local inbox에 처리할 URL이 있는지 확인합니다. 비어 있으면 digest/card news/publish를 실행하지 않고 종료합니다.
+3. local inbox를 백업합니다.
+4. digest 스킬을 실행합니다.
+5. digest 실패 시 local inbox를 백업 상태로 복원하고 card news를 실행하지 않습니다.
+6. digest 성공 시 local inbox를 명시적으로 비웁니다.
+7. 오늘 digest 파일이 새로 생성되었거나 변경된 것을 검증합니다.
+8. card news 스킬을 실행해 카드뉴스, sidecar JSON, public cardnews URL 자산을 생성합니다.
+9. `daily-insights-publish` 단계에서 digest와 card news 산출물을 한 번에 커밋/푸시합니다.
 
 ## Shortcut 선행 동기화 모드 (Codex / Claude Code)
 
@@ -68,7 +69,7 @@ claude auth login
 실행 순서:
 
 1. `shortcuts run "Digest"`
-2. 로컬 inbox 상태 확인 (비어 있으면 종료)
+2. 로컬 inbox 상태 확인. 같은 날짜에 이미 실행된 적이 있어도 inbox에 새 URL이 있으면 계속 진행합니다.
 3. (선택) 지연 후 선택한 엔진의 digest 실행
 4. digest 생성 후 daily flow가 card news와 publish 단계를 이어서 실행
 

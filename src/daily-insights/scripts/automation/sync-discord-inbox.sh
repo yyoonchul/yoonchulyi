@@ -200,6 +200,7 @@ append_url_count="$(wc -l < "${append_urls_path}" | tr -d '[:space:]')"
 reaction_count="$(wc -l < "${to_react_path}" | tr -d '[:space:]')"
 
 if [[ "${append_url_count}" -gt 0 ]]; then
+  print_header "Appending ${append_url_count} Discord URL(s) to ${LOCAL_INBOX_PATH}"
   python3 - "${LOCAL_INBOX_PATH}" "${append_urls_path}" <<'PY'
 import sys
 
@@ -221,6 +222,31 @@ with open(inbox_path, "ab") as handle:
     for url in urls:
         handle.write(url.encode("utf-8") + b"\n")
 PY
+
+  python3 - "${LOCAL_INBOX_PATH}" "${append_urls_path}" <<'PY'
+import sys
+
+inbox_path, urls_path = sys.argv[1:3]
+with open(urls_path, "r", encoding="utf-8") as handle:
+    expected = [line.strip() for line in handle if line.strip()]
+
+try:
+    with open(inbox_path, "r", encoding="utf-8") as handle:
+        inbox_urls = {line.strip().rstrip("/") for line in handle if line.strip().startswith(("http://", "https://"))}
+except FileNotFoundError:
+    inbox_urls = set()
+
+missing = [url for url in expected if url.rstrip("/") not in inbox_urls]
+if missing:
+    print("ERROR: Discord inbox URLs were not persisted to the local inbox. Refusing to mark messages checked.", file=sys.stderr)
+    print(f"Local inbox: {inbox_path}", file=sys.stderr)
+    for url in missing:
+        print(f"- {url}", file=sys.stderr)
+    raise SystemExit(1)
+PY
+
+  persisted_url_count="$(count_valid_inbox_urls "${LOCAL_INBOX_PATH}")"
+  print_header "Discord inbox append verified. Local inbox valid URL count: ${persisted_url_count}"
 fi
 
 put_reaction() {

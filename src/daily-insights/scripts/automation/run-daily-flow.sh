@@ -31,18 +31,6 @@ if [[ -f "${REPO_ROOT}/.env" ]]; then
 fi
 set +a
 
-cardnews_sent_state_dir="${DISCORD_STATE_DIR:-${STATE_ROOT}/discord-cardnews-sent}"
-cardnews_sent_state_file="${cardnews_sent_state_dir}/$(echo "${date_path}" | tr '/' '-').ok"
-if [[ "${DAILY_FLOW_SKIP_IF_TODAY_COMPLETE:-true}" == "true" \
-  && -f "${digest_path}" \
-  && -f "${cardnews_sent_state_file}" ]]; then
-  print_header "Today's daily flow is already complete. Skip catch-up run."
-  run_log_event "Daily flow already complete" \
-    "Digest: \`${DIGEST_RELATIVE_PATH}\`"$'\n'"Discord state: \`${cardnews_sent_state_file}\`."
-  run_log_finish_success "Today's digest and Discord send state already exist; skipped catch-up run."
-  exit 0
-fi
-
 [[ -x "${digest_runner}" ]] || {
   echo "ERROR: digest runner is not executable: ${digest_runner}" >&2
   exit 1
