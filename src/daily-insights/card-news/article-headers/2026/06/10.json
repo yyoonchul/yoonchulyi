@@ -1,0 +1,26 @@
+{
+  "articles": [
+    {
+      "cover": "AI 코딩의 숨은 비용",
+      "source": "Gerben Wierda의 \"Anthropic/OpenAI may be spending more than $1000 for every $100 you pay them\"",
+      "sections": [
+        "불안정한 AI 코딩 경제",
+        "비싼 고정확도 작업",
+        "구독이 가리는 API 비용",
+        "비용 통제와 모델 품질",
+        "제약된 영역의 성과"
+      ]
+    },
+    {
+      "cover": "애플의 AI 비밀 회의",
+      "source": "Bloomberg 기사 \"Inside Apple's Secret Meeting That Led It to Finally Take AI Seriously\"",
+      "sections": [
+        "임원급 AI 위기",
+        "Siri 재설정의 맥락",
+        "리더십과 제품 소유권",
+        "바뀌는 AI 제품 전제",
+        "거대한 소비자 접점"
+      ]
+    }
+  ]
+}

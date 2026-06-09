@@ -1,0 +1,25 @@
+{
+  "cover": "Anthropic",
+  "articles": [
+    {
+      "cover": "Anthropic",
+      "sections": [
+        "Claude Code",
+        "AI coding",
+        "Claude Max",
+        "Claude Opus",
+        "software compiler"
+      ]
+    },
+    {
+      "cover": "Apple",
+      "sections": [
+        "Apple Intelligence",
+        "Siri",
+        "Apple Vision Pro",
+        "Google Gemini",
+        "iPhone"
+      ]
+    }
+  ]
+}
