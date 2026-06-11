@@ -1,0 +1,26 @@
+{
+  "articles": [
+    {
+      "cover": "텍스트 최적화의 반격",
+      "source": "Yoonho Lee의 \"We Should Take Text Optimization More Seriously\"",
+      "sections": [
+        "학습 대상으로서 텍스트",
+        "샘플 효율의 근거",
+        "업데이트 시점 컴퓨트",
+        "가중치와 텍스트 라우팅",
+        "텍스트 레이어 연구 과제"
+      ]
+    },
+    {
+      "cover": "관심을 유통으로 바꾸는 법",
+      "source": "Alexandria 기사 \"Attention is all you need\"",
+      "sections": [
+        "일이 된 관심 습관",
+        "성과가 만든 설득력",
+        "MrBeast식 포맷 훈련",
+        "요청이 여는 선택지",
+        "네트워크 조율의 힘"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "cover": "Yoonho Lee",
+  "articles": [
+    {
+      "cover": "Yoonho Lee",
+      "sections": [
+        "AI prompts",
+        "pretrained language model",
+        "reinforcement learning",
+        "retrieval augmented generation",
+        "human computer interaction"
+      ]
+    },
+    {
+      "cover": "Rohan Kumar",
+      "sections": [
+        "Night Media",
+        "Ramp",
+        "MrBeast",
+        "Notion",
+        "San Francisco"
+      ]
+    }
+  ]
+}
