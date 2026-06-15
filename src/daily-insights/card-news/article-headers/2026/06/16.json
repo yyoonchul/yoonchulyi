@@ -1,0 +1,59 @@
+{
+  "articles": [
+    {
+      "cover": "조직 지식을 담는 공개 포맷",
+      "source": "Google Cloud 블로그 \"Introducing the Open Knowledge Format\"",
+      "sections": [
+        "에이전트의 맥락 공백",
+        "파일 포맷이 된 지식",
+        "플랫폼 아닌 포맷",
+        "참조 도구 공개",
+        "생태계 초대장"
+      ]
+    },
+    {
+      "cover": "10억 달러를 만드는 성장률",
+      "source": "Paul Graham의 \"How to Earn a Billion Dollars\"",
+      "sections": [
+        "부정행위라는 오해",
+        "복리 성장의 계산",
+        "성장률과 지속시간",
+        "직접 아는 필요",
+        "공감으로 번 부"
+      ]
+    },
+    {
+      "cover": "Meta AI 재편의 인력 충격",
+      "source": "Fox Business 기사 \"Mark Zuckerberg admits Meta has 'made mistakes' as AI overhaul reshapes 20% of its workforce: report\"",
+      "sections": [
+        "내부 메시지 보도",
+        "AI 투자와 조직 재설계",
+        "20% 영향의 규모",
+        "불확실성 낮추기",
+        "남은 실행 리스크"
+      ]
+    },
+    {
+      "cover": "느린 백엔드의 진짜 병목",
+      "source": "howtocenterdiv 글 \"Your Database Is the Bottleneck. Not Your Code\"",
+      "sections": [
+        "잘못 고치는 계층",
+        "숨은 N+1 쿼리",
+        "첫 수는 EXPLAIN",
+        "운영 통제 네 가지",
+        "캐시보다 쿼리 위생"
+      ]
+    },
+    {
+      "cover": "생성 없이 읽는 LLM 판단",
+      "source": "James Padolsey의 \"Don't let the LLM speak, just probe it.\"",
+      "sections": [
+        "분류 비용의 출발점",
+        "생성은 불필요하다",
+        "작은 모델과 보정",
+        "표현을 날카롭게",
+        "캐싱과 절충점"
+      ]
+    }
+  ]
+}

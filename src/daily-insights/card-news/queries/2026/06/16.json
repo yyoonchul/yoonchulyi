@@ -1,0 +1,55 @@
+{
+  "cover": "Google Cloud",
+  "articles": [
+    {
+      "cover": "Google Cloud",
+      "sections": [
+        "Open Knowledge Format",
+        "YAML",
+        "Markdown",
+        "BigQuery",
+        "GitHub"
+      ]
+    },
+    {
+      "cover": "Paul Graham",
+      "sections": [
+        "Y Combinator",
+        "startup founders",
+        "market size",
+        "Airbnb",
+        "startup growth"
+      ]
+    },
+    {
+      "cover": "Meta",
+      "sections": [
+        "Mark Zuckerberg",
+        "OpenAI",
+        "Reuters",
+        "Meta AI",
+        "Fox Business"
+      ]
+    },
+    {
+      "cover": "PostgreSQL",
+      "sections": [
+        "Node.js",
+        "GraphQL",
+        "PostgreSQL",
+        "Redis",
+        "database servers"
+      ]
+    },
+    {
+      "cover": "James Padolsey",
+      "sections": [
+        "machine learning classifier",
+        "large language model",
+        "IBM Granite",
+        "LoRA",
+        "KV cache"
+      ]
+    }
+  ]
+}
