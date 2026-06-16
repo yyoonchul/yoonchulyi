@@ -54,6 +54,50 @@
         "표현을 날카롭게",
         "캐싱과 절충점"
       ]
+    },
+    {
+      "cover": "모델보다 중요한 학습 생태계",
+      "source": "Satya Nadella의 \"A frontier without an ecosystem is not stable\"",
+      "sections": [
+        "기업 학습의 전환",
+        "인간 자본과 토큰 자본",
+        "복리 학습 루프",
+        "통제와 주권의 설계",
+        "모델 독점 경제의 경고"
+      ]
+    },
+    {
+      "cover": "현대 로봇 AI의 첫 원리",
+      "source": "Interlatent 글 \"An Overview of Modern AI Robotics from First Principles.\"",
+      "sections": [
+        "시간 압박의 정책 함수",
+        "이해와 행동의 분리",
+        "액션 청킹의 효과",
+        "엣지와 클라우드 지연",
+        "데이터와 훈련 병목"
+      ]
+    },
+    {
+      "cover": "모르는 분야에서 덜 단정하기",
+      "source": "Philosophy Stack Exchange 질문 \"How do I prevent myself from being a crank in areas I know very little about?\"",
+      "sections": [
+        "분야를 넘는 겸손",
+        "단정 보류의 기술",
+        "합의와 출처 신호",
+        "무지를 말하는 습관",
+        "보정된 참여 규범"
+      ]
+    },
+    {
+      "cover": "창업자 신뢰의 소진",
+      "source": "Mr. Market 글 \"What the Fuck Happened to Nerds\"",
+      "sections": [
+        "소진되는 신뢰 자산",
+        "제품 중심의 창업자 신화",
+        "미디어화된 창업자 문화",
+        "마피아 영상의 평판 위험",
+        "너드 가치의 공개 브랜드"
+      ]
     }
   ]
 }

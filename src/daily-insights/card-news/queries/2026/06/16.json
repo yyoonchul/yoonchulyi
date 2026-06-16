@@ -1,5 +1,5 @@
 {
-  "cover": "Google Cloud",
+  "cover": "Open Knowledge Format",
   "articles": [
     {
       "cover": "Google Cloud",
@@ -14,11 +14,11 @@
     {
       "cover": "Paul Graham",
       "sections": [
+        "Oxford Union",
         "Y Combinator",
-        "startup founders",
-        "market size",
+        "startup growth",
         "Airbnb",
-        "startup growth"
+        "startup founders"
       ]
     },
     {
@@ -36,19 +36,59 @@
       "sections": [
         "Node.js",
         "GraphQL",
-        "PostgreSQL",
-        "Redis",
-        "database servers"
+        "EXPLAIN ANALYZE",
+        "database connection pool",
+        "Redis"
       ]
     },
     {
       "cover": "James Padolsey",
       "sections": [
-        "machine learning classifier",
+        "NOPE",
         "large language model",
         "IBM Granite",
         "LoRA",
         "KV cache"
+      ]
+    },
+    {
+      "cover": "Satya Nadella",
+      "sections": [
+        "Microsoft",
+        "artificial intelligence capital",
+        "enterprise workflow",
+        "AI evaluation benchmark",
+        "global AI economy"
+      ]
+    },
+    {
+      "cover": "Interlatent",
+      "sections": [
+        "robot arm",
+        "vision language action model",
+        "Action Chunking Transformer",
+        "edge computing",
+        "Genie 3"
+      ]
+    },
+    {
+      "cover": "Philosophy Stack Exchange",
+      "sections": [
+        "mathematics physics",
+        "critical thinking",
+        "expert consensus",
+        "epistemology",
+        "Socrates"
+      ]
+    },
+    {
+      "cover": "Founders Fund",
+      "sections": [
+        "Silicon Valley",
+        "Steve Jobs",
+        "Y Combinator",
+        "PayPal Mafia",
+        "startup founders"
       ]
     }
   ]
