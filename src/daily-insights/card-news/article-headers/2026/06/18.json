@@ -1,0 +1,26 @@
+{
+  "articles": [
+    {
+      "cover": "쓸 만해진 로컬 모델",
+      "source": "Vicki Boykis의 \"Running local models is good now\"",
+      "sections": [
+        "실용성을 넘은 로컬 모델",
+        "API 의존도 감소",
+        "M2 맥의 실제 작업",
+        "로컬 추론과 샌드박스",
+        "낙관과 남은 한계"
+      ]
+    },
+    {
+      "cover": "AI 시대의 피벗 판단",
+      "source": "a16z speedrun의 \"How to Pivot Well\"",
+      "sections": [
+        "AI가 바꾼 피벗 판단",
+        "한 발을 남기는 피벗",
+        "세 가지 피벗 패턴",
+        "시장 반응으로 정하는 시점",
+        "이전 학습의 다음 검증"
+      ]
+    }
+  ]
+}

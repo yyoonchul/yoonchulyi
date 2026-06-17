@@ -1,0 +1,25 @@
+{
+  "cover": "Gemma",
+  "articles": [
+    {
+      "cover": "Gemma",
+      "sections": [
+        "Mistral 7B",
+        "GPT-OSS",
+        "Apple M2",
+        "LM Studio",
+        "Hugging Face"
+      ]
+    },
+    {
+      "cover": "a16z speedrun",
+      "sections": [
+        "Slack",
+        "startup pivot",
+        "Cursor",
+        "Troy Kirwin",
+        "A/B testing"
+      ]
+    }
+  ]
+}
