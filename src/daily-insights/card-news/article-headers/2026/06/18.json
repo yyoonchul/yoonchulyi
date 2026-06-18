@@ -21,6 +21,50 @@
         "시장 반응으로 정하는 시점",
         "이전 학습의 다음 검증"
       ]
+    },
+    {
+      "cover": "AI가 밀어올린 iPhone 가격",
+      "source": "TechCrunch 기사 \"AI is hurting Apple in more ways than one: it may force iPhone price increases\"",
+      "sections": [
+        "메모리 품귀와 Apple",
+        "Tim Cook의 비용 경고",
+        "iPhone 가격 인상",
+        "Apple의 AI 이중 압박",
+        "소비자 가격으로 번진 AI"
+      ]
+    },
+    {
+      "cover": "사용자가 조정하는 알고리즘",
+      "source": "TechCrunch 기사 \"Social media's next evolution: user-controlled algorithms\"",
+      "sections": [
+        "추천 제어의 이동",
+        "Threads의 비공개 조정",
+        "Instagram의 추천 주제",
+        "TikTok의 토픽 슬라이더",
+        "참여를 높이는 제어"
+      ]
+    },
+    {
+      "cover": "동맹국 AI 접근권의 정치",
+      "source": "Firstpost 기사 \"US and Europe discuss 'trusted partner' AI pact after Anthropic export restrictions\"",
+      "sections": [
+        "AI 접근권의 외교화",
+        "Anthropic 제한의 파장",
+        "유럽의 설명 요구",
+        "업계의 수출통제 반발",
+        "안전과 접근의 균형"
+      ]
+    },
+    {
+      "cover": "전문성이 키우는 Claude Code 성과",
+      "source": "Anthropic 보고서 \"Agentic coding and persistent returns to expertise\"",
+      "sections": [
+        "Claude Code 사용 측정",
+        "사람은 계획, Claude는 실행",
+        "전문가가 끌어낸 더 큰 작업",
+        "코딩을 넘어선 활용",
+        "성공을 가르는 전문성"
+      ]
     }
   ]
 }

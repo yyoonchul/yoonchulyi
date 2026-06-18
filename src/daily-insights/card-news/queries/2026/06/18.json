@@ -1,5 +1,5 @@
 {
-  "cover": "Gemma",
+  "cover": "Anthropic",
   "articles": [
     {
       "cover": "Gemma",
@@ -16,9 +16,49 @@
       "sections": [
         "Slack",
         "startup pivot",
-        "Cursor",
-        "Troy Kirwin",
+        "Clay",
+        "customer interviews",
         "A/B testing"
+      ]
+    },
+    {
+      "cover": "Apple Inc.",
+      "sections": [
+        "DRAM",
+        "Tim Cook",
+        "Apple iPhone",
+        "Apple Intelligence",
+        "NAND flash memory"
+      ]
+    },
+    {
+      "cover": "Threads",
+      "sections": [
+        "recommendation system",
+        "Meta Platforms",
+        "Instagram Reels",
+        "TikTok",
+        "social media feed"
+      ]
+    },
+    {
+      "cover": "Anthropic",
+      "sections": [
+        "G7",
+        "Anthropic",
+        "European Union",
+        "OpenAI",
+        "AI governance"
+      ]
+    },
+    {
+      "cover": "Claude Code",
+      "sections": [
+        "Claude Code",
+        "Claude AI",
+        "Anthropic",
+        "software development",
+        "domain expertise"
       ]
     }
   ]
