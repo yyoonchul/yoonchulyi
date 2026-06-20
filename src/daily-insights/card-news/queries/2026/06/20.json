@@ -1,0 +1,45 @@
+{
+  "cover": "Physical Intelligence",
+  "articles": [
+    {
+      "cover": "Physical Intelligence",
+      "sections": [
+        "robotics foundation model",
+        "Physical Intelligence pi0.6",
+        "laundry folding robot",
+        "robot training data",
+        "warehouse order packaging robot"
+      ]
+    },
+    {
+      "cover": "Multi-scale Embodied Memory",
+      "sections": [
+        "robot memory",
+        "Multi-scale Embodied Memory",
+        "robot reasoning loop",
+        "robot chopsticks",
+        "kitchen robot"
+      ]
+    },
+    {
+      "cover": "reinforcement learning robot",
+      "sections": [
+        "robot dexterity",
+        "actor critic reinforcement learning",
+        "robot action policy",
+        "Ethernet cable insertion robot",
+        "robot data efficiency"
+      ]
+    },
+    {
+      "cover": "Physical Intelligence pi0.7",
+      "sections": [
+        "robot generalization",
+        "multimodal robot learning",
+        "air fryer robot",
+        "UR5e robot arm",
+        "espresso making robot"
+      ]
+    }
+  ]
+}

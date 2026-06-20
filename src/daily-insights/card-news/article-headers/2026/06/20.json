@@ -1,0 +1,48 @@
+{
+  "articles": [
+    {
+      "cover": "로봇을 위한 물리 지능층",
+      "source": "Physical Intelligence 글 \"The Physical Intelligence Layer\"",
+      "sections": [
+        "로봇에 빠진 기반층",
+        "데모 밖의 파트너 배포",
+        "세탁 접기의 진입점",
+        "배포 데이터의 효과",
+        "창고 포장으로 확장"
+      ]
+    },
+    {
+      "cover": "로봇 기억의 두 스케일",
+      "source": "Physical Intelligence 연구 \"VLAs with Long and Short-Term Memory\"",
+      "sections": [
+        "기억이 만든 병목",
+        "단기와 장기 기억",
+        "추론 루프 속 기억",
+        "실패 뒤 바뀌는 행동",
+        "긴 작업에 필요한 기억"
+      ]
+    },
+    {
+      "cover": "정밀 조작을 배우는 RLT",
+      "source": "Physical Intelligence 연구 \"Precise Manipulation with Efficient Online RL\"",
+      "sections": [
+        "정밀 실행의 간극",
+        "VLA와 RL의 연결",
+        "가깝게 수정하는 학습",
+        "네 가지 조작 평가",
+        "속도와 데이터 효율"
+      ]
+    },
+    {
+      "cover": "조종 가능한 로봇 모델",
+      "source": "Physical Intelligence 글 \"π0.7: a Steerable Model with Emergent Capabilities\"",
+      "sections": [
+        "조합 일반화의 단계",
+        "멀티모달 조건 훈련",
+        "언어 코칭의 효과",
+        "몸체를 넘는 전이",
+        "일반성과 조종성"
+      ]
+    }
+  ]
+}
