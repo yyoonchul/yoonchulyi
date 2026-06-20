@@ -134,7 +134,7 @@ rm -f "${inbox_backup_path}"
 print_header "Digest changed successfully. Running card news step."
 run_log_event "Running card news step" "Digest: \`${DIGEST_RELATIVE_PATH}\`."
 set +e
-"${cardnews_runner}"
+"${cardnews_runner}" "${date_path}"
 cardnews_status="$?"
 set -e
 

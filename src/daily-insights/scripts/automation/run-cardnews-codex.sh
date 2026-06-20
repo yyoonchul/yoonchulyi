@@ -14,6 +14,12 @@ CODEX_BYPASS_APPROVALS_AND_SANDBOX="${CARDNEWS_CODEX_BYPASS_APPROVALS_AND_SANDBO
 CODEX_TIMEOUT_SECONDS="${CARDNEWS_CODEX_TIMEOUT_SECONDS:-3600}"
 CODEX_RETRY_MAX_ATTEMPTS="${CARDNEWS_CODEX_RETRY_MAX_ATTEMPTS:-2}"
 CODEX_RETRY_INTERVAL_SECONDS="${CARDNEWS_CODEX_RETRY_INTERVAL_SECONDS:-300}"
+DATE_PATH="${1:-$(date +%Y/%m/%d)}"
+
+if [[ ! "${DATE_PATH}" =~ ^[0-9]{4}/[0-9]{2}/[0-9]{2}$ ]]; then
+  echo "Usage: run-cardnews-codex.sh [YYYY/MM/DD]" >&2
+  exit 2
+fi
 
 if [[ ! "${CODEX_RETRY_MAX_ATTEMPTS}" =~ ^[1-9][0-9]*$ ]]; then
   CODEX_RETRY_MAX_ATTEMPTS="2"
@@ -22,20 +28,19 @@ if [[ ! "${CODEX_RETRY_INTERVAL_SECONDS}" =~ ^[0-9]+$ ]]; then
   CODEX_RETRY_INTERVAL_SECONDS="300"
 fi
 
-digest_path="${REPO_ROOT}/${DIGEST_RELATIVE_PATH}"
+digest_relative_path="content/${DATE_PATH}.md"
+digest_path="${REPO_ROOT}/${digest_relative_path}"
 if [[ ! -f "${digest_path}" ]]; then
-  print_header "Today's digest not found (${DIGEST_RELATIVE_PATH}). Skip card news run."
-  run_log_finish_success "Today's digest was not found at \`${DIGEST_RELATIVE_PATH}\`; skipped card news skill."
+  print_header "Digest not found (${digest_relative_path}). Skip card news run."
+  run_log_finish_success "Digest was not found at \`${digest_relative_path}\`; skipped card news skill."
   exit 0
 fi
-run_log_event "Digest found for card news" "Path: \`${DIGEST_RELATIVE_PATH}\`."
+run_log_event "Digest found for card news" "Path: \`${digest_relative_path}\`."
 
 if ! codex_login_ok; then
   echo "ERROR: Codex is not logged in. Run: codex login" >&2
   exit 1
 fi
-
-DATE_PATH="$(date +%Y/%m/%d)"
 
 read -r -d '' PROMPT <<EOF || true
 Use the \`\$card-news\` skill in this repository and execute the full workflow now for datePath \`${DATE_PATH}\`.

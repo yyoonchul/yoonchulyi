@@ -39,6 +39,13 @@ claude auth login
 ./scripts/automation/daily-flow-launchd.sh setup codex 08:30
 ```
 
+### 1-1) Codex resilient daily flow 스케줄 설정 (권장: 22:00-02:00, 10분마다 확인)
+```bash
+./scripts/automation/daily-flow-launchd.sh setup-resilient codex 600
+```
+
+resilient 모드는 `StartCalendarInterval` 대신 `StartInterval`을 사용합니다. launchd는 10분마다 runner를 시작하지만, runner는 22:00-02:00 창 안에서만 동작합니다. full daily flow가 한 번 끝까지 성공하면 해당 22:00 창의 성공 마커를 남기고, 다음날 22:00 전까지는 Discord inbox sync도 더 이상 보지 않습니다.
+
 ### 2) Claude Code daily flow 스케줄 설정 (기본 08:30)
 ```bash
 ./scripts/automation/daily-flow-launchd.sh setup claude 08:30
@@ -57,6 +64,27 @@ claude auth login
 7. 오늘 digest 파일이 새로 생성되었거나 변경된 것을 검증합니다.
 8. card news 스킬을 실행해 카드뉴스, sidecar JSON, public cardnews URL 자산을 생성합니다.
 9. `daily-insights-publish` 단계에서 digest와 card news 산출물을 한 번에 커밋/푸시합니다.
+
+## Resilient Daily Flow 동작
+
+`setup-resilient`로 등록하면 같은 launchd label을 사용해 기존 daily-flow 스케줄을 대체합니다.
+
+1. launchd가 기본 600초마다 runner를 실행합니다.
+2. runner는 22:00-02:00 창 밖이면 바로 종료합니다.
+3. 해당 22:00 창에서 이미 full daily flow가 성공했으면 바로 종료합니다.
+4. 아직 성공하지 않았으면 Discord inbox를 sync합니다.
+5. local inbox에 valid URL이 없으면 다음 interval에 다시 확인합니다.
+6. valid URL이 있으면 `caffeinate -dimsu`로 full daily flow를 실행합니다.
+7. full daily flow가 성공하면 `${DIGEST_STATE_ROOT:-~/Library/Application Support/daily-insights}/daily-flow-resilient/` 아래에 성공 마커를 기록합니다.
+
+기본 창은 22:00부터 다음날 02:00 직전까지입니다. 필요하면 plist 생성 시 아래 환경변수로 바꿀 수 있습니다.
+
+```bash
+DAILY_FLOW_LAUNCHD_RESILIENT_START_HOUR=22 \
+DAILY_FLOW_LAUNCHD_RESILIENT_END_HOUR=2 \
+DAILY_FLOW_LAUNCHD_RESILIENT_INTERVAL_SECONDS=600 \
+  ./scripts/automation/daily-flow-launchd.sh setup-resilient codex
+```
 
 ## Shortcut 선행 동기화 모드 (Codex / Claude Code)
 

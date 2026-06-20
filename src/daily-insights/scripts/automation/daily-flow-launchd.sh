@@ -29,11 +29,15 @@ DAILY_FLOW_LAUNCHD_CARDNEWS_CLAUDE_TIMEOUT_SECONDS="${DAILY_FLOW_LAUNCHD_CARDNEW
 DAILY_FLOW_LAUNCHD_CARDNEWS_CLAUDE_RETRY_MAX_ATTEMPTS="${DAILY_FLOW_LAUNCHD_CARDNEWS_CLAUDE_RETRY_MAX_ATTEMPTS:-2}"
 DAILY_FLOW_LAUNCHD_CARDNEWS_CLAUDE_RETRY_INTERVAL_SECONDS="${DAILY_FLOW_LAUNCHD_CARDNEWS_CLAUDE_RETRY_INTERVAL_SECONDS:-300}"
 DAILY_FLOW_LAUNCHD_RUN_AT_LOAD="${DAILY_FLOW_LAUNCHD_RUN_AT_LOAD:-true}"
+DAILY_FLOW_LAUNCHD_RESILIENT_INTERVAL_SECONDS="${DAILY_FLOW_LAUNCHD_RESILIENT_INTERVAL_SECONDS:-600}"
+DAILY_FLOW_LAUNCHD_RESILIENT_START_HOUR="${DAILY_FLOW_LAUNCHD_RESILIENT_START_HOUR:-22}"
+DAILY_FLOW_LAUNCHD_RESILIENT_END_HOUR="${DAILY_FLOW_LAUNCHD_RESILIENT_END_HOUR:-2}"
 
 usage() {
   cat <<'EOF'
 Usage:
   daily-flow-launchd.sh setup <codex|claude> [HH:MM]
+  daily-flow-launchd.sh setup-resilient <codex|claude> [interval_seconds]
   daily-flow-launchd.sh enable <codex|claude>
   daily-flow-launchd.sh disable <codex|claude>
   daily-flow-launchd.sh status [codex|claude|all]
@@ -42,6 +46,7 @@ Usage:
 
 Examples:
   daily-flow-launchd.sh setup codex 08:30
+  daily-flow-launchd.sh setup-resilient codex 600
   daily-flow-launchd.sh setup claude 08:30
   daily-flow-launchd.sh disable codex
   daily-flow-launchd.sh status all
@@ -194,6 +199,115 @@ ${engine_env_xml}
 EOF
 }
 
+write_resilient_plist() {
+  local engine="$1"
+  local interval_seconds="$2"
+  local label plist runner engine_env_xml
+
+  label="$(label_for "${engine}")"
+  plist="$(plist_for "${engine}")"
+  runner="${REPO_ROOT}/scripts/automation/run-daily-flow-resilient.sh"
+
+  [[ -x "${runner}" ]] || die "runner is not executable: ${runner}"
+
+  if [[ ! "${interval_seconds}" =~ ^[1-9][0-9]*$ ]]; then
+    die "interval_seconds must be a positive integer, got '${interval_seconds}'."
+  fi
+
+  engine_env_xml=""
+  if [[ "${engine}" == "codex" ]]; then
+    read -r -d '' engine_env_xml <<EOF || true
+    <key>DIGEST_CODEX_SANDBOX_MODE</key>
+    <string>${DAILY_FLOW_LAUNCHD_CODEX_SANDBOX_MODE}</string>
+    <key>DIGEST_CODEX_BYPASS_APPROVALS_AND_SANDBOX</key>
+    <string>${DAILY_FLOW_LAUNCHD_CODEX_BYPASS_APPROVALS_AND_SANDBOX}</string>
+    <key>DIGEST_CODEX_TIMEOUT_SECONDS</key>
+    <string>${DAILY_FLOW_LAUNCHD_CODEX_TIMEOUT_SECONDS}</string>
+    <key>DIGEST_CODEX_RETRY_MAX_ATTEMPTS</key>
+    <string>${DAILY_FLOW_LAUNCHD_CODEX_RETRY_MAX_ATTEMPTS}</string>
+    <key>DIGEST_CODEX_RETRY_INTERVAL_SECONDS</key>
+    <string>${DAILY_FLOW_LAUNCHD_CODEX_RETRY_INTERVAL_SECONDS}</string>
+    <key>CARDNEWS_CODEX_SANDBOX_MODE</key>
+    <string>${DAILY_FLOW_LAUNCHD_CODEX_SANDBOX_MODE}</string>
+    <key>CARDNEWS_CODEX_BYPASS_APPROVALS_AND_SANDBOX</key>
+    <string>${DAILY_FLOW_LAUNCHD_CODEX_BYPASS_APPROVALS_AND_SANDBOX}</string>
+    <key>CARDNEWS_CODEX_TIMEOUT_SECONDS</key>
+    <string>${DAILY_FLOW_LAUNCHD_CARDNEWS_CODEX_TIMEOUT_SECONDS}</string>
+    <key>CARDNEWS_CODEX_RETRY_MAX_ATTEMPTS</key>
+    <string>${DAILY_FLOW_LAUNCHD_CARDNEWS_CODEX_RETRY_MAX_ATTEMPTS}</string>
+    <key>CARDNEWS_CODEX_RETRY_INTERVAL_SECONDS</key>
+    <string>${DAILY_FLOW_LAUNCHD_CARDNEWS_CODEX_RETRY_INTERVAL_SECONDS}</string>
+EOF
+  else
+    read -r -d '' engine_env_xml <<EOF || true
+    <key>DIGEST_CLAUDE_TIMEOUT_SECONDS</key>
+    <string>${DAILY_FLOW_LAUNCHD_CLAUDE_TIMEOUT_SECONDS}</string>
+    <key>DIGEST_CLAUDE_RETRY_MAX_ATTEMPTS</key>
+    <string>${DAILY_FLOW_LAUNCHD_CLAUDE_RETRY_MAX_ATTEMPTS}</string>
+    <key>DIGEST_CLAUDE_RETRY_INTERVAL_SECONDS</key>
+    <string>${DAILY_FLOW_LAUNCHD_CLAUDE_RETRY_INTERVAL_SECONDS}</string>
+    <key>CARDNEWS_CLAUDE_TIMEOUT_SECONDS</key>
+    <string>${DAILY_FLOW_LAUNCHD_CARDNEWS_CLAUDE_TIMEOUT_SECONDS}</string>
+    <key>CARDNEWS_CLAUDE_RETRY_MAX_ATTEMPTS</key>
+    <string>${DAILY_FLOW_LAUNCHD_CARDNEWS_CLAUDE_RETRY_MAX_ATTEMPTS}</string>
+    <key>CARDNEWS_CLAUDE_RETRY_INTERVAL_SECONDS</key>
+    <string>${DAILY_FLOW_LAUNCHD_CARDNEWS_CLAUDE_RETRY_INTERVAL_SECONDS}</string>
+EOF
+  fi
+
+  cat > "${plist}" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>${label}</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>${runner}</string>
+    <string>${engine}</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>${REPO_ROOT}</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>${LAUNCHD_PATH}</string>
+    <key>DIGEST_TIMEZONE</key>
+    <string>${DAILY_FLOW_LAUNCHD_TIMEZONE}</string>
+    <key>DIGEST_ICLOUD_INBOX_PATH</key>
+    <string>${DAILY_FLOW_LAUNCHD_ICLOUD_INBOX_PATH}</string>
+    <key>DIGEST_LOCK_MAX_AGE_SECONDS</key>
+    <string>${DAILY_FLOW_LAUNCHD_LOCK_MAX_AGE_SECONDS}</string>
+    <key>DIGEST_LOCK_KILL_GRACE_SECONDS</key>
+    <string>${DAILY_FLOW_LAUNCHD_LOCK_KILL_GRACE_SECONDS}</string>
+    <key>DIGEST_DISABLE_ICLOUD_ON_PERMISSION_ERROR</key>
+    <string>${DAILY_FLOW_LAUNCHD_DISABLE_ICLOUD_ON_PERMISSION_ERROR}</string>
+    <key>DIGEST_PRE_SYNC_SHORTCUT_NAME</key>
+    <string>${DAILY_FLOW_LAUNCHD_PRE_SYNC_SHORTCUT_NAME}</string>
+    <key>DIGEST_PRE_SYNC_DELAY_SECONDS</key>
+    <string>${DAILY_FLOW_LAUNCHD_PRE_SYNC_DELAY_SECONDS}</string>
+    <key>DIGEST_PRE_SYNC_SHORTCUT_TIMEOUT_SECONDS</key>
+    <string>${DAILY_FLOW_LAUNCHD_PRE_SYNC_SHORTCUT_TIMEOUT_SECONDS}</string>
+    <key>DAILY_FLOW_RESILIENT_START_HOUR</key>
+    <string>${DAILY_FLOW_LAUNCHD_RESILIENT_START_HOUR}</string>
+    <key>DAILY_FLOW_RESILIENT_END_HOUR</key>
+    <string>${DAILY_FLOW_LAUNCHD_RESILIENT_END_HOUR}</string>
+${engine_env_xml}
+  </dict>
+  <key>RunAtLoad</key>
+  <${DAILY_FLOW_LAUNCHD_RUN_AT_LOAD}/>
+  <key>StartInterval</key>
+  <integer>${interval_seconds}</integer>
+  <key>StandardOutPath</key>
+  <string>${LOG_ROOT}/${label}.stdout.log</string>
+  <key>StandardErrorPath</key>
+  <string>${LOG_ROOT}/${label}.stderr.log</string>
+</dict>
+</plist>
+EOF
+}
+
 enable_job() {
   local engine="$1"
   local label plist
@@ -270,6 +384,13 @@ main() {
       ensure_system_dirs
       read -r hour minute < <(parse_time "${time_value}")
       write_plist "${engine}" "${hour}" "${minute}"
+      enable_job "${engine}"
+      status_job "${engine}"
+      ;;
+    setup-resilient)
+      validate_engine "${engine}"
+      ensure_system_dirs
+      write_resilient_plist "${engine}" "${3:-${DAILY_FLOW_LAUNCHD_RESILIENT_INTERVAL_SECONDS}}"
       enable_job "${engine}"
       status_job "${engine}"
       ;;
