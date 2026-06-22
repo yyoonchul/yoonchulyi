@@ -1,0 +1,37 @@
+{
+  "articles": [
+    {
+      "cover": "좀비 유니콘의 역습",
+      "source": "The Economist 기사 \"Zombie unicorns are haunting Silicon Valley\"",
+      "sections": [
+        "밸류에이션 붐의 후폭풍",
+        "유니콘 모멘텀 상실",
+        "고평가 스타트업 압박",
+        "거버넌스와 엑싯 난제",
+        "벤처 재평가 사이클"
+      ]
+    },
+    {
+      "cover": "미국 AI 사용의 명암",
+      "source": "Pew Research Center 보고서 \"Americans and AI 2026: Chatbots, Smart Devices and Views on Impact\"",
+      "sections": [
+        "챗봇 사용의 대중화",
+        "실용 정보 작업 중심",
+        "ChatGPT의 격차",
+        "효용과 불안의 공존",
+        "스마트기기와 신뢰"
+      ]
+    },
+    {
+      "cover": "Reddit이 흔드는 AI검색",
+      "source": "404 Media 기사 \"It Is Trivially Easy to Use Reddit to Manipulate AI Search, Research Suggests\"",
+      "sections": [
+        "작은 오염 공격",
+        "사용자 콘텐츠 공격면",
+        "AI 최적화 산업",
+        "유사도 기반 취약점",
+        "라이브웹 방어 과제"
+      ]
+    }
+  ]
+}

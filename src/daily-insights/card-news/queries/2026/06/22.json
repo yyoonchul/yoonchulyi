@@ -1,0 +1,35 @@
+{
+  "cover": "ChatGPT",
+  "articles": [
+    {
+      "cover": "Silicon Valley",
+      "sections": [
+        "venture capital",
+        "Stanford University",
+        "PitchBook",
+        "Cameo",
+        "startup funding"
+      ]
+    },
+    {
+      "cover": "Pew Research Center",
+      "sections": [
+        "ChatGPT",
+        "AI chatbot",
+        "Google Gemini",
+        "artificial intelligence",
+        "smart speaker"
+      ]
+    },
+    {
+      "cover": "Reddit",
+      "sections": [
+        "Cornell University",
+        "Wikipedia",
+        "Quora",
+        "search engine optimization",
+        "Reddit API"
+      ]
+    }
+  ]
+}
