@@ -1,0 +1,25 @@
+{
+  "cover": "Schema.org",
+  "articles": [
+    {
+      "cover": "GitHub",
+      "sections": [
+        "Gergely Orosz",
+        "Figma",
+        "Microsoft Outlook",
+        "AI search",
+        "engineering leadership"
+      ]
+    },
+    {
+      "cover": "JSON-LD",
+      "sections": [
+        "Schema.org",
+        "Googlebot",
+        "personal website",
+        "SoftwareApplication",
+        "search engine optimization"
+      ]
+    }
+  ]
+}
