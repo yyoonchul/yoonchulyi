@@ -1,0 +1,45 @@
+{
+  "cover": "OpenAI Codex",
+  "articles": [
+    {
+      "cover": "Anthropic Claude",
+      "sections": [
+        "Slack",
+        "Anthropic Claude",
+        "Anthropic",
+        "access control",
+        "enterprise AI"
+      ]
+    },
+    {
+      "cover": "GPTZero",
+      "sections": [
+        "GPTZero",
+        "Edward Tian",
+        "Superhuman",
+        "AI productivity software",
+        "AI text detection"
+      ]
+    },
+    {
+      "cover": "OpenAI Codex",
+      "sections": [
+        "OpenAI Codex",
+        "AGENTS.md",
+        "Codex CLI",
+        "ChatGPT",
+        "agent workflow"
+      ]
+    },
+    {
+      "cover": "Akshay Pachaar",
+      "sections": [
+        "AI agent loop",
+        "context engineering",
+        "software testing",
+        "agent tools",
+        "code review"
+      ]
+    }
+  ]
+}
