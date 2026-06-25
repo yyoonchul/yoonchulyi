@@ -1,0 +1,37 @@
+{
+  "articles": [
+    {
+      "cover": "시각 코드와 텍스트의 결합",
+      "source": "arXiv 논문 \"Mixing visual and textual code\"",
+      "sections": [
+        "텍스트만의 한계",
+        "언어 확장 VIsx",
+        "정적 추론 우선",
+        "DOM으로 낮춘 도입비",
+        "작업 사례로 본 시각 문법"
+      ]
+    },
+    {
+      "cover": "토큰을 아끼는 Web API",
+      "source": "Jim Montgomery의 \"What I’m Finding About LLM Code Style and Token Costs\"",
+      "sections": [
+        "LLM 보일러플레이트",
+        "네이티브 API의 힘",
+        "비용 너머의 정확성",
+        "주석과 포매팅의 균형",
+        "초기 기본값 제약"
+      ]
+    },
+    {
+      "cover": "AI 시대의 엔지니어링 취향",
+      "source": "Pratik Bhavsar의 \"How to Be a 30x AI Engineer with a Taste\"",
+      "sections": [
+        "희소해진 판단력",
+        "Taste의 세 렌즈",
+        "가치 영역의 Taste",
+        "의도적 취향 훈련",
+        "판단 중심 커리어"
+      ]
+    }
+  ]
+}

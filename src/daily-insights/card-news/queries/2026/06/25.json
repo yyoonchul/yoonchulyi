@@ -1,0 +1,35 @@
+{
+  "cover": "Hybrid ClojureScript",
+  "articles": [
+    {
+      "cover": "Hybrid ClojureScript",
+      "sections": [
+        "visual programming language",
+        "ClojureScript",
+        "Racket",
+        "CodeMirror",
+        "Catan board"
+      ]
+    },
+    {
+      "cover": "Web API",
+      "sections": [
+        "Claude AI",
+        "URLSearchParams",
+        "FormData",
+        "software documentation",
+        "Deno"
+      ]
+    },
+    {
+      "cover": "AI engineering",
+      "sections": [
+        "artificial intelligence coding",
+        "engineering judgment",
+        "software architecture",
+        "open source onboarding",
+        "developer experience"
+      ]
+    }
+  ]
+}
