@@ -1,0 +1,25 @@
+{
+  "cover": "OpenAI",
+  "articles": [
+    {
+      "cover": "OpenAI",
+      "sections": [
+        "OpenAI Jalapeno",
+        "ChatGPT",
+        "AI accelerator",
+        "semiconductor wafer",
+        "Broadcom"
+      ]
+    },
+    {
+      "cover": "Jim Nielsen",
+      "sections": [
+        "John Gruber",
+        "blogging",
+        "web browser popups",
+        "personal blog",
+        "newsletter subscription"
+      ]
+    }
+  ]
+}

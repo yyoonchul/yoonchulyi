@@ -1,0 +1,26 @@
+{
+  "articles": [
+    {
+      "cover": "OpenAI의 추론 칩 진입",
+      "source": "OpenAI 발표 \"OpenAI and Broadcom unveil LLM-optimized inference chip\"",
+      "sections": [
+        "커스텀 추론 인프라",
+        "LLM 서빙 최적화",
+        "활용률과 전력 효율",
+        "9개월 ASIC 개발",
+        "파트너 스택 의존"
+      ]
+    },
+    {
+      "cover": "명백한 글쓰기의 가치",
+      "source": "Jim Nielsen의 \"Blogging Can Just Be Stating The Obvious\"",
+      "sections": [
+        "웹 짜증에서 출발",
+        "명백한 주장 가치",
+        "반복 사례의 힘",
+        "개인 블로그의 기능",
+        "소박한 실천 조언"
+      ]
+    }
+  ]
+}
