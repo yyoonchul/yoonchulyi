@@ -1,0 +1,45 @@
+{
+  "cover": "Claude Code",
+  "articles": [
+    {
+      "cover": "Robin Williams",
+      "sections": [
+        "Good Will Hunting",
+        "artificial intelligence",
+        "Robin Williams",
+        "podcasting studio",
+        "creative writing"
+      ]
+    },
+    {
+      "cover": "Claude Code",
+      "sections": [
+        "Anthropic",
+        "software prototype",
+        "product market fit",
+        "software infrastructure",
+        "product management"
+      ]
+    },
+    {
+      "cover": "Char AI Chief of Staff",
+      "sections": [
+        "startup landing page",
+        "Granola AI",
+        "web animation",
+        "Apple Notes",
+        "privacy policy"
+      ]
+    },
+    {
+      "cover": "Toss Tech",
+      "sections": [
+        "technical writing",
+        "Toss",
+        "Markdown documentation",
+        "Model Context Protocol",
+        "knowledge management"
+      ]
+    }
+  ]
+}

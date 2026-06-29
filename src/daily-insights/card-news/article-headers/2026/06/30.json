@@ -1,0 +1,48 @@
+{
+  "articles": [
+    {
+      "cover": "AI가 못 갖는 삶의 순간",
+      "source": "Jay Acunzo의 \"The best response to AI slop, infinite advice, and online noise is from Robin Williams\"",
+      "sections": [
+        "굿윌헌팅의 은유",
+        "삶 없는 언어 지식",
+        "로빈 윌리엄스의 증거",
+        "예술과 정보의 경계",
+        "개인 경험의 과제"
+      ]
+    },
+    {
+      "cover": "제품팀 다섯 역할",
+      "source": "Boris Cherny의 \"Five Archetypes for Future Product Teams\"",
+      "sections": [
+        "무너지는 기능 경계",
+        "아이디어를 제품으로",
+        "품질과 PMF 개선",
+        "성숙한 시스템 운영",
+        "단계별 팀 조합"
+      ]
+    },
+    {
+      "cover": "랜딩페이지 첫 화면 설계",
+      "source": "John Jeong (JJ)의 \"I think I make some of the best landing pages in startups.\"",
+      "sections": [
+        "히어로의 첫인상",
+        "변화 중심 전달",
+        "줄이고 시선 통제",
+        "하나의 이야기",
+        "포지셔닝과 반론 처리"
+      ]
+    },
+    {
+      "cover": "문서 전문성의 제품화",
+      "source": "Toss Tech 기사 \"2. 전문성 밖으로 나아가기\"",
+      "sections": [
+        "문서에서 제품 소유로",
+        "todoc의 탄생",
+        "문서 시스템의 한계",
+        "지식 활용성의 가치",
+        "품질과 신선도 자동화"
+      ]
+    }
+  ]
+}
