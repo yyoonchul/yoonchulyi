@@ -40,6 +40,26 @@
         "Model Context Protocol",
         "knowledge management"
       ]
+    },
+    {
+      "cover": "Lean theorem prover",
+      "sections": [
+        "large language model",
+        "Python programming language",
+        "Lean theorem prover",
+        "software architecture",
+        "formal verification"
+      ]
+    },
+    {
+      "cover": "physical AI robots",
+      "sections": [
+        "robotics",
+        "teleoperation robotics",
+        "robot training data",
+        "industrial robots",
+        "data analytics dashboard"
+      ]
     }
   ]
 }

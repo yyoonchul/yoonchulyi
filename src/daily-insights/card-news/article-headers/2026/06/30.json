@@ -43,6 +43,28 @@
         "지식 활용성의 가치",
         "품질과 신선도 자동화"
       ]
+    },
+    {
+      "cover": "Lean의 예측 가능성 실험",
+      "source": "Gwern.net 에세이 \"Lean Software Scaling Laws\"",
+      "sections": [
+        "코딩 LLM 측정 질문",
+        "언어 선행성과 스케일",
+        "Lean의 높은 잠재력",
+        "예측 가능성 지표",
+        "교차점과 실패 모드"
+      ]
+    },
+    {
+      "cover": "로봇 데이터의 머니볼",
+      "source": "Praxis Currents 글 \"Moneyball for Physical AI\"",
+      "sections": [
+        "로봇 데이터 가격 문제",
+        "세 가지 데이터 양식",
+        "반복 데이터의 비용",
+        "배포 데이터의 함정",
+        "정보 밀도 지표"
+      ]
     }
   ]
 }
