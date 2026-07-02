@@ -71,6 +71,8 @@ Constraints:
 - Do not clear or modify `content/inbox.md`; the automation script owns inbox clearing.
 - If inbox has no valid URLs, respond exactly: `📭 Inbox is empty.`
 - Do not run any git commands.
+- Korean section: translate the English version into natural Korean. Do not leave English words in Korean prose just because the source used English.
+- For proper nouns, product names, model names, project names, technical terms, commands, APIs, file names, and important abbreviations, include the original English expression in parentheses where useful.
 EOF
 
 local_inbox_path="${REPO_ROOT}/${LOCAL_INBOX_RELATIVE_PATH}"

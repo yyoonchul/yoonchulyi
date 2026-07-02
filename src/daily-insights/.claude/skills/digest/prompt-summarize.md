@@ -13,17 +13,13 @@
 
 ## Korean Terminology Policy
 
-- Korean output should read as natural Korean, not English-heavy translated prose.
-- Preserve English for proper nouns, company names, product names, project names, library/framework names, protocol names, model names, commands, APIs, file names, and specific technology names.
-  - Examples to preserve: `OpenAI`, `Claude Code`, `GitHub Actions`, `React`, `Kubernetes`, `MCP`, `RAG`, `API`, `SDK`, `CLI`.
-- Translate general conceptual phrases into Korean when the Korean version is natural and precise.
-  - Prefer: `에이전트 작업 흐름`, `개발자 도구`, `배포 파이프라인`, `평가 기준`, `추론 비용`, `맥락 관리`.
-  - Avoid: `agent workflow`, `developer tool`, `deployment pipeline`, `evaluation criteria`, `inference cost`, `context management` in Korean prose unless used as an official product or quoted term.
-- Do not keep English merely because the source article used English.
-- For important abbreviations, keep the abbreviation itself and add Korean context around it.
-  - Prefer: `RAG 기반 검색`, `MCP 서버`, `API 호출`, `SDK 통합`.
-  - Avoid forcing unnatural full translations of specific technology names such as `MCP` or `RAG`.
-- Avoid excessive mixed-language noun phrases. If only one part is a proper noun or specific technology name, keep that part in English and translate the surrounding concept.
+- Translate the English digest into natural Korean. Do not leave English words in Korean prose just because the source used English.
+- For proper nouns, product names, model names, project names, technical terms, commands, APIs, file names, and important abbreviations, include the original English expression in parentheses where useful.
+  - Examples: `오픈AI(OpenAI)`, `클로드 코드(Claude Code)`, `깃허브 액션(GitHub Actions)`, `검색 증강 생성(RAG)`, `API 호출(API call)`, `배포 파이프라인(deployment pipeline)`.
+- If a name or abbreviation is already normally written in English in Korean technical writing, it may stay in English, but the surrounding sentence should still be Korean.
+  - Examples: `MCP 서버`, `SDK 통합`, `CLI 명령`, `React 컴포넌트`.
+- Article titles may remain in the original language in title lines when they are official titles, but prose bullets should translate their meaning into Korean.
+- Before finalizing the Korean section, scan it for unnecessary English-heavy phrasing and translate it into Korean.
 
 ## Tone
 

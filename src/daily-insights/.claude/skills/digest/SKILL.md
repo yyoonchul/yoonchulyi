@@ -30,7 +30,7 @@ English is the source of truth: write the digest in English first, then translat
    - Use numbered major points, and under each major point add indented bullet lists for detailed notes.
 4. Translate that English digest into Korean.
    - Use plain declarative form (`-다` 체), not polite form (`-ㅂ니다`/`-습니다` 체). See `prompt-summarize.md` → "Korean Style".
-   - Apply the Korean terminology policy in `prompt-summarize.md`: preserve proper nouns and specific technology names, but translate general English phrases into natural Korean.
+   - Apply the Korean terminology policy in `prompt-summarize.md`: translate the English version into Korean, and include the original English in parentheses for proper nouns and technical terms where useful.
    - When referring to authors, speakers, founders, executives, researchers, or other people, use the person's name or public handle instead of gendered pronouns (`그`, `그녀`, `he`, `she`, `him`, `her`) wherever possible.
    - 상세 정리: 기사별 20-30줄.
    - Preserve structure, order, numbering, and links.
