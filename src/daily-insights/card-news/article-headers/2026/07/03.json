@@ -1,0 +1,48 @@
+{
+  "articles": [
+    {
+      "cover": "AI 시대의 엔지니어 감각",
+      "source": "Pratik Bhavsar의 \"How to Be a 30x AI Engineer with a Taste\"",
+      "sections": [
+        "판단으로 옮겨간 가치",
+        "Taste의 세 가지 모드",
+        "코드 이전의 레버리지",
+        "훈련 가능한 감각",
+        "판단을 증명하는 산출물"
+      ]
+    },
+    {
+      "cover": "실시간 상호작용 모델",
+      "source": "ByteByteGo의 \"Inside Thinking Machines' Interaction Models\"",
+      "sections": [
+        "Voice AI 파이프라인의 한계",
+        "Native Interaction 구조",
+        "응답성과 추론의 분리",
+        "지연 너머의 벤치마크",
+        "Preview의 현실 제약"
+      ]
+    },
+    {
+      "cover": "전문화는 왜 피할 수 없나",
+      "source": "Hugging Face Blog의 \"Why Specialization Is Inevitable\"",
+      "sections": [
+        "제약이 만드는 전문화",
+        "No Free Lunch의 직관",
+        "생물과 시장의 선택압",
+        "ML이 반복한 패턴",
+        "전문화와 손코딩의 구분"
+      ]
+    },
+    {
+      "cover": "AI 노트테이커의 경계",
+      "source": "JA Westenberg의 \"I'm Begging You to Leave Your AI Note-taker at Home\"",
+      "sections": [
+        "사적인 대화에 들어온 기록기",
+        "대화가 아카이브가 될 때",
+        "동의가 만드는 사회적 비용",
+        "정보보다 관계의 손실",
+        "No-AI 경계의 제안"
+      ]
+    }
+  ]
+}

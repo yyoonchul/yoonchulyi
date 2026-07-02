@@ -1,0 +1,45 @@
+{
+  "cover": "Thinking Machines",
+  "articles": [
+    {
+      "cover": "OpenAI Codex",
+      "sections": [
+        "OpenAI Codex",
+        "software architecture",
+        "developer experience",
+        "AGENTS.md",
+        "open source onboarding"
+      ]
+    },
+    {
+      "cover": "Thinking Machines",
+      "sections": [
+        "voice activity detection",
+        "Thinking Machines",
+        "real-time streaming",
+        "pushups",
+        "low latency network"
+      ]
+    },
+    {
+      "cover": "Hugging Face",
+      "sections": [
+        "machine learning research",
+        "optimization theory",
+        "market competition",
+        "AlphaFold",
+        "Richard Sutton"
+      ]
+    },
+    {
+      "cover": "AI note taker",
+      "sections": [
+        "AI wearable",
+        "Erving Goffman",
+        "privacy consent",
+        "coffee conversation",
+        "no recording sign"
+      ]
+    }
+  ]
+}
