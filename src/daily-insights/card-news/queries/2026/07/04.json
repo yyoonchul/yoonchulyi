@@ -1,14 +1,34 @@
 {
-  "cover": "OpenAI Foundation",
+  "cover": "OpenAI",
   "articles": [
     {
       "cover": "Dwarkesh Patel",
       "sections": [
-        "Dwarkesh Patel",
+        "AI essay contest",
         "OpenAI Foundation",
         "far-UVC",
-        "Ege Erdil",
+        "Nigeria",
         "Hong Kong MTR"
+      ]
+    },
+    {
+      "cover": "Anthropic Claude",
+      "sections": [
+        "Claude Fable 5",
+        "coding model",
+        "whiteboard system design",
+        "source code",
+        "Remotion"
+      ]
+    },
+    {
+      "cover": "TechCrunch",
+      "sections": [
+        "AI glossary",
+        "OpenAI",
+        "Mixture of Experts",
+        "GPU",
+        "Model Context Protocol"
       ]
     }
   ]

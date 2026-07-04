@@ -1,14 +1,36 @@
 {
   "articles": [
     {
-      "cover": "AI 난제의 수상 답안",
+      "cover": "AI 논쟁의 실용 해법",
       "source": "드워케시 파텔의 \"The Winning Essays for the Big Questions About AI\"",
       "sections": [
-        "AI 큰 질문의 답안",
-        "재단형 생물보안",
-        "파누의 실행 로드맵",
-        "자동화 시대 국가 전략",
-        "AI 연구소의 가치 포착"
+        "AI 큰 질문의 답변",
+        "오픈AI 재단의 생물보안",
+        "파누 계획의 실행 단계",
+        "비공급망 국가 전략",
+        "AI 연구소의 보완 자산"
+      ]
+    },
+    {
+      "cover": "페이블 시대의 미지 찾기",
+      "source": "타리크의 \"A Field Guide to Fable: Finding Your Unknowns\"",
+      "sections": [
+        "지시문과 현실의 간극",
+        "사용자 명확성의 기준",
+        "구현 전 모호함 발견",
+        "참조와 계획의 정밀도",
+        "완료 후 공유 이해"
+      ]
+    },
+    {
+      "cover": "AI 용어의 새 지도",
+      "source": "TechCrunch 기사 \"The only AI glossary you'll need this year\"",
+      "sections": [
+        "AI 어휘의 실용 안내",
+        "능력과 제품 개념",
+        "훈련과 구조의 연결",
+        "하드웨어 기반 시설",
+        "산업 논쟁과 운영 위험"
       ]
     }
   ]
