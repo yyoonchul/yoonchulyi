@@ -1,0 +1,15 @@
+{
+  "articles": [
+    {
+      "cover": "AI 비용 역전의 경고",
+      "source": "Forbes 기사 \"AI Costs More Than The People It Replaced\"",
+      "sections": [
+        "비용 역전의 구조",
+        "사용량과 가치의 간극",
+        "공급망까지 번진 지출",
+        "자동화 경제성의 한계",
+        "모델 중심 구조 설계"
+      ]
+    }
+  ]
+}

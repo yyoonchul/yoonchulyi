@@ -1,0 +1,15 @@
+{
+  "cover": "OpenAI",
+  "articles": [
+    {
+      "cover": "Forbes",
+      "sections": [
+        "AI infrastructure",
+        "Uber",
+        "Nvidia",
+        "Sequoia Capital",
+        "Inversion AI"
+      ]
+    }
+  ]
+}
