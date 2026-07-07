@@ -1,0 +1,84 @@
+{
+  "articles": [
+    {
+      "cover": "레딧의 AI 스팸 방어",
+      "source": "TechCrunch 기사 \"Reddit is using LLMs to solve a problem LLMs largely created\"",
+      "sections": [
+        "AI 스팸에 맞선 LLM",
+        "레딧이 밝힌 차단 규모",
+        "플랫폼 전반의 AI 콘텐츠",
+        "인간 조정의 남은 역할"
+      ]
+    },
+    {
+      "cover": "AI 조작의 숨은 영향",
+      "source": "Roger Simon의 \"How Much Is AI Manipulating Us?\"",
+      "sections": [
+        "돈과 인센티브의 질문",
+        "유용하지만 불안한 AI",
+        "은밀한 프레이밍",
+        "편향 감시와 사용자 증언"
+      ]
+    },
+    {
+      "cover": "데이터 곁으로 간 코드",
+      "source": "millfolio 글 \"Send the program to your data, not your data to the model\"",
+      "sections": [
+        "파일을 보내지 않는 구조",
+        "기기 안의 개인정보 경계",
+        "Mojo로 만든 추론 실험",
+        "남아 있는 현실적 한계"
+      ]
+    },
+    {
+      "cover": "미지부터 찾는 코딩",
+      "source": "Thariq의 \"A Field Guide to Fable: Finding Your Unknowns\"",
+      "sections": [
+        "지도와 현실의 간극",
+        "미지의 네 가지 분류",
+        "생애주기별 프롬프트",
+        "구현 후 학습 루프"
+      ]
+    },
+    {
+      "cover": "로컬 LLM 장비 가이드",
+      "source": "GitHub 레포 \"jamesob/local-llm\"",
+      "sections": [
+        "로컬 추론의 두 경로",
+        "VRAM과 PCIe 토폴로지",
+        "설정에서 얻은 교훈",
+        "로컬 운영 워크플로"
+      ]
+    },
+    {
+      "cover": "검증 루프의 증거",
+      "source": "Thinkroom 문서 \"Closing the Verification Loop\"",
+      "sections": [
+        "빌드보다 비싼 증명",
+        "변경분 범위 브라우저 QA",
+        "페이지보다 흐름 먼저",
+        "증거로 통제하는 수정"
+      ]
+    },
+    {
+      "cover": "에이전트 루프 설계",
+      "source": "ClaudeDevs의 \"Getting started with loops\"",
+      "sections": [
+        "중단 조건까지 반복",
+        "턴 기반과 목표 기반",
+        "시간 기반과 선제 루프",
+        "품질과 사용량 경계"
+      ]
+    },
+    {
+      "cover": "Claude 내부 작업공간",
+      "source": "Anthropic Research의 \"A global workspace in language models\"",
+      "sections": [
+        "Claude 안의 J-공간",
+        "전역 작업공간의 속성",
+        "고차 인지에서의 역할",
+        "안전 활용과 철학적 한계"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "cover": "Anthropic Claude",
+  "articles": [
+    {
+      "cover": "Reddit",
+      "sections": [
+        "large language model spam",
+        "spam analytics dashboard",
+        "TikTok",
+        "content moderation"
+      ]
+    },
+    {
+      "cover": "ChatGPT",
+      "sections": [
+        "OpenAI Stargate",
+        "Google Gemini",
+        "conversational AI",
+        "Claude AI"
+      ]
+    },
+    {
+      "cover": "millfolio",
+      "sections": [
+        "local first software",
+        "data privacy",
+        "Mojo programming language",
+        "Apple Silicon"
+      ]
+    },
+    {
+      "cover": "Claude Fable",
+      "sections": [
+        "Claude Code",
+        "software requirements",
+        "prototype design",
+        "code review"
+      ]
+    },
+    {
+      "cover": "jamesob local-llm",
+      "sections": [
+        "graphics card",
+        "RTX PRO 6000 Blackwell",
+        "ASRock Rack ROMED8-2T",
+        "Docker Compose"
+      ]
+    },
+    {
+      "cover": "Thinkroom",
+      "sections": [
+        "software testing",
+        "browser QA",
+        "user journey map",
+        "regression test"
+      ]
+    },
+    {
+      "cover": "ClaudeDevs",
+      "sections": [
+        "Claude Code",
+        "goal based agent",
+        "scheduled automation",
+        "token usage dashboard"
+      ]
+    },
+    {
+      "cover": "Anthropic Claude",
+      "sections": [
+        "Jacobian matrix",
+        "global workspace theory",
+        "multi step reasoning",
+        "AI safety"
+      ]
+    }
+  ]
+}
