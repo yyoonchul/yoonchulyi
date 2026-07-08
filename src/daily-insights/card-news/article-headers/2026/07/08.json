@@ -1,0 +1,26 @@
+{
+  "articles": [
+    {
+      "cover": "메타 뮤즈의 사진 논란",
+      "source": "TechCrunch 기사 \"Meta just launched a new AI generator, Muse Image, and users are already pushing back over use of their photos\"",
+      "sections": [
+        "앱 전면의 뮤즈",
+        "이미지 생성 제품군",
+        "공개 사진 논란",
+        "메타의 개인정보 이력",
+        "미디어 생성 로드맵"
+      ]
+    },
+    {
+      "cover": "창고로 향한 휴머노이드",
+      "source": "TechCrunch 기사 \"This humanoid robotics company is going public, but its CEO isn’t promising a robot in your home anytime soon\"",
+      "sections": [
+        "첫 휴머노이드 상장",
+        "절제된 상장 설명",
+        "산업 현장 우선",
+        "디짓의 물리 작업",
+        "언어모델과 로봇"
+      ]
+    }
+  ]
+}
