@@ -1,0 +1,15 @@
+{
+  "articles": [
+    {
+      "cover": "LLM 피로의 반복 신호",
+      "source": "Alec Scollon Blog의 \"I Think I Have LLM Burnout\"",
+      "sections": [
+        "일상화된 LLM 노출",
+        "LLM을 거친 개발 흐름",
+        "비감독 생성 프로젝트",
+        "AI로 옮겨 간 검색",
+        "반복 문체의 소진감"
+      ]
+    }
+  ]
+}
