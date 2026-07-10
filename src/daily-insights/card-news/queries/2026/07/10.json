@@ -1,0 +1,55 @@
+{
+  "cover": "OpenAI",
+  "articles": [
+    {
+      "cover": "Mistral AI",
+      "sections": [
+        "Robostral Navigate",
+        "RGB camera",
+        "R2R-CE",
+        "wheeled robot",
+        "Google DeepMind"
+      ]
+    },
+    {
+      "cover": "OpenAI Atlas",
+      "sections": [
+        "ChatGPT",
+        "Perplexity Comet",
+        "Google Gemini",
+        "ChatGPT desktop app",
+        "OpenAI"
+      ]
+    },
+    {
+      "cover": "Nvidia",
+      "sections": [
+        "S&P 500",
+        "Micron Technology",
+        "CUDA",
+        "Nvidia H100",
+        "OpenAI"
+      ]
+    },
+    {
+      "cover": "OpenAI Sol",
+      "sections": [
+        "Anthropic Fable",
+        "Georgetown CSET",
+        "Department of Commerce",
+        "U.K. AI Safety Institute",
+        "AI safety audit"
+      ]
+    },
+    {
+      "cover": "Sequoia Capital",
+      "sections": [
+        "David Cahn",
+        "AI data center",
+        "OpenAI",
+        "Apollo Global Management",
+        "open-weight model"
+      ]
+    }
+  ]
+}

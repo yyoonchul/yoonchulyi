@@ -1,0 +1,59 @@
+{
+  "articles": [
+    {
+      "cover": "미스트랄의 로봇 항해",
+      "source": "Tech Monitor 기사 \"Mistral AI unveils Robostral Navigate robotics model\"",
+      "sections": [
+        "물리적 AI 확장",
+        "단일 카메라 항해",
+        "R2R-CE 경쟁력",
+        "로봇 간 일반화",
+        "상업 전략의 확장"
+      ]
+    },
+    {
+      "cover": "Atlas 이후의 AI 브라우저",
+      "source": "TechCrunch 기사 \"OpenAI is shutting down Atlas, but its AI browser ambitions are still growing\"",
+      "sections": [
+        "Atlas 종료와 유지",
+        "AI 브라우저 경쟁",
+        "크롬 안의 챗GPT",
+        "웹 작업공간화",
+        "교차 표면 전략"
+      ]
+    },
+    {
+      "cover": "엔비디아 이후의 병목",
+      "source": "TechCrunch 기사 \"Nvidia is a victim of the compute marketplace it created\"",
+      "sections": [
+        "가치평가 압박",
+        "메모리로 옮긴 열기",
+        "희소성의 수혜",
+        "컴퓨트 가격 하락",
+        "검증한 시장의 역풍"
+      ]
+    },
+    {
+      "cover": "Sol 공개의 거버넌스",
+      "source": "TechCrunch 기사 \"How did the government decide OpenAI's frontier model was safe to release?\"",
+      "sections": [
+        "출시 권한의 질문",
+        "불투명한 절차",
+        "미정인 기관 책임",
+        "닫힌 정부 접근",
+        "비밀주의의 위험"
+      ]
+    },
+    {
+      "cover": "AI 인프라 3조 과제",
+      "source": "TechCrunch 기사 \"Can AI answer the $3 trillion question?\"",
+      "sections": [
+        "회수 계산의 갱신",
+        "더 커진 매출 부담",
+        "부족한 현재 매출",
+        "2028년 현금흐름",
+        "토큰 가격의 압박"
+      ]
+    }
+  ]
+}
