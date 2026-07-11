@@ -1,0 +1,15 @@
+{
+  "articles": [
+    {
+      "cover": "휴머노이드 수술 첫 사례",
+      "source": "The American Bazaar 기사 \"Humanoid robot performs surgery in historic medical first at UC San Diego\"",
+      "sections": [
+        "실제 절차 보조 시연",
+        "원격 조작형 시스템",
+        "양팔 수술 제어",
+        "임상과 로봇공학",
+        "임상 적용 장기 과제"
+      ]
+    }
+  ]
+}
