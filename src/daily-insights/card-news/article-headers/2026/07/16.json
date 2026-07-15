@@ -1,0 +1,59 @@
+{
+  "articles": [
+    {
+      "cover": "빈 시간을 책으로 바꾸기",
+      "source": "Elia Scotto의 \"How to read more books\"",
+      "sections": [
+        "습관 설계로 읽기",
+        "휴대전화 덜어내기",
+        "틈새에 닿는 책",
+        "유연한 책 선택",
+        "목표와 지름길"
+      ]
+    },
+    {
+      "cover": "LLM 열광과 과장 비판",
+      "source": "George Hotz의 \"I love LLMs, I hate hype\"",
+      "sections": [
+        "AI 열의의 출발점",
+        "공포 과장의 구조",
+        "초지능 서사 비판",
+        "오픈소스와 상품화",
+        "코딩 에이전트 갱신"
+      ]
+    },
+    {
+      "cover": "코드베이스를 덜 아는 일",
+      "source": "Sean Goedecke의 \"In defense of not understanding your codebase\"",
+      "sections": [
+        "작은 코드와 큰 코드",
+        "Naur 주장 다시 보기",
+        "재작성의 현실",
+        "부분 이론의 효용",
+        "이해도 하나의 가치"
+      ]
+    },
+    {
+      "cover": "AI 시대에도 코드 쓰기",
+      "source": "Doug Turnbull의 \"Why write code in 2026\"",
+      "sections": [
+        "소프트웨어 공장",
+        "실행 환경 안의 사고",
+        "주의와 소유감",
+        "나쁜 결정의 증폭",
+        "세부 점검의 필요"
+      ]
+    },
+    {
+      "cover": "프런티어 AI 표준 제안",
+      "source": "Demis Hassabis의 X Article \"A Framework for Frontier AI and the Dawning of a New Age\"",
+      "sections": [
+        "임박한 AGI",
+        "가능성과 위험",
+        "표준 기구 구상",
+        "자발에서 의무로",
+        "국제 공조와 선택"
+      ]
+    }
+  ]
+}

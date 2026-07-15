@@ -1,0 +1,55 @@
+{
+  "cover": "artificial intelligence",
+  "articles": [
+    {
+      "cover": "Elia Scotto",
+      "sections": [
+        "reading books",
+        "iPhone",
+        "ebook reader",
+        "public transport reading",
+        "Goodreads"
+      ]
+    },
+    {
+      "cover": "George Hotz",
+      "sections": [
+        "comma.ai",
+        "San Francisco",
+        "superintelligence",
+        "open source software",
+        "coding agent"
+      ]
+    },
+    {
+      "cover": "Sean Goedecke",
+      "sections": [
+        "GitHub",
+        "Peter Naur",
+        "software rewrite",
+        "codebase",
+        "open source project"
+      ]
+    },
+    {
+      "cover": "Doug Turnbull",
+      "sections": [
+        "software factory",
+        "execution environment",
+        "software architecture",
+        "browser local storage",
+        "continuous integration"
+      ]
+    },
+    {
+      "cover": "Demis Hassabis",
+      "sections": [
+        "artificial general intelligence",
+        "cybersecurity",
+        "financial district",
+        "AI safety evaluation",
+        "United States Capitol"
+      ]
+    }
+  ]
+}
