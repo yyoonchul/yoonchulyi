@@ -12,7 +12,7 @@
       ]
     },
     {
-      "cover": "LLM 열광과 과장 비판",
+      "cover": "AI 과장의 언어 걷어내기",
       "source": "George Hotz의 \"I love LLMs, I hate hype\"",
       "sections": [
         "AI 열의의 출발점",
@@ -46,13 +46,35 @@
     },
     {
       "cover": "프런티어 AI 표준 제안",
-      "source": "Demis Hassabis의 X Article \"A Framework for Frontier AI and the Dawning of a New Age\"",
+      "source": "Demis Hassabis의 \"A Framework for Frontier AI and the Dawning of a New Age _(X Article)_\"",
       "sections": [
         "임박한 AGI",
         "가능성과 위험",
         "표준 기구 구상",
         "자발에서 의무로",
         "국제 공조와 선택"
+      ]
+    },
+    {
+      "cover": "화면 없는 챗GPT 기기",
+      "source": "Firstpost 기사 \"OpenAI's first AI device could be a screen-free companion that brings ChatGPT into your home\"",
+      "sections": [
+        "오픈AI의 첫 기기",
+        "개인화와 맥락",
+        "움직이는 물리 설계",
+        "AI 하드웨어 흐름",
+        "애플 소송 변수"
+      ]
+    },
+    {
+      "cover": "클라우드 소프트웨어 공장",
+      "source": "Zach Lloyd의 \"The guide to software factories _(X Article)_\"",
+      "sections": [
+        "에이전트 이후 공장",
+        "전달을 도는 순환",
+        "클라우드 실행 기반",
+        "거버넌스의 조건",
+        "공장 설정도 코드로"
       ]
     }
   ]

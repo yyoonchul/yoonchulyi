@@ -1,5 +1,5 @@
 {
-  "cover": "artificial intelligence",
+  "cover": "OpenAI",
   "articles": [
     {
       "cover": "Elia Scotto",
@@ -7,7 +7,7 @@
         "reading books",
         "iPhone",
         "ebook reader",
-        "public transport reading",
+        "fiction books",
         "Goodreads"
       ]
     },
@@ -46,9 +46,29 @@
       "sections": [
         "artificial general intelligence",
         "cybersecurity",
-        "financial district",
+        "FINRA",
         "AI safety evaluation",
-        "United States Capitol"
+        "United States"
+      ]
+    },
+    {
+      "cover": "OpenAI",
+      "sections": [
+        "ChatGPT",
+        "smart home device",
+        "voice assistant",
+        "AI hardware",
+        "Apple"
+      ]
+    },
+    {
+      "cover": "Zach Lloyd",
+      "sections": [
+        "software development lifecycle",
+        "CI/CD",
+        "Kubernetes",
+        "Warp",
+        "infrastructure as code"
       ]
     }
   ]
