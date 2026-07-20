@@ -1,0 +1,26 @@
+{
+  "articles": [
+    {
+      "cover": "하드웨어보다 어려운 것",
+      "source": "Chip Weinberger의 \"What I learned selling 2500 MIDI recorders, part 1: Hardware is not so hard\"",
+      "sections": [
+        "사업이 된 잼코더",
+        "예상 밖의 제조 순항",
+        "진짜 비용은 소프트웨어",
+        "단순함이 만든 관리성",
+        "제조 가능성 중심 설계"
+      ]
+    },
+    {
+      "cover": "만드는 시간을 되찾는 AI",
+      "source": "Andreessen Horowitz 기사 \"The Most Human Technology Ever Made\"",
+      "sections": [
+        "만들 때 더 행복하다",
+        "표현 매체로서의 AI",
+        "소비 피드의 경고",
+        "누구나 만드는 소프트웨어",
+        "대규모 개성화의 미래"
+      ]
+    }
+  ]
+}

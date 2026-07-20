@@ -1,0 +1,25 @@
+{
+  "cover": "AI creativity",
+  "articles": [
+    {
+      "cover": "MIDI keyboard",
+      "sections": [
+        "MIDI keyboard",
+        "electronics manufacturing",
+        "firmware development",
+        "printed circuit board",
+        "electronics assembly"
+      ]
+    },
+    {
+      "cover": "Andreessen Horowitz",
+      "sections": [
+        "paintbrush",
+        "printing press",
+        "social media feed",
+        "AI software development",
+        "personal creative projects"
+      ]
+    }
+  ]
+}
