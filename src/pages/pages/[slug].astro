@@ -1,4 +1,4 @@
-import type { APIRoute } from 'astro';
+---
 import {
   getSharedHtmlEntries,
   readSharedHtml,
@@ -27,21 +27,13 @@ function addNoIndexMeta(html: string): string {
   );
 }
 
-export const GET: APIRoute = async ({ params }) => {
-  if (!params.slug) {
-    return new Response('Not found', { status: 404 });
-  }
+const html = Astro.params.slug
+  ? await readSharedHtml(Astro.params.slug)
+  : null;
 
-  const html = await readSharedHtml(params.slug);
+if (!html) {
+  return Astro.redirect('/404');
+}
+---
 
-  if (!html) {
-    return new Response('Not found', { status: 404 });
-  }
-
-  return new Response(addNoIndexMeta(html), {
-    headers: {
-      'Content-Type': 'text/html; charset=utf-8',
-      'X-Robots-Tag': 'noindex, nofollow',
-    },
-  });
-};
+<Fragment set:html={addNoIndexMeta(html)} />
