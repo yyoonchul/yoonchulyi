@@ -3,7 +3,7 @@ role: Business Research
 organization: RLWRLD
 organizationHref: https://www.rlwrld.ai/
 period: 2025.10. – 2026.01.
-order: 100
+order: 90
 ---
 
 - Structured global partner requirements into feasible PoC scenarios to align with technical capabilities.

@@ -12,6 +12,8 @@ const experiences = await getAboutExperiences();
 const projects = await getAboutProjects();
 const description =
   'Portfolio and resume of Yoonchul Yi: MaekNote, Mynovel, Storybook4me, Notion templates, AI product research, and SNU Mechanical Engineering.';
+const isActiveExperience = (period: string) =>
+  /present/i.test(period) || /–\s*$/.test(period);
 ---
 
 <BaseLayout
@@ -30,36 +32,42 @@ const description =
 >
   <main class="py-8 space-y-12">
     <AboutSection title="Experiences">
-      {experiences.map(({ entry, Content }) => (
-        <article class="space-y-2">
-          <h2 class="font-serif text-lg text-text">
-            {entry.data.role}
-            {entry.data.organization && (
-              <>
-                {' '}@{' '}
-                {entry.data.organizationHref ? (
-                  <a
-                    href={entry.data.organizationHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="text-sub hover:text-accent hover:underline transition-colors"
-                  >
-                    {entry.data.organization}
-                  </a>
-                ) : (
-                  entry.data.organization
-                )}
-              </>
-            )}
-            <span class="block font-mono text-xs text-sub mt-1">
-              {entry.data.period}
-            </span>
-          </h2>
-          <div class="about-rich-text font-serif text-sm leading-relaxed text-text/90">
-            <Content />
-          </div>
-        </article>
-      ))}
+      <div class="experience-timeline">
+        {experiences.map(({ entry, Content }) => (
+          <article
+            class={`experience-item space-y-2 ${
+              isActiveExperience(entry.data.period) ? 'is-active' : ''
+            }`}
+          >
+            <h2 class="font-serif text-lg text-text">
+              {entry.data.role}
+              {entry.data.organization && (
+                <>
+                  {' '}@{' '}
+                  {entry.data.organizationHref ? (
+                    <a
+                      href={entry.data.organizationHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="text-sub hover:text-accent hover:underline transition-colors"
+                    >
+                      {entry.data.organization}
+                    </a>
+                  ) : (
+                    entry.data.organization
+                  )}
+                </>
+              )}
+              <span class="block font-mono text-xs text-sub mt-1">
+                {entry.data.period}
+              </span>
+            </h2>
+            <div class="about-rich-text font-serif text-sm leading-relaxed text-text/90">
+              <Content />
+            </div>
+          </article>
+        ))}
+      </div>
     </AboutSection>
 
     <AboutSection title="Projects">
@@ -88,6 +96,44 @@ const description =
 </BaseLayout>
 
 <style>
+  .experience-timeline {
+    position: relative;
+    display: grid;
+    gap: 2rem;
+    padding-left: 1.5rem;
+  }
+
+  .experience-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.25rem;
+    top: 0.35rem;
+    bottom: 0.35rem;
+    width: 1px;
+    background: rgba(140, 140, 140, 0.35);
+  }
+
+  .experience-item {
+    position: relative;
+  }
+
+  .experience-item::before {
+    content: '';
+    position: absolute;
+    left: -1.45rem;
+    top: 0.45rem;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 999px;
+    border: 1px solid rgba(140, 140, 140, 0.5);
+    background: #f4f4f0;
+  }
+
+  .experience-item.is-active::before {
+    background: #8c8c8c;
+    box-shadow: 0 0 0 4px rgba(140, 140, 140, 0.12);
+  }
+
   :global(.about-rich-text p) {
     margin-bottom: 1rem;
   }
