@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YC 로보틱스 인덱스 · 2025–2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --paper:#E7EBED;--grid:rgba(20,28,38,.045);--surface:#FBFCFC;
+    --ink:#141C26;--muted:#5E6E7B;--faint:#8A98A3;--hair:#D2D9DE;--hair-strong:#BFC8CE;
+    --accent:#0BA37F;--accent-ink:#076B54;--warn:#B06A12;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --disp:'Space Grotesk','Pretendard',system-ui,sans-serif;
+    --body:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{margin:0;font-family:var(--body);color:var(--ink);background-color:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:30px 30px;-webkit-font-smoothing:antialiased;line-height:1.5;}
+  a{color:inherit}
+
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(231,235,237,.86);backdrop-filter:saturate(1.4) blur(8px);border-bottom:1px solid var(--hair-strong);}
+  .topbar-in{max-width:1120px;margin:0 auto;padding:11px 24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+  .wordmark{font-family:var(--mono);font-weight:600;font-size:12.5px;letter-spacing:.14em;white-space:nowrap;display:flex;align-items:center;gap:9px}
+  .wordmark .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px rgba(11,163,127,.18)}
+  .filters{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-left:auto}
+  .filters .lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--faint);margin-right:2px}
+  .chip{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.04em;padding:5px 9px;border:1px solid var(--hair-strong);border-radius:999px;background:var(--surface);color:var(--muted);cursor:pointer;transition:all .16s ease;}
+  .chip:hover{border-color:var(--accent);color:var(--accent-ink)}
+  .chip[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){.chip{transition:none}}
+
+  .hero{max-width:1120px;margin:0 auto;padding:56px 24px 30px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;color:var(--accent-ink);text-transform:uppercase;margin:0 0 18px}
+  .hero h1{font-family:var(--disp);font-weight:600;font-size:clamp(34px,6vw,60px);line-height:1.02;letter-spacing:-.01em;margin:0}
+  .hero h1 .yr{color:var(--faint);font-weight:400}
+  .hero p.lede{max-width:62ch;margin:20px 0 0;font-size:16px;color:var(--muted)}
+  .meta{display:flex;gap:0;flex-wrap:wrap;margin-top:30px;border:1px solid var(--hair-strong);border-radius:12px;overflow:hidden;background:var(--surface);width:fit-content;max-width:100%}
+  .meta .cell{padding:12px 22px;border-right:1px solid var(--hair)}
+  .meta .cell:last-child{border-right:0}
+  .meta .num{font-family:var(--disp);font-weight:600;font-size:24px;line-height:1}
+  .meta .cap{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--faint);margin-top:6px;text-transform:uppercase}
+
+  .layout{max-width:1120px;margin:0 auto;padding:14px 24px 40px;display:grid;grid-template-columns:210px 1fr;gap:52px;align-items:start}
+  .toc{position:sticky;top:78px}
+  .toc h2{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--faint);text-transform:uppercase;margin:0 0 12px;padding-left:2px}
+  .toc ol{list-style:none;margin:0;padding:0;counter-reset:t}
+  .toc li{counter-increment:t}
+  .toc a{display:flex;gap:8px;align-items:baseline;text-decoration:none;padding:7px 8px;border-radius:7px;color:var(--muted);font-size:13.5px;transition:background .14s,color .14s}
+  .toc a:hover{background:rgba(11,163,127,.09);color:var(--ink)}
+  .toc a::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);font-size:10.5px;color:var(--faint);min-width:18px}
+  .toc a .tc{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--faint)}
+  .toc a.dim{opacity:.38}
+  .toc a:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+  @media (prefers-reduced-motion:reduce){.toc a{transition:none}}
+
+  main{min-width:0}
+  .field{margin-bottom:16px;scroll-margin-top:84px}
+  .field.hidden{display:none}
+  .field-head{display:flex;align-items:flex-end;gap:14px;padding:0 0 12px;border-bottom:2px solid var(--ink)}
+  .field-head .idx{font-family:var(--mono);font-size:12px;color:var(--accent-ink);font-weight:600;letter-spacing:.06em}
+  .field-head h3{font-family:var(--body);font-weight:700;font-size:20px;margin:0;letter-spacing:-.01em}
+  .field-head .en{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.06em;padding-bottom:2px}
+  .field-head .cnt{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted);padding-bottom:2px}
+
+  .rows{margin:0 0 34px}
+  .row{display:grid;grid-template-columns:58px 1fr minmax(140px,auto);gap:18px;align-items:baseline;padding:16px 10px 16px 12px;border-bottom:1px solid var(--hair);position:relative;transition:background .14s;}
+  .row::before{content:"";position:absolute;left:0;top:0;bottom:-1px;width:2px;background:transparent;transition:background .14s}
+  .row:hover{background:var(--surface)}
+  .row:hover::before{background:var(--accent)}
+  .row.hidden{display:none}
+  @media (prefers-reduced-motion:reduce){.row,.row::before{transition:none}}
+
+  .batch{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.03em;color:var(--muted);border:1px solid var(--hair-strong);border-radius:6px;padding:3px 0;text-align:center;background:var(--surface);white-space:nowrap;}
+  .batch.q{color:var(--warn);border-color:#E4C79A;background:#FBF4E7}
+
+  .co .name{font-family:var(--disp);font-weight:600;font-size:16.5px;letter-spacing:-.005em}
+  .co .desc{color:var(--muted);font-size:13.5px;margin-top:3px;max-width:60ch}
+  .co .founder{display:flex;gap:9px;align-items:baseline;margin-top:8px;font-size:12px;color:var(--ink);opacity:.82;line-height:1.5;max-width:60ch}
+  .co .founder .fl{font-family:var(--mono);font-size:8.5px;letter-spacing:.13em;color:var(--accent-ink);flex-shrink:0;padding-top:2px}
+
+  .link{justify-self:end;text-align:right}
+  .link a{font-family:var(--mono);font-size:12px;text-decoration:none;color:var(--accent-ink);border-bottom:1px solid rgba(11,163,127,.35);padding-bottom:1px;transition:border-color .14s,color .14s;word-break:break-all}
+  .link a:hover{border-color:var(--accent);color:var(--accent)}
+  .link a.yc{color:var(--faint);border-bottom-color:var(--hair-strong)}
+  .link a.yc:hover{color:var(--muted);border-bottom-color:var(--muted)}
+  .link a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .link .tag{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--faint);text-transform:uppercase;margin-bottom:3px}
+
+  .empty{display:none;padding:40px 4px;color:var(--faint);font-family:var(--mono);font-size:13px}
+  .empty.show{display:block}
+
+  footer{border-top:1px solid var(--hair-strong);background:var(--surface)}
+  .foot-in{max-width:1120px;margin:0 auto;padding:26px 24px 40px;color:var(--muted);font-size:12.5px}
+  .foot-in p{margin:0 0 8px;max-width:82ch}
+  .foot-in a{color:var(--accent-ink)}
+  .foot-in .stamp{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--faint);margin-top:14px;text-transform:uppercase}
+
+  @media (max-width:860px){
+    .layout{grid-template-columns:1fr;gap:8px}
+    .toc{position:static;top:auto;margin-bottom:8px;border:1px solid var(--hair);border-radius:12px;background:var(--surface);padding:14px}
+    .toc ol{display:flex;flex-wrap:wrap;gap:4px}
+    .toc a .tc{margin-left:4px}
+    .filters{width:100%;margin-left:0}
+    .row{grid-template-columns:52px 1fr;gap:12px}
+    .link{grid-column:1 / -1;justify-self:start;text-align:left;padding-left:64px}
+    .link .tag{display:inline;margin-right:6px}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="wordmark"><span class="dot"></span>YC ROBOTICS INDEX</div>
+    <div class="filters" id="filters" role="group" aria-label="배치 필터">
+      <span class="lbl">BATCH</span>
+      <button class="chip" data-batch="ALL" aria-pressed="true">All</button>
+      <button class="chip" data-batch="W25" aria-pressed="false">W25</button>
+      <button class="chip" data-batch="X25" aria-pressed="false">X25</button>
+      <button class="chip" data-batch="S25" aria-pressed="false">S25</button>
+      <button class="chip" data-batch="F25" aria-pressed="false">F25</button>
+      <button class="chip" data-batch="W26" aria-pressed="false">W26</button>
+      <button class="chip" data-batch="P26" aria-pressed="false">P26</button>
+      <button class="chip" data-batch="S26" aria-pressed="false">S26</button>
+      <button class="chip" data-batch="2026" aria-pressed="false">2026?</button>
+    </div>
+  </div>
+</div>
+
+<header class="hero">
+  <p class="eyebrow">Y Combinator · Physical AI &amp; Robotics</p>
+  <h1>YC 로보틱스 인덱스<br><span class="yr">2025 – 2026 배치 · 분야별</span></h1>
+  <p class="lede">YC 스타트업 디렉토리의 Robotics / Manufacturing &amp; Robotics 태그 기준, 2025~2026년 배치의 로보틱스 회사를 9개 분야로 묶었어. 각 행에 회사명 · 공식 홈페이지 · 사업 원라이너 · 파운더 핵심 이력을 담았고, 상단 배치 칩으로 필터할 수 있어.</p>
+  <div class="meta">
+    <div class="cell"><div class="num" id="m-co">38</div><div class="cap">Companies</div></div>
+    <div class="cell"><div class="num">9</div><div class="cap">Fields</div></div>
+    <div class="cell"><div class="num">7</div><div class="cap">Batches</div></div>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="toc" aria-label="분야 목차">
+    <h2>Fields</h2>
+    <ol id="toc"></ol>
+  </nav>
+  <main id="main"></main>
+</div>
+
+<footer>
+  <div class="foot-in">
+    <p><strong>출처 &amp; 한계.</strong> YC 회사 디렉토리(산업 태그 Robotics / Manufacturing &amp; Robotics)와 각 배치·개별 회사 페이지, 배치 리뷰 아티클, 파운더 LinkedIn·회사 소개를 교차 확인해 수집했어. 디렉토리가 클라이언트 렌더링이라 완전 exhaustive는 아닐 수 있고, 진행 중인 Spring/Summer 2026은 누락 가능. 순수 무기체계는 제외.</p>
+    <p><strong>링크 규칙.</strong> 초록 링크는 확인된 공식 홈페이지, 회색 <em>YC 페이지</em>는 공식 사이트를 확정하지 못한 곳. <strong>2026?</strong> 태그는 배치(W26/P26/S26)가 확정되지 않은 곳. 파운더 이력은 공개 정보 기준이며 일부는 자기소개 기반.</p>
+    <p>라이브 정본: <a href="https://www.ycombinator.com/companies/industry/robotics" target="_blank" rel="noopener">ycombinator.com/companies/industry/robotics</a> 에서 좌측 Batch 필터를 Winter 2025 ~ Summer 2026으로 선택.</p>
+    <p class="stamp">Compiled 2026-07-21 · for Yoonchul</p>
+  </div>
+</footer>
+
+<script>
+const YC="https://www.ycombinator.com/companies/";
+
+const FIELDS=[
+ {ko:"휴머노이드 · 범용 로봇",en:"Humanoid & general-purpose",cos:[
+   {name:"Piggy Robotics",batch:"F25",home:"piggyrobotics.com",yc:"piggy-robotics",
+    desc:"공압 인공 근육(튜브+단일 펌프)으로 부품비 $1,000 이하 풀사이즈 휴머노이드를 2개월 만에 제작 — 대량생산으로 학습 데이터 확보를 노림.",
+    founder:"Richard Gong(옥스퍼드·의대 중퇴) · Chenny Deng(前 Tencent AI 연구). 옥스퍼드+글로벌 로봇대회 출신 16인 팀."},
+   {name:"Twolabs",batch:"P26",home:"twolabs.ai",yc:"twolabs",
+    desc:"모듈형 휴머노이드 + Record→Upload→Train→Deploy 소프트웨어 플랫폼. 요양원·시니어 케어(식사·투약·말벗)용 세미 휴머노이드 'Tobi'로 시작.",
+    founder:"Sardor Rahmatulloev(前 Meta Superintelligence Labs · Cornell 자율전투로봇팀, 우즈베키스탄 출신 첫 YC 파운더) · Danyal Ahmad(前 Salesforce · Georgia Tech AI 석사)."},
+   {name:"Eden Robotics",batch:"P26",home:"edenrobotics.ai",yc:"eden-robotics",
+    desc:"제조·물류용 세미 휴머노이드를 판매 대신 시간당 사용량으로 대여(RaaS). 자체 OS(Theta OS)+자율 스택으로 통합 없이 즉시 투입.",
+    founder:"Stamatis Floratos(CEO · LSE, 10대에 7자리 매출 애드테크 창업) · Joey Humphreys(CTO · 로보틱스 PhD, Nature 게재, 로켓엔진 경력)."},
+   {name:"The Robot Learning Company",batch:"X25",home:null,yc:"the-robot-learning-company",
+    desc:"공장 밖 반복·고정형 작업을 자동화하는 저가 범용 로봇 플랫폼.",
+    founder:"Jannik(솔로 파운더 · 메카트로닉스 학위, UC Berkeley·TU Munich 로봇러닝 연구, 오픈소스 기여)."},
+   {name:"Philon",batch:"F25",home:null,yc:"philon",
+    desc:"위험·반복·지루한 작업을 대신하는 오픈소스 범용 로봇.",
+    founder:"공개 정보 적음."},
+ ]},
+ {ko:"매니퓰레이션 (손·팔)",en:"Manipulation",cos:[
+   {name:"Proception",batch:"W25",home:"proception.ai",yc:"proception-inc",
+    desc:"20+ 자유도·촉각 피드백·힘줄 구동의 고정밀 로봇 손 'ProHand' — 접촉 중심 조작 연구용, 손외과 의사와 협업 설계.",
+    founder:"Jay Li(스탠퍼드 출신, 휴머노이드 연구) 등."},
+   {name:"Origami Robotics",batch:"W26",home:"origami-robotics.com",yc:"origami-robotics",
+    desc:"로봇 손과 1:1로 맞춘 손 착용형 데이터 수집 장치로 공장·물류센터 현장('in the wild')에서 조작 데이터를 모아 '무엇이든 조작' 모델을 학습·배치.",
+    founder:"공개 정보 적음."},
+   {name:"Verne Robotics",batch:"S25",home:null,yc:"verne-robotics",
+    desc:"로봇팔에 새 작업을 몇 달→몇 시간으로 학습시키는 AI. 밀키트 포장·CPG 키팅·물류 분류·바이오 클린룸, 시간당 과금.",
+    founder:"Neil Nie(Columbia·Stanford 로봇러닝 연구자, Shuran Song 사사) · Aditya Jha(고교 때부터 로봇 제작)."},
+   {name:"Axol",batch:"2026",home:null,yc:"axol",
+    desc:"physical AI를 위한 듀얼암 로봇 'Axol' — 실제 작업 수행.",
+    founder:"공개 정보 적음."},
+ ]},
+ {ko:"산업 · 물류 · 현장 자동화",en:"Industrial & logistics",cos:[
+   {name:"Servo7",batch:"W26",home:"servo7.com",yc:"servo7",
+    desc:"시설 재설계 없이 기존 라인에 투입되고 시연으로 학습·개선하는 산업/물류 로봇(컨테이너 하역·팔레타이징·케이스 핸들링).",
+    founder:"Pieter Becking(前 Boeing 심층강화학습·LLM·Hyperloop) · Jasper van Leuven(자율 국방시스템 우크라이나 배치, AV용 비디오 생성모델)."},
+   {name:"Remy AI",batch:"W26",home:null,yc:"remy-ai",
+    desc:"브라운필드 3PL 창고용 양팔(bi-manual) 로봇 — 30일 내 배치, 변하는 SKU 대응, 자체 파이프라인으로 VLA보다 적은 데이터로 학습.",
+    founder:"Oscar Brisset(CEO · 옥스퍼드 · 前 BCG/BCG X) · Ben Kaye(CTO · 3D 재구성 컴퓨터비전 PhD, 前 OrganOx 특허)."},
+   {name:"Boost Robotics",batch:"X25",home:"boostrobotics.ai",yc:"boost-robotics",
+    desc:"데이터센터의 케이블 점검·리부팅·부품 교체를 원격 수행하는 자율 모바일 매니퓰레이션 로봇('로봇 원격 손') + 24/7 보안 모니터링.",
+    founder:"Hardik Singh(CMU 로보틱스 석사) · Hans Kumar(前 Boston Dynamics Spot 팀 · CMU 로보틱스)."},
+   {name:"Flywheel AI",batch:"S25",home:null,yc:"flywheel-ai",
+    desc:"기존 굴착기를 유압 장비 무관하게 개조해 원격 조종 → 텔레오퍼레이션 데이터로 자율화('굴착기의 Waymo').",
+    founder:"Jash · Mahimana(상세 배경 공개 적음)."},
+   {name:"RoboDock",batch:"W26",home:null,yc:"robodock",
+    desc:"자율주행/전기차 플릿의 데포 운영(충전·차량 점검)을 자동화해 depot을 무인화, 차량 가동률↑.",
+    founder:"Zinny Weli(CEO · 前 Zipline 드론 충전 인프라 · 前 Amazon 홈로봇 충전 · 스탠퍼드 로보틱스 석사)."},
+ ]},
+ {ko:"무인 이동체 (드론·수중·우주)",en:"Autonomous vehicles",cos:[
+   {name:"Tornyol",batch:"F25",home:"tornyol.com",yc:"tornyol",
+    desc:"스마트폰 마이크·주차센서 등 상용 부품으로 40g 드론을 개조, 초음파 위상배열로 모기를 탐지·추적·제거하는 자율 마이크로 드론.",
+    founder:"Clovis Piedallu · Alex Toussaint(YC 전 Scott Alexander·Vitalik Buterin $28k 그랜트)."},
+   {name:"GrazeMate",batch:"W26",home:"grazemate.com",yc:"grazemate",
+    desc:"버튼 한 번에 AI 드론이 목초지로 날아가 소떼를 원하는 곳으로 모는 자율 목축(호주).",
+    founder:"Sam Rogers(솔로 파운더)."},
+   {name:"Voltair",batch:"W26",home:"voltairlabs.com",yc:"voltair",
+    desc:"전신주에 설치한 충전 패드로 무한 체류하는 장거리 자율 드론망 — 전력 인프라 점검부터(패드 1개당 반경 약 1,000평방마일), 도로·철도·통신으로 확장.",
+    founder:"Ronan Nopp(CEO · SpaceX Starship 합류 제안 거절, 학생 때 유인 eVTOL 제어 설계) · Hayden Gosch(CTO · 前 Schweitzer Eng Labs 전력계통 보호 R&D) 외 2인."},
+   {name:"Ornadyne",batch:"2026",home:null,yc:"ornadyne",
+    desc:"음향·시각·전자적으로 탐지가 어려운, 새처럼 날고 소리 내는 정찰용 플래핑윙 드론(국방).",
+    founder:"Armen Arakelyan · Geourg Kivijian."},
+   {name:"Seeing Systems",batch:"W26",home:"seeing-systems.com",yc:"seeing-systems",
+    desc:"국방용 모듈형 AI 지휘 드론(런던).",
+    founder:"Matthew Le Maitre(前 Jane Street · 케임브리지 CS 수석 · 케임브리지 모바일로봇랩) · Alexander Le Maitre(독학 임베디드·펌웨어, 군용 EOD 하드웨어) — 형제."},
+   {name:"Albacore",batch:"S25",home:"albacore.inc",yc:"albacore-inc",
+    desc:"해군·특수전·정보기관용 자율 드론 잠수함(무인 수중정).",
+    founder:"前 Lockheed Martin·J&J 출신, 수중로봇 대회 우승·우주비행 기술 경력 팀."},
+   {name:"General Astronautics",batch:"W26",home:null,yc:"general-astronautics",
+    desc:"상업 우주정거장의 제약·반도체 제조 노동(시간당 $130K 우주인 인건비)을 대체하는 우주용 로봇.",
+    founder:"Bram Schork(Caltech 기계 · 前 SpaceX Starlink Lasers) · Shibo Zhou(CMU CS/로보틱스, USACO 파이널리스트)."},
+ ]},
+ {ko:"로봇 지능 인프라 (데이터·모델·시뮬)",en:"Robot intelligence infra",cos:[
+   {name:"Cortex AI",batch:"F25",home:"cortex.ai",yc:"cortex-ai",
+    desc:"실제 작업장 로봇·에고센트릭(1인칭) 데이터셋을 구축하고, 작업장이 데이터 수집·평가 세션을 호스팅하면 돈을 버는 마켓플레이스(Cortex Marketplace).",
+    founder:"Lucas Ngoo(前 Carousell 공동창업·CTO, $1B+ 마켓플레이스)."},
+   {name:"Spatial AI",batch:"F25",home:"spatial-ai.com",yc:"spatial-ai",
+    desc:"로봇 파운데이션 모델용 대규모 에고센트릭 데이터셋 'SEA'(오픈소스는 Hugging Face 공개). '병목은 하드웨어가 아니라 모델' 테제.",
+    founder:"Alex Petkos(파운더)."},
+   {name:"Parametric",batch:"F25",home:null,yc:"parametric",
+    desc:"로봇을 1급 시민으로 프로세스를 새로 설계한 '자율 물리 사업체' — 무인 세탁소로 시작, 고객 피드백+심판 모델로 RL 보상 루프 자동화.",
+    founder:"前 Facebook 추천시스템 모델 ROI·오프라인 시뮬 리드(스테이블코인 지갑 창업) · 前 Parallel Systems 자율주행 리드/BAIR 연구자."},
+   {name:"Asimov",batch:"W26",home:null,yc:"asimov",
+    desc:"가정·식당·호텔·공장의 5,000+ 기여자 네트워크에 하드웨어를 배치해 프런티어 로봇랩에 다양한 인간 동작 데이터를 공급.",
+    founder:"Lyem Ningthou · Anshul(둘 다 UC Berkeley 학부; Lyem은 前 Blume[YC W24] 창립엔지니어, Anshul은 Scale AI·Amazon 인턴·BAIR 연구)."},
+   {name:"Human Archive",batch:"W26",home:null,yc:"human-archive",
+    desc:"1,000+ 커스텀 리그를 가정·제조 현장에 배치해 정합된 멀티모달 데이터를 수집·QA·익명화·주석 → 로봇 파운데이션 모델용 데이터셋.",
+    founder:"Berkeley/Stanford 4인(Rushil: Berkeley MET·前 Coinbase PM·엑싯 / Samay: Berkeley EECS / Raj: Berkeley 중퇴 / Shloke: Stanford ME/CS 연구)."},
+   {name:"One Robot",batch:"W26",home:"onerobot.io",yc:"one-robot",
+    desc:"실물 없이 VLA 정책을 학습·평가하는 사실적 월드모델/시뮬레이션(그립·조립·유연물체 조작).",
+    founder:"Hemanth Sarabu(前 Google·NASA JPL·Symbio Robotics·Industrial Next, McLaren 차량 시뮬) · Elton Shon(前 Tesla — Model 3 공장 자동화·Dojo 슈퍼컴퓨터팀)."},
+   {name:"Fern (Ishiki Labs)",batch:"W26",home:null,yc:"fern-bot",
+    desc:"파운데이션 월드모델 기반 RL 환경 — 고객 로봇 정책을 소프트웨어에서 plug-and-play로 검증하고 RL 헤드를 얹어 성공률·속도 개선(주간 지속 학습).",
+    founder:"前 Meta LLaMA·Reality Labs 스마트글래스 연구자(Purdue PhD, 20+편) · 前 Meta Orion AR·前 Citadel 출신 CTO."},
+   {name:"Robocurve",batch:"S26",home:null,yc:"robocurve",
+    desc:"프런티어 랩의 데모 영상 대신, 실물 하드웨어로 재현 가능한 오픈소스 로봇 벤치마크를 상시 운영하는 독립 평가(공익법인).",
+    founder:"Jay Chooi(하버드 CS/수학·통계 석사, Rhodes Scholar, 前 UK AI Security Institute·Inspect Evals 톱 기여자, 2024 대선 50개주 적중) · Aris Zhu(하버드 CS·물리)."},
+   {name:"General Trajectory",batch:"W25",home:"generaltrajectory.com",yc:"general-trajectory",
+    desc:"물리 세계용 AI — 자율 국방부터 과학 R&D까지.",
+    founder:"Joshua Belofsky(학계 ML 연구 출신)."},
+ ]},
+ {ko:"하드웨어 부품 · 공급망",en:"Hardware & supply chain",cos:[
+   {name:"HLabs",batch:"W26",home:"hlaboratories.com",yc:"hlabs",
+    desc:"미국산 plug-and-play 로봇 부품 생태계(Nvidia Jetson 컴패니언 보드·무선 모듈·FOC 제어보드·모터·액추에이터)+파이썬 라이브러리 — 중국산 블랙박스 부품 의존 탈피.",
+    founder:"Paul Hetherington(2회차 YC 파운더 — 前 Mystic[W21] CEO 6년)."},
+ ]},
+ {ko:"로봇 SW · 제어 · HITL",en:"Software, control & HITL",cos:[
+   {name:"Lightberry",batch:"F25",home:"lightberry.com",yc:"lightberry",
+    desc:"코딩 없이 말로 프로그래밍하는 로봇용 소프트웨어 — Unitree·Booster 등에 음성 대화·감정·자율 행동 탑재(가정·오피스·리테일·컨퍼런스 배치).",
+    founder:"Ali Attar · Stephan Koenigstorfer(R2-D2·WALL·E에서 영감)."},
+   {name:"Avea Robotics",batch:"P26",home:null,yc:"avea-robotics",
+    desc:"로봇용 human-in-the-loop 원격 개입 시스템.",
+    founder:"공개 정보 적음."},
+   {name:"Intelligence Factory",batch:"P26",home:null,yc:"intelligence-factory",
+    desc:"로봇을 위한 '인간 지능'(원격 조작/데이터) 공급, 국방.",
+    founder:"공개 정보 적음."},
+ ]},
+ {ko:"센싱",en:"Sensing",cos:[
+   {name:"Congruent",batch:"W26",home:null,yc:"congruent",
+    desc:"원시 레이더 데이터 노출 + 월드모델 기반 레이더 시뮬레이터 — end-to-end 자율주행 학습 파이프라인에 넣을 수 있는 저가 전천후 레이더.",
+    founder:"Clement Barthes(UC Berkeley PhD) · Evan Carnahan(UT Austin PhD, 前 NASA JPL) — 둘 다 레이더 AV사 Zendar 출신."},
+   {name:"Milliray",batch:"W26",home:"milliray.com",yc:"milliray",
+    desc:"사람이 새와 헷갈리는 소형 드론을 센서로 정확히 탐지·추적하는 레이더 시스템(국방).",
+    founder:"공개 정보 적음."},
+ ]},
+ {ko:"도메인 특화",en:"Vertical",cos:[
+   {name:"OctaPulse",batch:"W26",home:"tryoctapulse.com",yc:"octapulse",
+    desc:"로보틱스+컴퓨터비전으로 부화부터 수확까지 양식장을 자동화.",
+    founder:"고아(인도)·몰타/푸에르토리코 출신 2인(해안 커뮤니티 배경, 아쿠아컬처 무경력)."},
+   {name:"Zeon",batch:"2026",home:null,yc:"zeon",
+    desc:"자연어로 실험을 지시하면 코드로 변환해 로봇팔로 실행하는 실험실 자동화(장비 인식·프로토콜 적응, Stanford·UCSF 협업).",
+    founder:"공개 정보 적음."},
+ ]},
+];
+
+const main=document.getElementById('main');
+const toc=document.getElementById('toc');
+let activeBatch="ALL";
+
+FIELDS.forEach((f,i)=>{
+  const id="f"+(i+1);
+  const sec=document.createElement('section');
+  sec.className="field";sec.id=id;
+  const idx=String(i+1).padStart(2,'0');
+  let rows="";
+  f.cos.forEach(c=>{
+    const q=c.batch==="2026";
+    let link;
+    if(c.home){
+      link=`<span class="tag">홈페이지</span><a href="https://${c.home}" target="_blank" rel="noopener">${c.home}</a>`;
+    }else{
+      link=`<span class="tag">YC 페이지</span><a class="yc" href="${YC}${c.yc}" target="_blank" rel="noopener">ycombinator.com ↗</a>`;
+    }
+    const founder=c.founder?`<div class="founder"><span class="fl">FOUNDERS</span><span>${c.founder}</span></div>`:"";
+    rows+=`<div class="row" data-batch="${c.batch}">
+      <div class="batch ${q?'q':''}">${c.batch}</div>
+      <div class="co"><div class="name">${c.name}</div><div class="desc">${c.desc}</div>${founder}</div>
+      <div class="link">${link}</div>
+    </div>`;
+  });
+  sec.innerHTML=`
+    <div class="field-head">
+      <span class="idx">${idx}</span>
+      <h3>${f.ko}</h3>
+      <span class="en">${f.en}</span>
+      <span class="cnt" data-cnt>${f.cos.length}</span>
+    </div>
+    <div class="rows">${rows}</div>`;
+  main.appendChild(sec);
+
+  const li=document.createElement('li');
+  li.innerHTML=`<a href="#${id}" data-jump="${id}">${f.ko}<span class="tc" data-toc-cnt>${f.cos.length}</span></a>`;
+  toc.appendChild(li);
+});
+
+const empty=document.createElement('div');
+empty.className="empty";empty.textContent="// 이 배치에 해당하는 회사가 없어.";
+main.appendChild(empty);
+
+const chips=[...document.querySelectorAll('.chip')];
+function applyFilter(){
+  let total=0;
+  document.querySelectorAll('.field').forEach(sec=>{
+    let vis=0;
+    sec.querySelectorAll('.row').forEach(r=>{
+      const show=activeBatch==="ALL"||r.dataset.batch===activeBatch;
+      r.classList.toggle('hidden',!show);
+      if(show)vis++;
+    });
+    sec.classList.toggle('hidden',vis===0);
+    sec.querySelector('[data-cnt]').textContent=vis;
+    const tocA=document.querySelector(`[data-jump="${sec.id}"]`);
+    tocA.classList.toggle('dim',vis===0);
+    tocA.querySelector('[data-toc-cnt]').textContent=vis;
+    total+=vis;
+  });
+  document.getElementById('m-co').textContent=total;
+  empty.classList.toggle('show',total===0);
+}
+chips.forEach(ch=>ch.addEventListener('click',()=>{
+  activeBatch=ch.dataset.batch;
+  chips.forEach(c=>c.setAttribute('aria-pressed',String(c===ch)));
+  applyFilter();
+}));
+</script>
+</body>
+</html>

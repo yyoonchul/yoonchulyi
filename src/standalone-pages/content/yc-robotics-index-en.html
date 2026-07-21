@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YC Robotics Index · 2025–2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#E7EBED;--grid:rgba(20,28,38,.045);--surface:#FBFCFC;
+    --ink:#141C26;--muted:#5E6E7B;--faint:#8A98A3;--hair:#D2D9DE;--hair-strong:#BFC8CE;
+    --accent:#0BA37F;--accent-ink:#076B54;--warn:#B06A12;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+    --body:'Inter',system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{margin:0;font-family:var(--body);color:var(--ink);background-color:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:30px 30px;-webkit-font-smoothing:antialiased;line-height:1.5;}
+  a{color:inherit}
+
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(231,235,237,.86);backdrop-filter:saturate(1.4) blur(8px);border-bottom:1px solid var(--hair-strong);}
+  .topbar-in{max-width:1120px;margin:0 auto;padding:11px 24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+  .wordmark{font-family:var(--mono);font-weight:600;font-size:12.5px;letter-spacing:.14em;white-space:nowrap;display:flex;align-items:center;gap:9px}
+  .wordmark .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px rgba(11,163,127,.18)}
+  .filters{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-left:auto}
+  .filters .lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--faint);margin-right:2px}
+  .chip{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.04em;padding:5px 9px;border:1px solid var(--hair-strong);border-radius:999px;background:var(--surface);color:var(--muted);cursor:pointer;transition:all .16s ease;}
+  .chip:hover{border-color:var(--accent);color:var(--accent-ink)}
+  .chip[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){.chip{transition:none}}
+
+  .hero{max-width:1120px;margin:0 auto;padding:56px 24px 30px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;color:var(--accent-ink);text-transform:uppercase;margin:0 0 18px}
+  .hero h1{font-family:var(--disp);font-weight:600;font-size:clamp(34px,6vw,60px);line-height:1.02;letter-spacing:-.01em;margin:0}
+  .hero h1 .yr{color:var(--faint);font-weight:400}
+  .hero p.lede{max-width:66ch;margin:20px 0 0;font-size:16px;color:var(--muted)}
+  .meta{display:flex;gap:0;flex-wrap:wrap;margin-top:30px;border:1px solid var(--hair-strong);border-radius:12px;overflow:hidden;background:var(--surface);width:fit-content;max-width:100%}
+  .meta .cell{padding:12px 22px;border-right:1px solid var(--hair)}
+  .meta .cell:last-child{border-right:0}
+  .meta .num{font-family:var(--disp);font-weight:600;font-size:24px;line-height:1}
+  .meta .cap{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--faint);margin-top:6px;text-transform:uppercase}
+
+  .layout{max-width:1120px;margin:0 auto;padding:14px 24px 40px;display:grid;grid-template-columns:210px 1fr;gap:52px;align-items:start}
+  .toc{position:sticky;top:78px}
+  .toc h2{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--faint);text-transform:uppercase;margin:0 0 12px;padding-left:2px}
+  .toc ol{list-style:none;margin:0;padding:0;counter-reset:t}
+  .toc li{counter-increment:t}
+  .toc a{display:flex;gap:8px;align-items:baseline;text-decoration:none;padding:7px 8px;border-radius:7px;color:var(--muted);font-size:13px;transition:background .14s,color .14s}
+  .toc a:hover{background:rgba(11,163,127,.09);color:var(--ink)}
+  .toc a::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);font-size:10.5px;color:var(--faint);min-width:18px}
+  .toc a .tc{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--faint)}
+  .toc a.dim{opacity:.38}
+  .toc a:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+  @media (prefers-reduced-motion:reduce){.toc a{transition:none}}
+
+  main{min-width:0}
+  .field{margin-bottom:16px;scroll-margin-top:84px}
+  .field.hidden{display:none}
+  .field-head{display:flex;align-items:flex-end;gap:14px;padding:0 0 12px;border-bottom:2px solid var(--ink)}
+  .field-head .idx{font-family:var(--mono);font-size:12px;color:var(--accent-ink);font-weight:600;letter-spacing:.06em}
+  .field-head h3{font-family:var(--disp);font-weight:600;font-size:19px;margin:0;letter-spacing:-.01em}
+  .field-head .en{font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.12em;padding-bottom:3px;text-transform:uppercase}
+  .field-head .cnt{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted);padding-bottom:2px}
+
+  .rows{margin:0 0 34px}
+  .row{display:grid;grid-template-columns:58px 1fr minmax(140px,auto);gap:18px;align-items:baseline;padding:16px 10px 16px 12px;border-bottom:1px solid var(--hair);position:relative;transition:background .14s;}
+  .row::before{content:"";position:absolute;left:0;top:0;bottom:-1px;width:2px;background:transparent;transition:background .14s}
+  .row:hover{background:var(--surface)}
+  .row:hover::before{background:var(--accent)}
+  .row.hidden{display:none}
+  @media (prefers-reduced-motion:reduce){.row,.row::before{transition:none}}
+
+  .batch{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.03em;color:var(--muted);border:1px solid var(--hair-strong);border-radius:6px;padding:3px 0;text-align:center;background:var(--surface);white-space:nowrap;}
+  .batch.q{color:var(--warn);border-color:#E4C79A;background:#FBF4E7}
+
+  .co .name{font-family:var(--disp);font-weight:600;font-size:16.5px;letter-spacing:-.005em}
+  .co .desc{color:var(--muted);font-size:13.5px;margin-top:3px;max-width:64ch}
+  .co .founder{display:flex;gap:9px;align-items:baseline;margin-top:8px;font-size:12px;color:var(--ink);opacity:.82;line-height:1.5;max-width:64ch}
+  .co .founder .fl{font-family:var(--mono);font-size:8.5px;letter-spacing:.13em;color:var(--accent-ink);flex-shrink:0;padding-top:2px}
+
+  .link{justify-self:end;text-align:right}
+  .link a{font-family:var(--mono);font-size:12px;text-decoration:none;color:var(--accent-ink);border-bottom:1px solid rgba(11,163,127,.35);padding-bottom:1px;transition:border-color .14s,color .14s;word-break:break-all}
+  .link a:hover{border-color:var(--accent);color:var(--accent)}
+  .link a.yc{color:var(--faint);border-bottom-color:var(--hair-strong)}
+  .link a.yc:hover{color:var(--muted);border-bottom-color:var(--muted)}
+  .link a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .link .tag{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--faint);text-transform:uppercase;margin-bottom:3px}
+
+  .empty{display:none;padding:40px 4px;color:var(--faint);font-family:var(--mono);font-size:13px}
+  .empty.show{display:block}
+
+  footer{border-top:1px solid var(--hair-strong);background:var(--surface)}
+  .foot-in{max-width:1120px;margin:0 auto;padding:26px 24px 40px;color:var(--muted);font-size:12.5px}
+  .foot-in p{margin:0 0 8px;max-width:88ch}
+  .foot-in a{color:var(--accent-ink)}
+  .foot-in .stamp{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--faint);margin-top:14px;text-transform:uppercase}
+
+  @media (max-width:860px){
+    .layout{grid-template-columns:1fr;gap:8px}
+    .toc{position:static;top:auto;margin-bottom:8px;border:1px solid var(--hair);border-radius:12px;background:var(--surface);padding:14px}
+    .toc ol{display:flex;flex-wrap:wrap;gap:4px}
+    .toc a .tc{margin-left:4px}
+    .filters{width:100%;margin-left:0}
+    .row{grid-template-columns:52px 1fr;gap:12px}
+    .link{grid-column:1 / -1;justify-self:start;text-align:left;padding-left:64px}
+    .link .tag{display:inline;margin-right:6px}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="wordmark"><span class="dot"></span>YC ROBOTICS INDEX</div>
+    <div class="filters" id="filters" role="group" aria-label="Filter by batch">
+      <span class="lbl">BATCH</span>
+      <button class="chip" data-batch="ALL" aria-pressed="true">All</button>
+      <button class="chip" data-batch="W25" aria-pressed="false">W25</button>
+      <button class="chip" data-batch="X25" aria-pressed="false">X25</button>
+      <button class="chip" data-batch="S25" aria-pressed="false">S25</button>
+      <button class="chip" data-batch="F25" aria-pressed="false">F25</button>
+      <button class="chip" data-batch="W26" aria-pressed="false">W26</button>
+      <button class="chip" data-batch="P26" aria-pressed="false">P26</button>
+      <button class="chip" data-batch="S26" aria-pressed="false">S26</button>
+      <button class="chip" data-batch="2026" aria-pressed="false">2026?</button>
+    </div>
+  </div>
+</div>
+
+<header class="hero">
+  <p class="eyebrow">Y Combinator · Physical AI &amp; Robotics</p>
+  <h1>YC Robotics Index<br><span class="yr">2025 – 2026 Batches · By Field</span></h1>
+  <p class="lede">Robotics companies from YC's 2025–2026 batches, grouped into 9 fields (based on the directory's Robotics / Manufacturing &amp; Robotics tags). Each row lists the company, official homepage, a one-line business summary, and key founder background. Filter by batch with the chips above.</p>
+  <div class="meta">
+    <div class="cell"><div class="num" id="m-co">38</div><div class="cap">Companies</div></div>
+    <div class="cell"><div class="num">9</div><div class="cap">Fields</div></div>
+    <div class="cell"><div class="num">7</div><div class="cap">Batches</div></div>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="toc" aria-label="Fields">
+    <h2>Fields</h2>
+    <ol id="toc"></ol>
+  </nav>
+  <main id="main"></main>
+</div>
+
+<footer>
+  <div class="foot-in">
+    <p><strong>Sources &amp; caveats.</strong> Compiled by cross-referencing YC's company directory (Robotics / Manufacturing &amp; Robotics tags), batch and individual company pages, batch reviews, and founder LinkedIn / company bios. The directory is client-rendered, so this isn't fully exhaustive; the in-progress Spring/Summer 2026 batches may be incomplete. Pure weapons systems are excluded.</p>
+    <p><strong>Link rules.</strong> Green links are verified official homepages; grey <em>YC PAGE</em> links are used where the official site couldn't be confirmed. The <strong>2026?</strong> tag marks companies whose batch (W26/P26/S26) isn't confirmed. Founder details are from public info; some are self-reported.</p>
+    <p>Live source of truth: <a href="https://www.ycombinator.com/companies/industry/robotics" target="_blank" rel="noopener">ycombinator.com/companies/industry/robotics</a> — filter Batch to Winter 2025 – Summer 2026.</p>
+    <p class="stamp">Compiled 2026-07-21 · for Yoonchul</p>
+  </div>
+</footer>
+
+<script>
+const YC="https://www.ycombinator.com/companies/";
+
+const FIELDS=[
+ {title:"Humanoid & general-purpose",tag:"Humanoid",cos:[
+   {name:"Piggy Robotics",batch:"F25",home:"piggyrobotics.com",yc:"piggy-robotics",
+    desc:"Full-size humanoids built with pneumatic artificial muscles (tubes + a single pump) for under $1,000 in parts, prototyped in 2 months — betting on mass production to capture training data.",
+    founder:"Richard Gong (Oxford & med-school dropout) · Chenny Deng (ex-Tencent AI research). 16-person hardware team from Oxford + global robotics competitions."},
+   {name:"Twolabs",batch:"P26",home:"twolabs.ai",yc:"twolabs",
+    desc:"Modular humanoids + a Record→Upload→Train→Deploy software platform. Starting with a semi-humanoid ('Tobi') for nursing homes and senior care (feeding, medication, companionship).",
+    founder:"Sardor Rahmatulloev (ex-Meta Superintelligence Labs; led Cornell's autonomous combat-robot team; first YC founder from Uzbekistan) · Danyal Ahmad (ex-Salesforce; MS in AI, Georgia Tech)."},
+   {name:"Eden Robotics",batch:"P26",home:"edenrobotics.ai",yc:"eden-robotics",
+    desc:"Semi-humanoids for manufacturing and logistics rented by the hour instead of sold (robots-as-a-service), with an in-house OS (Theta OS) and autonomy stack that drops in without integration.",
+    founder:"Stamatis Floratos (CEO · LSE; bootstrapped a 7-figure adtech company as a teenager) · Joey Humphreys (CTO · robotics PhD, Nature publication, rocket-engine background)."},
+   {name:"The Robot Learning Company",batch:"X25",home:null,yc:"the-robot-learning-company",
+    desc:"A low-cost, general-purpose robot platform automating repetitive, stationary tasks outside the factory.",
+    founder:"Jannik (solo founder · mechatronics degree; robot-learning research at UC Berkeley and TU Munich; open-source contributor)."},
+   {name:"Philon",batch:"F25",home:null,yc:"philon",
+    desc:"Open-source general-purpose robots for unsafe, repetitive, or boring tasks.",
+    founder:"Limited public info."},
+ ]},
+ {title:"Manipulation (hands & arms)",tag:"Manipulation",cos:[
+   {name:"Proception",batch:"W25",home:"proception.ai",yc:"proception-inc",
+    desc:"'ProHand,' a high-dexterity robotic hand with 20+ DOF, dense tactile feedback, and tendon-driven actuation for contact-rich manipulation research; designed with hand surgeons.",
+    founder:"Jay Li (Stanford alum, working on humanoids) and others."},
+   {name:"Origami Robotics",batch:"W26",home:"origami-robotics.com",yc:"origami-robotics",
+    desc:"A hand-worn data-collection device matched 1:1 to its robotic hand, capturing manipulation data 'in the wild' (factories, logistics centers) to train and deploy a 'manipulate anything' model.",
+    founder:"Limited public info."},
+   {name:"Verne Robotics",batch:"S25",home:null,yc:"verne-robotics",
+    desc:"AI that teaches robot arms new tasks in hours instead of months — meal-kit packing, CPG kitting, logistics sorting, biotech cleanrooms; billed by the hour.",
+    founder:"Neil Nie (robot-learning researcher, Columbia & Stanford, advised by Shuran Song) · Aditya Jha (building robots since high school)."},
+   {name:"Axol",batch:"2026",home:null,yc:"axol",
+    desc:"'Axol,' a dual-arm robot for physical-AI, real-world tasks.",
+    founder:"Limited public info."},
+ ]},
+ {title:"Industrial, logistics & field automation",tag:"Industrial",cos:[
+   {name:"Servo7",batch:"W26",home:"servo7.com",yc:"servo7",
+    desc:"Industrial/logistics robots that deploy into existing lines with no facility redesign and learn from demonstrations (container unloading, palletizing, case handling).",
+    founder:"Pieter Becking (ex-Boeing deep RL · LLM · Hyperloop) · Jasper van Leuven (built autonomous defense systems deployed in Ukraine; video-generation model for AVs)."},
+   {name:"Remy AI",batch:"W26",home:null,yc:"remy-ai",
+    desc:"Bi-manual robots for brownfield 3PL warehouses — deployed in under 30 days, adapting to changing SKUs, with a pipeline that learns on less data than vanilla VLA fine-tuning.",
+    founder:"Oscar Brisset (CEO · Oxford · ex-BCG/BCG X) · Ben Kaye (CTO · computer-vision PhD in 3D reconstruction; patent from OrganOx)."},
+   {name:"Boost Robotics",batch:"X25",home:"boostrobotics.ai",yc:"boost-robotics",
+    desc:"Autonomous mobile manipulation robots that remotely handle data-center work — cable checks, reboots, part swaps ('robot remote hands') — plus 24/7 security monitoring.",
+    founder:"Hardik Singh (MS, CMU Robotics) · Hans Kumar (ex-Boston Dynamics Spot team · CMU Robotics)."},
+   {name:"Flywheel AI",batch:"S25",home:null,yc:"flywheel-ai",
+    desc:"Retrofits existing excavators (hydraulic-equipment-agnostic) for remote teleoperation, then uses that data to automate them ('Waymo for excavators').",
+    founder:"Jash · Mahimana (limited public background)."},
+   {name:"RoboDock",batch:"W26",home:null,yc:"robodock",
+    desc:"Automates depot operations (charging, vehicle inspections) for autonomous/EV fleets, turning manual depots into self-running sites and raising uptime.",
+    founder:"Zinny Weli (CEO · ex-Zipline autonomous-drone charging infra · ex-Amazon home-robot charging · MS Robotics, Stanford)."},
+ ]},
+ {title:"Autonomous vehicles (drones, undersea, space)",tag:"Mobility",cos:[
+   {name:"Tornyol",batch:"F25",home:"tornyol.com",yc:"tornyol",
+    desc:"Autonomous 40g micro-drones repurposed from commodity parts (phone mics, parking sensors) that detect, track, and kill mosquitoes via an ultrasonic phased array.",
+    founder:"Clovis Piedallu · Alex Toussaint (pre-YC $28k grant from Scott Alexander & Vitalik Buterin)."},
+   {name:"GrazeMate",batch:"W26",home:"grazemate.com",yc:"grazemate",
+    desc:"Autonomous herding: at the push of a button, AI drones fly to a paddock and guide cattle where they need to go (Australia).",
+    founder:"Sam Rogers (solo founder)."},
+   {name:"Voltair",batch:"W26",home:"voltairlabs.com",yc:"voltair",
+    desc:"A network of long-range autonomous drones that stay deployed indefinitely via charging pads on utility poles — starting with power-grid inspection (~1,000 sq mi per pad), expanding to road/rail/telecom.",
+    founder:"Ronan Nopp (CEO · turned down a SpaceX Starship role; designed controls for a manned eVTOL in school) · Hayden Gosch (CTO · ex-Schweitzer Engineering Labs, power-system protection R&D) + 2 more."},
+   {name:"Ornadyne",batch:"2026",home:null,yc:"ornadyne",
+    desc:"Flapping-wing reconnaissance drones that look, fly, and sound like birds — hard to detect acoustically, visually, or electronically (defense).",
+    founder:"Armen Arakelyan · Geourg Kivijian."},
+   {name:"Seeing Systems",batch:"W26",home:"seeing-systems.com",yc:"seeing-systems",
+    desc:"Modular, AI-commanded drones for defense (London).",
+    founder:"Matthew Le Maitre (ex-Jane Street · top CS grad, Cambridge · Cambridge Mobile Robotics Lab) · Alexander Le Maitre (self-taught embedded/firmware; built military EOD hardware) — brothers."},
+   {name:"Albacore",batch:"S25",home:"albacore.inc",yc:"albacore-inc",
+    desc:"Autonomous drone submarines (uncrewed underwater vehicles) for the Navy, special operations, and the intelligence community.",
+    founder:"Team from Lockheed Martin, J&J and others, with underwater-vehicle competition wins and spaceflight experience."},
+   {name:"General Astronautics",batch:"W26",home:null,yc:"general-astronautics",
+    desc:"Robots for space that replace astronaut labor (~$130K/hr) in pharma/semiconductor manufacturing aboard commercial space stations.",
+    founder:"Bram Schork (Caltech MechE · ex-SpaceX Starlink Lasers) · Shibo Zhou (CMU CS/Robotics; USACO finalist)."},
+ ]},
+ {title:"Robot intelligence infra (data, models, sim)",tag:"Intel Infra",cos:[
+   {name:"Cortex AI",batch:"F25",home:"cortex.ai",yc:"cortex-ai",
+    desc:"Builds large-scale real-world workplace-robot and egocentric (first-person) datasets, plus a marketplace (Cortex Marketplace) that pays workplaces to host data-collection and evaluation sessions.",
+    founder:"Lucas Ngoo (co-founder & CTO of Carousell, a $1B+ marketplace)."},
+   {name:"Spatial AI",batch:"F25",home:"spatial-ai.com",yc:"spatial-ai",
+    desc:"Large egocentric datasets for robot foundation models — its 'SEA' dataset (open-source version on Hugging Face). Thesis: the bottleneck is the models, not the hardware.",
+    founder:"Alex Petkos (founder)."},
+   {name:"Parametric",batch:"F25",home:null,yc:"parametric",
+    desc:"'Autonomous physical businesses' redesigned around robots as first-class citizens — starting with a laundromat, with an RL reward loop automated via customer feedback and a judge model.",
+    founder:"Ex-Facebook recsys model-ROI/offline-sim lead (founded a stablecoin wallet) · ex-Parallel Systems self-driving lead / BAIR researcher."},
+   {name:"Asimov",batch:"W26",home:null,yc:"asimov",
+    desc:"Deploys hardware across a 5,000+ contributor network in homes, restaurants, hotels, and factories to supply frontier robotics labs with diverse human-motion data.",
+    founder:"Lyem Ningthou · Anshul (both UC Berkeley undergrads; Lyem was a founding engineer at Blume [YC W24], Anshul interned at Scale AI/Amazon and did BAIR research)."},
+   {name:"Human Archive",batch:"W26",home:null,yc:"human-archive",
+    desc:"Deploys 1,000+ custom rigs in homes and manufacturing sites to capture aligned multimodal data, then QA/anonymizes/annotates it into datasets for robot foundation models.",
+    founder:"Four founders from Berkeley/Stanford (Rushil: Berkeley MET · ex-Coinbase PM · prior exit / Samay: Berkeley EECS / Raj: Berkeley dropout / Shloke: Stanford ME/CS researcher)."},
+   {name:"One Robot",batch:"W26",home:"onerobot.io",yc:"one-robot",
+    desc:"Realistic world-model/simulation environments to train and evaluate VLA policies without physical robots (gripping, assembly, deformable-object manipulation).",
+    founder:"Hemanth Sarabu (ex-Google · NASA JPL · Symbio Robotics · Industrial Next; vehicle sims at McLaren) · Elton Shon (ex-Tesla — Model 3 factory automation · Dojo supercomputer team)."},
+   {name:"Fern (Ishiki Labs)",batch:"W26",home:null,yc:"fern-bot",
+    desc:"RL environments powered by a foundational world model — validate customer robot policies in software (plug-and-play) and add RL heads to boost success rate and speed (weekly continual learning).",
+    founder:"Ex-Meta LLaMA / Reality Labs smart-glasses researcher (Purdue PhD, 20+ papers) · ex-Meta Orion AR / ex-Citadel CTO."},
+   {name:"Robocurve",batch:"S26",home:null,yc:"robocurve",
+    desc:"An independent evaluator (public-benefit corp) running continuous, reproducible open-source robot benchmarks on real hardware — instead of relying on frontier-lab demo videos.",
+    founder:"Jay Chooi (Harvard BA CS/Math + MA Statistics; Rhodes Scholar; ex-UK AI Security Institute; top Inspect Evals contributor; called all 50 states in the 2024 election) · Aris Zhu (Harvard CS & Physics)."},
+   {name:"General Trajectory",batch:"W25",home:"generaltrajectory.com",yc:"general-trajectory",
+    desc:"AI for the physical world — from autonomous defense to scientific R&D.",
+    founder:"Joshua Belofsky (from academic ML research)."},
+ ]},
+ {title:"Hardware components & supply chain",tag:"Hardware",cos:[
+   {name:"HLabs",batch:"W26",home:"hlaboratories.com",yc:"hlabs",
+    desc:"A US-made, plug-and-play robot-parts ecosystem (Nvidia Jetson companion board, wireless module, FOC control boards, motors, actuators) with Python libraries — breaking dependence on black-box overseas parts.",
+    founder:"Paul Hetherington (second-time YC founder — ran Mystic [W21] as CEO for 6 years)."},
+ ]},
+ {title:"Robot software, control & HITL",tag:"Software",cos:[
+   {name:"Lightberry",batch:"F25",home:"lightberry.com",yc:"lightberry",
+    desc:"Software that lets you program robots by talking to them — adding voice conversation, personality, and autonomy to Unitree, Booster, and others (deployed in homes, offices, retail, conferences).",
+    founder:"Ali Attar · Stephan Koenigstorfer (inspired by R2-D2 and WALL·E)."},
+   {name:"Avea Robotics",batch:"P26",home:null,yc:"avea-robotics",
+    desc:"A human-in-the-loop remote-intervention system for robots.",
+    founder:"Limited public info."},
+   {name:"Intelligence Factory",batch:"P26",home:null,yc:"intelligence-factory",
+    desc:"Supplies 'human intelligence' (teleoperation/data) for robots; defense.",
+    founder:"Limited public info."},
+ ]},
+ {title:"Sensing",tag:"Sensing",cos:[
+   {name:"Congruent",batch:"W26",home:null,yc:"congruent",
+    desc:"A low-cost, all-weather radar that exposes raw data plus a world-model-based radar simulator — built to slot into end-to-end autonomous-driving training pipelines.",
+    founder:"Clement Barthes (PhD, UC Berkeley) · Evan Carnahan (PhD, UT Austin; ex-NASA JPL) — both from radar-AV company Zendar."},
+   {name:"Milliray",batch:"W26",home:"milliray.com",yc:"milliray",
+    desc:"A radar system that reliably detects and tracks small drones that people can mistake for birds (defense).",
+    founder:"Limited public info."},
+ ]},
+ {title:"Vertical / domain-specific",tag:"Vertical",cos:[
+   {name:"OctaPulse",batch:"W26",home:"tryoctapulse.com",yc:"octapulse",
+    desc:"Robotics + computer vision to automate fish farming from hatchery to harvest.",
+    founder:"Two founders from coastal communities (Goa, India and Malta/Puerto Rico); no prior aquaculture background."},
+   {name:"Zeon",batch:"2026",home:null,yc:"zeon",
+    desc:"Lab automation: describe an experiment in plain language and it's translated to code and run on robotic arms (equipment-aware, protocol-adaptive; working with Stanford and UCSF).",
+    founder:"Limited public info."},
+ ]},
+];
+
+const main=document.getElementById('main');
+const toc=document.getElementById('toc');
+let activeBatch="ALL";
+
+FIELDS.forEach((f,i)=>{
+  const id="f"+(i+1);
+  const sec=document.createElement('section');
+  sec.className="field";sec.id=id;
+  const idx=String(i+1).padStart(2,'0');
+  let rows="";
+  f.cos.forEach(c=>{
+    const q=c.batch==="2026";
+    let link;
+    if(c.home){
+      link=`<span class="tag">Homepage</span><a href="https://${c.home}" target="_blank" rel="noopener">${c.home}</a>`;
+    }else{
+      link=`<span class="tag">YC page</span><a class="yc" href="${YC}${c.yc}" target="_blank" rel="noopener">ycombinator.com ↗</a>`;
+    }
+    const founder=c.founder?`<div class="founder"><span class="fl">FOUNDERS</span><span>${c.founder}</span></div>`:"";
+    rows+=`<div class="row" data-batch="${c.batch}">
+      <div class="batch ${q?'q':''}">${c.batch}</div>
+      <div class="co"><div class="name">${c.name}</div><div class="desc">${c.desc}</div>${founder}</div>
+      <div class="link">${link}</div>
+    </div>`;
+  });
+  sec.innerHTML=`
+    <div class="field-head">
+      <span class="idx">${idx}</span>
+      <h3>${f.title}</h3>
+      <span class="en">${f.tag}</span>
+      <span class="cnt" data-cnt>${f.cos.length}</span>
+    </div>
+    <div class="rows">${rows}</div>`;
+  main.appendChild(sec);
+
+  const li=document.createElement('li');
+  li.innerHTML=`<a href="#${id}" data-jump="${id}">${f.title}<span class="tc" data-toc-cnt>${f.cos.length}</span></a>`;
+  toc.appendChild(li);
+});
+
+const empty=document.createElement('div');
+empty.className="empty";empty.textContent="// No companies in this batch.";
+main.appendChild(empty);
+
+const chips=[...document.querySelectorAll('.chip')];
+function applyFilter(){
+  let total=0;
+  document.querySelectorAll('.field').forEach(sec=>{
+    let vis=0;
+    sec.querySelectorAll('.row').forEach(r=>{
+      const show=activeBatch==="ALL"||r.dataset.batch===activeBatch;
+      r.classList.toggle('hidden',!show);
+      if(show)vis++;
+    });
+    sec.classList.toggle('hidden',vis===0);
+    sec.querySelector('[data-cnt]').textContent=vis;
+    const tocA=document.querySelector(`[data-jump="${sec.id}"]`);
+    tocA.classList.toggle('dim',vis===0);
+    tocA.querySelector('[data-toc-cnt]').textContent=vis;
+    total+=vis;
+  });
+  document.getElementById('m-co').textContent=total;
+  empty.classList.toggle('show',total===0);
+}
+chips.forEach(ch=>ch.addEventListener('click',()=>{
+  activeBatch=ch.dataset.batch;
+  chips.forEach(c=>c.setAttribute('aria-pressed',String(c===ch)));
+  applyFilter();
+}));
+</script>
+</body>
+</html>
