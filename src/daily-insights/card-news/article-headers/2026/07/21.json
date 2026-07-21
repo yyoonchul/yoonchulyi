@@ -1,0 +1,37 @@
+{
+  "articles": [
+    {
+      "cover": "데이터로 키우는 로봇",
+      "source": "샤오미 로보틱스의 \"Xiaomi-Robotics-1\"",
+      "sections": [
+        "데이터로 키우는 로봇",
+        "10만 시간 사전학습",
+        "실제 실행에 맞추기",
+        "물리 배포까지 확장",
+        "적응과 벤치마크"
+      ]
+    },
+    {
+      "cover": "목표 모드의 양면성",
+      "source": "Charles Azam의 \"Fable 5 vs. GPT-5.6 Sol on an NP-Hard Problem: Does /goal Help?\"",
+      "sections": [
+        "키로 벤치마크",
+        "원시 성능과 지속 모드",
+        "페이블 5의 우위",
+        "자주 이긴 목표 모드",
+        "검색 경로를 바꾸다"
+      ]
+    },
+    {
+      "cover": "AI 표준 제안의 빈칸",
+      "source": "Zvi Mowshowitz의 \"Demis Hassabis on the New Coming Age\"",
+      "sections": [
+        "중요하지만 불완전한 제안",
+        "표준 기구의 한계",
+        "AI 상방 규모 논쟁",
+        "바이오리스크 거버넌스",
+        "군사 사용 거버넌스 실패"
+      ]
+    }
+  ]
+}

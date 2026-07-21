@@ -1,0 +1,35 @@
+{
+  "cover": "Google DeepMind",
+  "articles": [
+    {
+      "cover": "Xiaomi Robotics",
+      "sections": [
+        "robot foundation model",
+        "Universal Manipulation Interface",
+        "robotics dataset",
+        "robot arm",
+        "RoboCasa"
+      ]
+    },
+    {
+      "cover": "Claude Fable",
+      "sections": [
+        "fiber optic network",
+        "Claude Fable",
+        "GPT-5.6 Sol",
+        "optimization benchmark",
+        "OpenAI Codex"
+      ]
+    },
+    {
+      "cover": "Demis Hassabis",
+      "sections": [
+        "Demis Hassabis",
+        "FINRA",
+        "Noah Smith",
+        "Google DeepMind",
+        "Alex Turner"
+      ]
+    }
+  ]
+}
