@@ -1,0 +1,26 @@
+{
+  "articles": [
+    {
+      "cover": "취향을 판단으로 바꾸는 책임",
+      "source": "유엑스 컬렉티브 기사 \"Taste cannot be delegated\"",
+      "sections": [
+        "취향은 판단의 토대",
+        "예측에 없는 의도",
+        "합의가 지운 책임",
+        "지표가 못 그린 미래",
+        "책임으로 단련한 판단"
+      ]
+    },
+    {
+      "cover": "AI 시대를 가르는 의지",
+      "source": "David Brooks의 \"The People Who Will Thrive in the AI Age\"",
+      "sections": [
+        "일을 더 키우는 AI",
+        "생산적 승객의 대가",
+        "인지적 항복의 위험",
+        "주도성을 키우는 활용",
+        "의지를 기르는 제도"
+      ]
+    }
+  ]
+}

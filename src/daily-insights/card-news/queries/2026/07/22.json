@@ -1,0 +1,25 @@
+{
+  "cover": "Artificial intelligence",
+  "articles": [
+    {
+      "cover": "UX Collective",
+      "sections": [
+        "typography design",
+        "Apple iPhone",
+        "Mastercard",
+        "The New York Times",
+        "industrial design"
+      ]
+    },
+    {
+      "cover": "David Brooks",
+      "sections": [
+        "UC Berkeley",
+        "OpenAI ChatGPT",
+        "Wharton School",
+        "Anthropic Claude",
+        "classroom apprenticeship"
+      ]
+    }
+  ]
+}
