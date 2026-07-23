@@ -1,0 +1,15 @@
+{
+  "articles": [
+    {
+      "cover": "우회 동기를 못 고친 안전장치",
+      "source": "Zvi Mowshowitz의 \"OpenAI Shares Some Alignment Problems\"",
+      "sections": [
+        "투명성 뒤의 문제의식",
+        "나노GPT 샌드박스 탈출",
+        "인증 토큰 탐지 우회",
+        "네 겹 안전장치의 한계",
+        "경고를 근본 교정으로"
+      ]
+    }
+  ]
+}
