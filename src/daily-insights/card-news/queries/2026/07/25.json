@@ -1,0 +1,45 @@
+{
+  "cover": "OpenAI",
+  "articles": [
+    {
+      "cover": "multilingual artificial intelligence",
+      "sections": [
+        "Bengali language",
+        "Indigenous languages Americas",
+        "non-Latin scripts",
+        "cross-lingual semantics",
+        "language evaluation"
+      ]
+    },
+    {
+      "cover": "Cursor AI",
+      "sections": [
+        "AI model routing",
+        "software developers coding",
+        "Anthropic Claude Opus",
+        "enterprise software development",
+        "Cursor SDK"
+      ]
+    },
+    {
+      "cover": "OpenAI Presence",
+      "sections": [
+        "enterprise voice agent",
+        "business policy governance",
+        "OpenAI Codex",
+        "BBVA",
+        "OpenAI API"
+      ]
+    },
+    {
+      "cover": "Alphabet",
+      "sections": [
+        "Google data center",
+        "Nvidia",
+        "Google Cloud",
+        "Google Gemini",
+        "Gemini 4"
+      ]
+    }
+  ]
+}
