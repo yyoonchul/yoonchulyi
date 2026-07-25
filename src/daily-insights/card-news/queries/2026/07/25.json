@@ -2,22 +2,22 @@
   "cover": "OpenAI",
   "articles": [
     {
-      "cover": "multilingual artificial intelligence",
+      "cover": "Artifipedia",
       "sections": [
         "Bengali language",
         "Indigenous languages Americas",
         "non-Latin scripts",
         "cross-lingual semantics",
-        "language evaluation"
+        "multilingual language evaluation"
       ]
     },
     {
-      "cover": "Cursor AI",
+      "cover": "Cursor",
       "sections": [
-        "AI model routing",
+        "Cursor Router",
         "software developers coding",
         "Anthropic Claude Opus",
-        "enterprise software development",
+        "Cursor Teams",
         "Cursor SDK"
       ]
     },
@@ -38,7 +38,17 @@
         "Nvidia",
         "Google Cloud",
         "Google Gemini",
-        "Gemini 4"
+        "Google Gemini 4"
+      ]
+    },
+    {
+      "cover": "OpenAI ChatGPT Health",
+      "sections": [
+        "Apple iOS",
+        "Apple Health",
+        "OpenAI ChatGPT",
+        "HealthBench",
+        "medical consultation"
       ]
     }
   ]
