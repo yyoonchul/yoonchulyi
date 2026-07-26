@@ -159,20 +159,49 @@
     }
     .toc {
       position: sticky;
-      top: 100px;
+      top: 24px;
       align-self: start;
+      max-height: calc(100vh - 48px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
       padding: var(--space-5);
       border-left: 3px solid var(--teal-600);
       background: var(--surface);
+      z-index: 20;
+    }
+    .toc.is-pinned {
+      position: fixed;
+      top: 24px;
+      left: var(--toc-left);
+      width: var(--toc-width);
     }
     .toc strong { display: block; margin-bottom: var(--space-3); color: var(--navy-950); font-size: .82rem; letter-spacing: .08em; }
     .toc ol { margin: 0; padding: 0; list-style: none; }
     .toc li + li { margin-top: var(--space-2); }
-    .toc a { display: block; color: var(--muted); font-size: .9rem; text-decoration: none; line-height: 1.45; }
+    .toc a {
+      display: block;
+      margin-left: -11px;
+      padding: 6px 9px;
+      border-left: 3px solid transparent;
+      border-radius: 0 6px 6px 0;
+      color: var(--muted);
+      font-size: .9rem;
+      text-decoration: none;
+      line-height: 1.45;
+      transition: color .16s ease, background-color .16s ease, border-color .16s ease;
+    }
     .toc a:hover { color: var(--teal-700); }
+    .toc a.is-active,
+    .toc a[aria-current="location"] {
+      border-left-color: var(--teal-600);
+      color: var(--navy-950);
+      background: var(--teal-50);
+      font-weight: 800;
+    }
 
-    .content { min-width: 0; }
-    .section { padding-block: 72px; border-top: 1px solid var(--line); }
+    .content { grid-column: 2; min-width: 0; }
+    .section { padding-block: 72px; border-top: 1px solid var(--line); scroll-margin-top: 28px; }
     .section:first-child { padding-top: 0; border-top: 0; }
     .section-kicker {
       margin-bottom: var(--space-3);
@@ -581,8 +610,19 @@
       body { font-size: 16px; word-break: normal; }
       .hero-copy { padding: 64px 24px; }
       .page-layout { display: block; padding-top: 32px; }
-      .toc { position: static; margin-bottom: 48px; border-left: 0; border-top: 3px solid var(--teal-600); }
+      .toc,
+      .toc.is-pinned {
+        position: static;
+        width: auto;
+        max-height: none;
+        margin-bottom: 48px;
+        overflow: visible;
+        border-left: 0;
+        border-top: 3px solid var(--teal-600);
+      }
       .toc ol { columns: 2; column-gap: 28px; }
+      .toc a { margin-left: 0; border-left: 0; border-radius: 6px; }
+      .content { grid-column: auto; }
       .section { padding-block: 56px; }
       .video-card, .storage-grid { grid-template-columns: 1fr; }
       .video-visual { min-height: 220px; }
@@ -622,6 +662,7 @@
       body, p, li { color: #dce6eb; }
       h1, h2, h3, h4 { color: #f4f8fa; }
       .toc, .fact, .step, .storage-card, .resource, .dose { background: var(--surface); }
+      .toc a.is-active, .toc a[aria-current="location"] { color: #f4f8fa; background: #123238; }
       .ifu-banner, .parts-list li, .check-card, .faq-list details, .lock-state { background: var(--surface); }
       .toc a { color: #b5c4cc; }
       .lead { color: #c2d1d8; }
@@ -1210,6 +1251,98 @@
       </div>
     </section>
   </main>
+
+  <script>
+    (() => {
+      const toc = document.querySelector(".toc");
+      const pageLayout = document.querySelector(".page-layout");
+      const desktop = window.matchMedia("(min-width: 769px)");
+      const links = [...document.querySelectorAll('.toc a[href^="#"]')];
+      const sections = links
+        .map(link => {
+          const id = decodeURIComponent(link.getAttribute("href").slice(1));
+          return { id, link, section: document.getElementById(id) };
+        })
+        .filter(item => item.section);
+
+      if (!toc || !pageLayout || !sections.length) return;
+
+      let tocStart = 0;
+      let ticking = false;
+
+      const measureToc = () => {
+        const wasPinned = toc.classList.contains("is-pinned");
+        toc.classList.remove("is-pinned");
+        const rect = toc.getBoundingClientRect();
+        const layoutRect = pageLayout.getBoundingClientRect();
+        const layoutPaddingTop = Number.parseFloat(getComputedStyle(pageLayout).paddingTop) || 0;
+        tocStart = layoutRect.top + window.scrollY + layoutPaddingTop - 24;
+        toc.style.setProperty("--toc-left", `${Math.round(rect.left)}px`);
+        toc.style.setProperty("--toc-width", `${Math.round(rect.width)}px`);
+        if (wasPinned && desktop.matches && window.scrollY >= tocStart) {
+          toc.classList.add("is-pinned");
+        }
+      };
+
+      const updatePinnedState = () => {
+        toc.classList.toggle("is-pinned", desktop.matches && window.scrollY >= tocStart);
+      };
+
+      const updateActiveSection = () => {
+        const activationLine = Math.min(window.innerHeight * 0.3, 240);
+        let current = sections[0];
+
+        for (const item of sections) {
+          if (item.section.getBoundingClientRect().top <= activationLine) current = item;
+          else break;
+        }
+
+        if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) {
+          current = sections[sections.length - 1];
+        }
+
+        for (const item of sections) {
+          const isCurrent = item === current;
+          item.link.classList.toggle("is-active", isCurrent);
+          if (isCurrent) item.link.setAttribute("aria-current", "location");
+          else item.link.removeAttribute("aria-current");
+        }
+
+        if (desktop.matches && toc.scrollHeight > toc.clientHeight) {
+          const linkTop = current.link.offsetTop;
+          const linkBottom = linkTop + current.link.offsetHeight;
+          if (linkTop < toc.scrollTop || linkBottom > toc.scrollTop + toc.clientHeight) {
+            toc.scrollTop = Math.max(0, linkTop - toc.clientHeight / 2);
+          }
+        }
+      };
+
+      const update = () => {
+        updatePinnedState();
+        updateActiveSection();
+        ticking = false;
+      };
+
+      const requestUpdate = () => {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(update);
+      };
+
+      const remeasure = () => {
+        measureToc();
+        requestUpdate();
+      };
+
+      measureToc();
+      requestUpdate();
+      window.addEventListener("scroll", requestUpdate, { passive: true });
+      window.addEventListener("resize", remeasure, { passive: true });
+      desktop.addEventListener?.("change", remeasure);
+      document.fonts?.ready.then(remeasure);
+      window.requestAnimationFrame(() => window.requestAnimationFrame(remeasure));
+    })();
+  </script>
 
   <!-- FALLBACK: vendor/pretext.js missing, using CDN -->
   <script type="module">
