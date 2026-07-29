@@ -1,0 +1,48 @@
+{
+  "articles": [
+    {
+      "cover": "플랫폼 대신 내 웹사이트",
+      "source": "Elizabeth Tai의 \"Substack writers, you need a website!\"",
+      "sections": [
+        "글의 거점과 유통 분리",
+        "플랫폼 소유권의 위험",
+        "독립 도메인의 연속성",
+        "자기 사이트 우선 발행",
+        "독립 기록의 복리 가치"
+      ]
+    },
+    {
+      "cover": "오픈 웨이트 규제의 기준",
+      "source": "Anthropic의 \"Our position on open-weights models\"",
+      "sections": [
+        "전면 금지 주장 부인",
+        "기업 사용 금지의 한계",
+        "첨단 반도체 통제",
+        "산업 규모 증류 대응",
+        "역량 기반 안전성 시험"
+      ]
+    },
+    {
+      "cover": "통제 잃은 궤도 상승 우주선",
+      "source": "TechCrunch 기사 \"The robot NASA hired to lift a orbital telescope tumbled out of control\"",
+      "sections": [
+        "링크의 통제 불능 회전",
+        "자세 제어와 통신 장애",
+        "예비 추진기로 복구",
+        "스위프트 수명 연장 임무",
+        "속도전이 키운 임무 위험"
+      ]
+    },
+    {
+      "cover": "인공지능 개발에 브레이크를 걸다",
+      "source": "TechCrunch 기사 \"Sam Altman is ready to decelerate\"",
+      "sections": [
+        "인공지능 발전 속도 조절",
+        "속도 조절 연대의 변화",
+        "보안 사고가 바꾼 인식",
+        "안전과 경제적 유인",
+        "엇갈린 유인의 거버넌스"
+      ]
+    }
+  ]
+}

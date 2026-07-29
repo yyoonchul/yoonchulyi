@@ -1,0 +1,45 @@
+{
+  "cover": "OpenAI",
+  "articles": [
+    {
+      "cover": "Substack",
+      "sections": [
+        "Elizabeth Tai",
+        "Medium",
+        "IndieWeb",
+        "POSSE",
+        "John Scalzi"
+      ]
+    },
+    {
+      "cover": "Anthropic",
+      "sections": [
+        "Dario Amodei",
+        "China",
+        "semiconductor wafer",
+        "AI model distillation",
+        "AI safety testing"
+      ]
+    },
+    {
+      "cover": "NASA",
+      "sections": [
+        "Northrop Grumman Pegasus",
+        "spacecraft reaction wheel",
+        "Katalyst Space",
+        "Neil Gehrels Swift Observatory",
+        "satellite servicing spacecraft"
+      ]
+    },
+    {
+      "cover": "Sam Altman",
+      "sections": [
+        "Invest Like the Best",
+        "Anthropic",
+        "Hugging Face",
+        "Kimi K3",
+        "AI governance"
+      ]
+    }
+  ]
+}
