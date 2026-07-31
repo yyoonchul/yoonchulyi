@@ -1,0 +1,50 @@
+{
+  "cover": "Google DeepMind",
+  "articles": [
+    {
+      "cover": "Google DeepMind",
+      "sections": [
+        "Apptronik Apollo 2",
+        "Gemini Robotics ER 2",
+        "SharpaWave hand",
+        "ASIMOV-Agentic"
+      ]
+    },
+    {
+      "cover": "AlphaFold",
+      "sections": [
+        "Google DeepMind",
+        "Google Gemini",
+        "Anthropic",
+        "Isomorphic Labs"
+      ]
+    },
+    {
+      "cover": "DeepSeek V4 Flash",
+      "sections": [
+        "computer code tokens",
+        "OpenRouter",
+        "GPT-5.6 Sol",
+        "Cloudflare"
+      ]
+    },
+    {
+      "cover": "OpenAI",
+      "sections": [
+        "ChatGPT Work",
+        "Nvidia",
+        "Anthropic",
+        "US Securities and Exchange Commission"
+      ]
+    },
+    {
+      "cover": "Zoox",
+      "sections": [
+        "NHTSA",
+        "Las Vegas",
+        "Zoox robotaxi",
+        "SAE Industry Technologies Consortia"
+      ]
+    }
+  ]
+}
