@@ -5,4 +5,4 @@ period: 2023.01. – 2024.07.
 order: 80
 ---
 
-Provided transportation and operational support within a counter-intelligence unit.
+Provided transportation and operational support within a counter-intelligence unit. Served as a squad leader.
