@@ -1,0 +1,25 @@
+{
+  "cover": "OpenAI",
+  "articles": [
+    {
+      "cover": "Joel Spolsky",
+      "sections": [
+        "user interface design",
+        "industrial bakery",
+        "bakery dough production",
+        "Martin Seligman",
+        "Microsoft Windows"
+      ]
+    },
+    {
+      "cover": "OpenAI",
+      "sections": [
+        "OpenAI Astra",
+        "Thomas Bloom",
+        "Lean theorem prover",
+        "Sam Altman",
+        "autonomous AI researcher"
+      ]
+    }
+  ]
+}
