@@ -1,6 +1,12 @@
 name = "yoonchulyi"
 compatibility_date = "2026-08-20"
 
+# Both hostnames served the site under GitHub Pages, so both stay bound here.
+routes = [
+  { pattern = "yoonchulyi.com", custom_domain = true },
+  { pattern = "www.yoonchulyi.com", custom_domain = true },
+]
+
 # Static-only for now. The subscribe endpoint (Plan B) adds `main` and
 # `run_worker_first = ["/api/*"]` here; every other request is served
 # straight from the CDN without touching Worker code.
