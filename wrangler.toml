@@ -1,0 +1,8 @@
+name = "yoonchulyi"
+compatibility_date = "2026-08-20"
+
+# Static-only for now. The subscribe endpoint (Plan B) adds `main` and
+# `run_worker_first = ["/api/*"]` here; every other request is served
+# straight from the CDN without touching Worker code.
+[assets]
+directory = "./dist/"

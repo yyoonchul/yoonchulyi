@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy to Cloudflare Workers
 
 on:
   # main 브랜치에 푸시될 때마다 실행
@@ -9,30 +9,33 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
+
+# 배포가 겹치지 않도록 (앞선 실행은 취소하지 않고 순서대로 처리)
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout your repository using git
         uses: actions/checkout@v4
-      
-      - name: Install, build, and upload your site
-        uses: withastro/action@v2
-        # pnpm이나 yarn을 쓴다면 아래 주석을 해제하고 수정하세요. (기본은 npm)
-        # with:
-        #   path: .
-        #   package-manager: pnpm
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the site
+        run: npm run build
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
