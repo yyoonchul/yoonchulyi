@@ -5,7 +5,16 @@ import {
   createPersonSchema,
   createWebsiteSchema,
 } from '../lib/schema';
-import { DEFAULT_DESCRIPTION } from '../lib/seo';
+import { AUTHOR, DEFAULT_DESCRIPTION } from '../lib/seo';
+
+const socialLinks = [
+  { label: 'LinkedIn', href: AUTHOR.linkedin },
+  { label: 'GitHub', href: AUTHOR.github },
+  { label: 'X', href: AUTHOR.x },
+  { label: 'Threads', href: AUTHOR.threads },
+  { label: 'Instagram', href: AUTHOR.instagram },
+  { label: 'Email', href: AUTHOR.email },
+];
 ---
 
 <BaseLayout
@@ -29,4 +38,21 @@ import { DEFAULT_DESCRIPTION } from '../lib/seo';
   </section>
 
   <SubscribeForm blurb="Essays, and the articles I read." />
+
+  <!-- Social Links: last thing on the page, after the one request to stay -->
+  <div class="flex flex-wrap gap-x-4 gap-y-2 pb-8 font-mono text-sm">
+    {socialLinks.map(({ label, href }) => {
+      const isMail = href.startsWith('mailto:');
+      return (
+        <a
+          href={href}
+          target={isMail ? undefined : '_blank'}
+          rel={isMail ? undefined : 'noopener noreferrer'}
+          class="text-sub hover:text-accent transition-colors"
+        >
+          {label} ↗
+        </a>
+      );
+    })}
+  </div>
 </BaseLayout>
