@@ -4,6 +4,10 @@ on:
   # main 브랜치에 푸시될 때마다 실행
   push:
     branches: [ main ]
+    # 뉴스레터 발송 기록은 사이트 내용과 무관하므로 재배포하지 않는다
+    # (재배포 → 발송 워크플로우 재실행 루프 방지)
+    paths-ignore:
+      - '.newsletter-state.json'
   # 수동으로도 실행 가능하게 설정
   workflow_dispatch:
 
