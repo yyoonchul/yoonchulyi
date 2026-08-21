@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import ListItem from '../../components/ListItem.astro';
+import SubscribeForm from '../../components/SubscribeForm.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import {
   formatBlogDate,
@@ -55,4 +56,6 @@ const description =
       })}
     </div>
   </section>
+
+  <SubscribeForm />
 </BaseLayout>

@@ -1,5 +1,6 @@
 name = "yoonchulyi"
 compatibility_date = "2026-08-20"
+main = "./worker/index.ts"
 
 # Both hostnames served the site under GitHub Pages, so both stay bound here.
 routes = [
@@ -7,8 +8,22 @@ routes = [
   { pattern = "www.yoonchulyi.com", custom_domain = true },
 ]
 
-# Static-only for now. The subscribe endpoint (Plan B) adds `main` and
-# `run_worker_first = ["/api/*"]` here; every other request is served
-# straight from the CDN without touching Worker code.
+# Only /api/* reaches the Worker; everything else is served straight from
+# the CDN without running any code.
 [assets]
 directory = "./dist/"
+binding = "ASSETS"
+run_worker_first = ["/api/*"]
+
+# Not a credential — the Resend API key is the thing that must stay secret.
+[vars]
+RESEND_AUDIENCE_ID = "a263ebb3-76f3-48bd-bfdc-cc4b1fd948d5"
+
+# /api/subscribe sends mail on an anonymous request, so it is capped per IP.
+[[ratelimits]]
+name = "SUBSCRIBE_LIMITER"
+namespace_id = "1001"
+
+[ratelimits.simple]
+limit = 5
+period = 60
