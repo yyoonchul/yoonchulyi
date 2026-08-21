@@ -1,0 +1,34 @@
+---
+import AboutSection from '../components/AboutSection.astro';
+import ExperienceList from '../components/ExperienceList.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import {
+  createBreadcrumbSchema,
+  createPersonSchema,
+  createProfilePageSchema,
+} from '../../lib/schema';
+
+const description =
+  'Work history of Yoonchul Yi: AI product research, startup engineering, and SNU Mechanical Engineering.';
+---
+
+<BaseLayout
+  title="Experiences - Yoonchul Yi"
+  description={description}
+  canonicalPath="/experiences/"
+  ogType="profile"
+  jsonLd={[
+    createPersonSchema(),
+    createProfilePageSchema('/experiences/'),
+    createBreadcrumbSchema([
+      { name: 'Home', path: '/' },
+      { name: 'Experiences', path: '/experiences/' },
+    ]),
+  ]}
+>
+  <main class="py-8">
+    <AboutSection title="Experiences">
+      <ExperienceList />
+    </AboutSection>
+  </main>
+</BaseLayout>

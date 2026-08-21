@@ -1,0 +1,31 @@
+---
+import AboutSection from '../components/AboutSection.astro';
+import ProjectList from '../components/ProjectList.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import {
+  createBreadcrumbSchema,
+  createPersonSchema,
+} from '../../lib/schema';
+
+const description =
+  'Projects by Yoonchul Yi: MaekNote, Mynovel, Storybook4me, Notion templates, and content work.';
+---
+
+<BaseLayout
+  title="Projects - Yoonchul Yi"
+  description={description}
+  canonicalPath="/projects/"
+  jsonLd={[
+    createPersonSchema(),
+    createBreadcrumbSchema([
+      { name: 'Home', path: '/' },
+      { name: 'Projects', path: '/projects/' },
+    ]),
+  ]}
+>
+  <main class="py-8">
+    <AboutSection title="Projects">
+      <ProjectList />
+    </AboutSection>
+  </main>
+</BaseLayout>

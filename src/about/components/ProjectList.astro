@@ -1,0 +1,28 @@
+---
+import { getAboutProjects } from '../lib/about';
+
+const projects = await getAboutProjects();
+---
+
+<div class="space-y-8">
+  {projects.map(({ entry, Content }) => (
+    <article class="space-y-2">
+      <h2 class="font-serif text-lg text-text">
+        {entry.data.title}
+      </h2>
+      <div class="about-rich-text font-serif text-sm leading-relaxed text-text/90">
+        <Content />
+      </div>
+      {entry.data.href && (
+        <a
+          href={entry.data.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="font-mono text-xs text-sub hover:text-accent hover:underline transition-colors"
+        >
+          {entry.data.linkLabel ?? 'learn more ↗'}
+        </a>
+      )}
+    </article>
+  ))}
+</div>

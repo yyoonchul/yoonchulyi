@@ -95,7 +95,7 @@ The SEO backbone should continue to emit:
 
 - `WebSite` on the home page.
 - `Person` with `@id: https://yoonchulyi.com/#person`.
-- `ProfilePage` on About.
+- `ProfilePage` on `/experiences/`.
 - `BlogPosting` for blog posts and Daily Insight detail pages.
 - `BreadcrumbList` for navigable pages.
 - `ItemList` for blog and Daily Insight indexes.
@@ -118,8 +118,10 @@ The site should expose:
 
 Sitemap rules:
 
-- Include home, about, blog index, Daily Insights index, all indexable blog
-  posts, and Daily Insight detail pages.
+- Include home, experiences, projects, blog index, Daily Insights index, all
+  indexable blog posts, and Daily Insight detail pages.
+- `/about/` is retired. The Worker 301s it to `/experiences/`; keep it out of
+  the sitemap so the redirect stays the only signal.
 - Use `dateModified` for blog `lastmod` when present.
 - Fall back to `datePublished` or `date`.
 - Exclude blog posts where `index: false`.

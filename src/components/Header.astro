@@ -2,42 +2,33 @@
 import { isPathActive } from '../lib/navigation';
 
 const pathname = Astro.url.pathname;
-const isAbout = isPathActive(pathname, '/about', { exact: false });
-const isBlog = isPathActive(pathname, '/blog', { exact: false });
-const isDailyInsights = isPathActive(pathname, '/daily-insights', { exact: false });
+
+const navItems = [
+  { label: 'Experiences', href: '/experiences' },
+  { label: 'Projects', href: '/projects' },
+  { label: 'Blog', href: '/blog' },
+  { label: 'Daily Insights', href: '/daily-insights' },
+];
 ---
 
 <header class="flex items-baseline justify-between py-8">
   <a href="/" class="font-serif italic text-3xl hover:text-accent transition-colors">
     Yoonchul Yi
   </a>
-  <nav class="flex gap-6 font-mono text-sm">
-    <a
-      href="/about"
-      class:list={[
-        'transition-colors hover:text-accent pb-1',
-        isAbout ? 'text-accent border-b border-accent' : 'text-sub',
-      ]}
-    >
-      About
-    </a>
-    <a
-      href="/blog"
-      class:list={[
-        'transition-colors hover:text-accent pb-1',
-        isBlog ? 'text-accent border-b border-accent' : 'text-sub',
-      ]}
-    >
-      Blog
-    </a>
-    <a
-      href="/daily-insights"
-      class:list={[
-        'transition-colors hover:text-accent pb-1',
-        isDailyInsights ? 'text-accent border-b border-accent' : 'text-sub',
-      ]}
-    >
-      Daily Insights
-    </a>
+  <nav class="flex flex-wrap gap-x-6 gap-y-1 font-mono text-sm">
+    {navItems.map(({ label, href }) => {
+      const isActive = isPathActive(pathname, href, { exact: false });
+      return (
+        <a
+          href={href}
+          class:list={[
+            'transition-colors hover:text-accent pb-1',
+            isActive ? 'text-accent border-b border-accent' : 'text-sub',
+          ]}
+        >
+          {label}
+        </a>
+      );
+    })}
   </nav>
 </header>

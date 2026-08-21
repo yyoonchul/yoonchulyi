@@ -58,7 +58,7 @@ export function createWebsiteSchema(): JsonLd {
   };
 }
 
-export function createProfilePageSchema(path = '/about/'): JsonLd {
+export function createProfilePageSchema(path = '/experiences/'): JsonLd {
   return {
     '@context': 'https://schema.org',
     '@type': 'ProfilePage',

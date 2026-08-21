@@ -34,7 +34,8 @@ export async function GET() {
 
   const entries: SitemapEntry[] = [
     { path: '/', changefreq: 'weekly', priority: '1.0' },
-    { path: '/about/', changefreq: 'monthly', priority: '0.8' },
+    { path: '/experiences/', changefreq: 'monthly', priority: '0.8' },
+    { path: '/projects/', changefreq: 'monthly', priority: '0.8' },
     { path: '/blog/', changefreq: 'weekly', priority: '0.9' },
     { path: '/daily-insights/', changefreq: 'daily', priority: '0.8' },
     ...blogPosts

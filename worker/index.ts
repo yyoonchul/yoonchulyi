@@ -59,6 +59,12 @@ export default {
       return json({ error: 'Not found' }, 404);
     }
 
+    // /about/ was the combined profile page before it was split. Keep the
+    // indexed URL working and hand its ranking to the page that replaced it.
+    if (url.pathname === '/about' || url.pathname === '/about/') {
+      return Response.redirect(`${SITE}/experiences/`, 301);
+    }
+
     return env.ASSETS.fetch(request);
   },
 };

@@ -6,8 +6,42 @@
   html {
     @apply bg-bg text-text antialiased;
   }
-  
+
   body {
     @apply min-h-screen;
   }
+}
+
+/* Rendered markdown inside About-style entries. Global because the
+   Experiences and Projects pages each render one list on its own. */
+.about-rich-text p {
+  margin-bottom: 1rem;
+}
+
+.about-rich-text p:last-child {
+  margin-bottom: 0;
+}
+
+.about-rich-text ul,
+.about-rich-text ol {
+  margin: 0.75rem 0;
+  padding-left: 1.25rem;
+}
+
+.about-rich-text ul {
+  list-style: disc;
+}
+
+.about-rich-text ol {
+  list-style: decimal;
+}
+
+.about-rich-text li + li {
+  margin-top: 0.25rem;
+}
+
+.about-rich-text a {
+  color: #ea580c;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
