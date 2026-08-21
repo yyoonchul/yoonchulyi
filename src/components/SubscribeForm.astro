@@ -3,6 +3,7 @@ type Topic = 'essays' | 'daily';
 
 interface Props {
   heading?: string;
+  /** Pass an empty string to let the heading stand on its own. */
   blurb?: string;
   /**
    * Fixes what the reader subscribes to. On a section page the choice is
@@ -37,8 +38,8 @@ const websiteId = `subscribe-website-${uid}`;
 ---
 
 <section class="py-8 border-t border-sub/20">
-  <h2 class="font-serif text-lg mb-1">{heading}</h2>
-  <p class="text-sub text-sm mb-5">{blurb}</p>
+  <h2 class:list={['font-serif text-lg', blurb ? 'mb-1' : 'mb-5']}>{heading}</h2>
+  {blurb && <p class="text-sub text-sm mb-5">{blurb}</p>}
 
   <form data-subscribe-form action="/api/subscribe" method="post" class="flex flex-col gap-5">
     {showTopicPicker ? (
