@@ -20,8 +20,10 @@ interface Env {
 }
 
 const SITE = 'https://yoonchulyi.com';
+// Sending lives on the mail subdomain so bulk reputation never touches the
+// root domain; replies come back to the root, which Email Routing forwards.
 const FROM = 'Yoonchul Yi <yc@mail.yoonchulyi.com>';
-const REPLY_TO = 'yoonchulyi@gmail.com';
+const REPLY_TO = 'hi@yoonchulyi.com';
 const TOKEN_TTL_SECONDS = 60 * 60 * 24;
 
 // Deliberately conservative: this endpoint sends mail on a stranger's
