@@ -7,21 +7,35 @@
  * in wrangler.toml keeps the rest of the site on the static asset path.
  *
  * Confirmation state lives entirely in a signed token rather than storage:
- * the token carries the address and an expiry, and the HMAC makes it
- * unforgeable, so double opt-in needs no database.
+ * the token carries the address, the chosen language and topics, and an
+ * expiry, and the HMAC makes it unforgeable. Signing the preferences (not just
+ * the address) is what stops someone editing the confirm link to subscribe
+ * another person to something they never asked for.
  */
 
 interface Env {
   ASSETS: Fetcher;
   RESEND_API_KEY: string;
-  RESEND_AUDIENCE_ID: string;
+  RESEND_SEGMENT_EN: string;
+  RESEND_SEGMENT_KO: string;
+  RESEND_TOPIC_ESSAYS: string;
+  RESEND_TOPIC_DAILY: string;
   SUBSCRIBE_SECRET: string;
   SUBSCRIBE_LIMITER: RateLimit;
 }
 
-const SITE = 'https://yoonchulyi.com';
+type Language = 'en' | 'ko';
+type Topic = 'essays' | 'daily';
+
+interface Subscription {
+  email: string;
+  language: Language;
+  topics: Topic[];
+}
+
 // Sending lives on the mail subdomain so bulk reputation never touches the
 // root domain; replies come back to the root, which Email Routing forwards.
+const SITE = 'https://yoonchulyi.com';
 const FROM = 'Yoonchul Yi <yc@mail.yoonchulyi.com>';
 const REPLY_TO = 'hi@yoonchulyi.com';
 const TOKEN_TTL_SECONDS = 60 * 60 * 24;
@@ -54,16 +68,24 @@ async function handleSubscribe(request: Request, env: Env): Promise<Response> {
     return json({ error: 'Method not allowed' }, 405);
   }
 
-  const { email, honeypot } = await readSubmission(request);
+  const submission = await readSubmission(request);
 
   // Bots fill every field they find; humans never see this one.
-  if (honeypot) {
+  if (submission.honeypot) {
     return json({ ok: true });
   }
 
-  const normalized = email.trim().toLowerCase();
-  if (!normalized || normalized.length > MAX_EMAIL_LENGTH || !EMAIL_PATTERN.test(normalized)) {
+  const email = submission.email.trim().toLowerCase();
+  if (!email || email.length > MAX_EMAIL_LENGTH || !EMAIL_PATTERN.test(email)) {
     return json({ error: 'Enter a valid email address.' }, 400);
+  }
+
+  const language: Language = submission.language === 'ko' ? 'ko' : 'en';
+  const topics = submission.topics.filter(
+    (topic): topic is Topic => topic === 'essays' || topic === 'daily',
+  );
+  if (topics.length === 0) {
+    return json({ error: 'Choose at least one thing to receive.' }, 400);
   }
 
   const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
@@ -72,41 +94,60 @@ async function handleSubscribe(request: Request, env: Env): Promise<Response> {
     return json({ error: 'Too many requests. Try again in a minute.' }, 429);
   }
 
-  const token = await createToken(normalized, env.SUBSCRIBE_SECRET);
+  const token = await createToken({ email, language, topics }, env.SUBSCRIBE_SECRET);
   const confirmUrl = `${SITE}/api/confirm?token=${encodeURIComponent(token)}`;
-  await sendConfirmationEmail(normalized, confirmUrl, env);
+  await sendConfirmationEmail(email, language, confirmUrl, env);
 
   return json({ ok: true });
 }
 
 async function handleConfirm(url: URL, env: Env): Promise<Response> {
   const token = url.searchParams.get('token') ?? '';
-  const email = await verifyToken(token, env.SUBSCRIBE_SECRET);
+  const subscription = await verifyToken(token, env.SUBSCRIBE_SECRET);
 
-  if (!email) {
+  if (!subscription) {
     return Response.redirect(`${SITE}/subscribe/error/`, 302);
   }
 
-  const response = await fetch(
-    `https://api.resend.com/audiences/${env.RESEND_AUDIENCE_ID}/contacts`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, unsubscribed: false }),
+  const segmentId =
+    subscription.language === 'ko' ? env.RESEND_SEGMENT_KO : env.RESEND_SEGMENT_EN;
+  const topicIds: Record<Topic, string> = {
+    essays: env.RESEND_TOPIC_ESSAYS,
+    daily: env.RESEND_TOPIC_DAILY,
+  };
+
+  const response = await fetch('https://api.resend.com/contacts', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${env.RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
     },
-  );
+    body: JSON.stringify({
+      email: subscription.email,
+      unsubscribed: false,
+      segments: [{ id: segmentId }],
+      topics: subscription.topics.map((topic) => ({
+        id: topicIds[topic],
+        subscription: 'opt_in',
+      })),
+    }),
+  });
 
   if (!response.ok) {
     return Response.redirect(`${SITE}/subscribe/error/`, 302);
   }
 
-  return Response.redirect(`${SITE}/subscribe/confirmed/`, 302);
+  return Response.redirect(`${SITE}/subscribe/confirmed/?lang=${subscription.language}`, 302);
 }
 
-async function readSubmission(request: Request): Promise<{ email: string; honeypot: string }> {
+interface Submission {
+  email: string;
+  honeypot: string;
+  language: string;
+  topics: string[];
+}
+
+async function readSubmission(request: Request): Promise<Submission> {
   const contentType = request.headers.get('Content-Type') ?? '';
 
   if (contentType.includes('application/json')) {
@@ -114,6 +155,8 @@ async function readSubmission(request: Request): Promise<{ email: string; honeyp
     return {
       email: typeof body.email === 'string' ? body.email : '',
       honeypot: typeof body.website === 'string' ? body.website : '',
+      language: typeof body.language === 'string' ? body.language : 'en',
+      topics: Array.isArray(body.topics) ? body.topics.map(String) : [],
     };
   }
 
@@ -121,10 +164,19 @@ async function readSubmission(request: Request): Promise<{ email: string; honeyp
   return {
     email: String(form.get('email') ?? ''),
     honeypot: String(form.get('website') ?? ''),
+    language: String(form.get('language') ?? 'en'),
+    topics: form.getAll('topics').map(String),
   };
 }
 
-async function sendConfirmationEmail(email: string, confirmUrl: string, env: Env): Promise<void> {
+async function sendConfirmationEmail(
+  email: string,
+  language: Language,
+  confirmUrl: string,
+  env: Env,
+): Promise<void> {
+  const copy = CONFIRMATION_COPY[language];
+
   await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -135,35 +187,43 @@ async function sendConfirmationEmail(email: string, confirmUrl: string, env: Env
       from: FROM,
       to: email,
       reply_to: REPLY_TO,
-      subject: 'Confirm your subscription',
-      text: confirmationText(confirmUrl),
-      html: confirmationHtml(confirmUrl),
+      subject: copy.subject,
+      text: [copy.intro, '', confirmUrl, '', copy.expiry, copy.ignore].join('\n'),
+      html: confirmationHtml(copy, confirmUrl),
     }),
   });
 }
 
-function confirmationText(confirmUrl: string): string {
-  return [
-    'Please confirm your subscription to Yoonchul Yi.',
-    '',
-    confirmUrl,
-    '',
-    'The link expires in 24 hours.',
-    "If you did not request this, ignore this email — nothing was subscribed.",
-  ].join('\n');
-}
+const CONFIRMATION_COPY = {
+  en: {
+    subject: 'Confirm your subscription',
+    intro: 'Please confirm your subscription to Yoonchul Yi.',
+    button: 'Confirm subscription',
+    expiry: 'The link expires in 24 hours.',
+    ignore: 'If you did not request this, ignore this email — nothing was subscribed.',
+  },
+  ko: {
+    subject: '구독 확인',
+    intro: '이윤철의 뉴스레터 구독을 확인해 주세요.',
+    button: '구독 확인하기',
+    expiry: '이 링크는 24시간 후 만료됩니다.',
+    ignore: '요청하신 적이 없다면 이 메일을 무시하세요. 구독은 이루어지지 않습니다.',
+  },
+} as const;
 
-function confirmationHtml(confirmUrl: string): string {
+type ConfirmationCopy = (typeof CONFIRMATION_COPY)[Language];
+
+function confirmationHtml(copy: ConfirmationCopy, confirmUrl: string): string {
   return `<!doctype html>
 <html>
-  <body style="margin:0;padding:32px;background:#ffffff;font-family:Georgia,'Times New Roman',serif;color:#1a1a1a;line-height:1.6;">
+  <body style="margin:0;padding:32px 16px;background:#F4F4F0;font-family:Georgia,'Times New Roman',serif;color:#191919;line-height:1.7;">
     <div style="max-width:480px;margin:0 auto;">
-      <p style="margin:0 0 24px;font-size:16px;">Please confirm your subscription to <em>Yoonchul Yi</em>.</p>
+      <p style="margin:0 0 24px;font-size:16px;">${copy.intro}</p>
       <p style="margin:0 0 24px;">
-        <a href="${confirmUrl}" style="display:inline-block;padding:10px 20px;background:#1a1a1a;color:#ffffff;text-decoration:none;font-size:15px;">Confirm subscription</a>
+        <a href="${confirmUrl}" style="display:inline-block;padding:10px 20px;background:#191919;color:#F4F4F0;text-decoration:none;font-size:15px;">${copy.button}</a>
       </p>
-      <p style="margin:0 0 8px;font-size:13px;color:#666;">The link expires in 24 hours.</p>
-      <p style="margin:0;font-size:13px;color:#666;">If you did not request this, ignore this email — nothing was subscribed.</p>
+      <p style="margin:0 0 8px;font-size:13px;color:#8C8C8C;">${copy.expiry}</p>
+      <p style="margin:0;font-size:13px;color:#8C8C8C;">${copy.ignore}</p>
     </div>
   </body>
 </html>`;
@@ -179,14 +239,17 @@ async function importKey(secret: string): Promise<CryptoKey> {
   );
 }
 
-async function createToken(email: string, secret: string): Promise<string> {
-  const expiry = Math.floor(Date.now() / 1000) + TOKEN_TTL_SECONDS;
-  const payload = `${email}:${expiry}`;
-  const signature = await sign(payload, secret);
-  return `${base64UrlEncode(payload)}.${signature}`;
+async function createToken(subscription: Subscription, secret: string): Promise<string> {
+  const payload = JSON.stringify({
+    e: subscription.email,
+    l: subscription.language,
+    t: subscription.topics,
+    x: Math.floor(Date.now() / 1000) + TOKEN_TTL_SECONDS,
+  });
+  return `${base64UrlEncode(payload)}.${await sign(payload, secret)}`;
 }
 
-async function verifyToken(token: string, secret: string): Promise<string | null> {
+async function verifyToken(token: string, secret: string): Promise<Subscription | null> {
   const [encodedPayload, signature] = token.split('.');
   if (!encodedPayload || !signature) {
     return null;
@@ -199,19 +262,35 @@ async function verifyToken(token: string, secret: string): Promise<string | null
     return null;
   }
 
-  const expected = await sign(payload, secret);
-  if (!timingSafeEqual(signature, expected)) {
+  if (!timingSafeEqual(signature, await sign(payload, secret))) {
     return null;
   }
 
-  const separator = payload.lastIndexOf(':');
-  const email = payload.slice(0, separator);
-  const expiry = Number(payload.slice(separator + 1));
-  if (!email || !Number.isFinite(expiry) || expiry < Math.floor(Date.now() / 1000)) {
+  let parsed: { e?: unknown; l?: unknown; t?: unknown; x?: unknown };
+  try {
+    parsed = JSON.parse(payload);
+  } catch {
     return null;
   }
 
-  return email;
+  const expiry = Number(parsed.x);
+  if (!Number.isFinite(expiry) || expiry < Math.floor(Date.now() / 1000)) {
+    return null;
+  }
+
+  const email = typeof parsed.e === 'string' ? parsed.e : '';
+  const topics = Array.isArray(parsed.t)
+    ? parsed.t.filter((topic): topic is Topic => topic === 'essays' || topic === 'daily')
+    : [];
+  if (!email || topics.length === 0) {
+    return null;
+  }
+
+  return {
+    email,
+    language: parsed.l === 'ko' ? 'ko' : 'en',
+    topics,
+  };
 }
 
 async function sign(payload: string, secret: string): Promise<string> {

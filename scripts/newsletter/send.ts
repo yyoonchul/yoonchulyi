@@ -1,29 +1,56 @@
 /**
- * Emails subscribers about blog posts that have not been sent yet.
+ * Emails subscribers about posts that have not been sent yet.
  *
- * The feed is read over HTTP rather than from `dist/`, so a post is only ever
- * announced once it is actually live — an email whose link 404s cannot be
- * unsent. Already-sent posts are tracked in a state file committed to the repo,
- * which makes the send history reviewable in git and survives a rerun.
+ * Four feeds are checked — essays and Daily Insights, each in English and
+ * Korean — and each maps to one segment (language) and one topic (what they
+ * opted into). Feeds are read over HTTP rather than from `dist/`, so a post is
+ * only ever announced once it is actually live: an email whose link 404s
+ * cannot be unsent.
+ *
+ * Sends are recorded in a state file committed to the repo, keyed by URL and
+ * language, so the history is reviewable in git and a rerun is a no-op.
  *
  * Usage:
- *   tsx scripts/newsletter/send.ts --seed      mark every current post as sent
+ *   tsx scripts/newsletter/send.ts --seed      mark everything current as sent
  *   tsx scripts/newsletter/send.ts --dry-run   report what would be sent
+ *   tsx scripts/newsletter/send.ts --preview   write the next email per feed to disk
  *   tsx scripts/newsletter/send.ts             send
  */
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { XMLParser } from 'fast-xml-parser';
+import { EMAIL_COPY, htmlToText, renderEmailHtml } from './email.ts';
 
 const STATE_PATH = new URL('../../.newsletter-state.json', import.meta.url);
-const FEED_URL = process.env.FEED_URL ?? 'https://yoonchulyi.com/rss.xml';
+const SITE = process.env.SITE_URL ?? 'https://yoonchulyi.com';
 const FROM = process.env.NEWSLETTER_FROM ?? 'Yoonchul Yi <yc@mail.yoonchulyi.com>';
 const REPLY_TO = process.env.NEWSLETTER_REPLY_TO ?? 'hi@yoonchulyi.com';
-const SITE_NAME = 'yoonchulyi.com';
 
 // A freshly deployed post can 404 on some edges for a few seconds.
 const FEED_ATTEMPTS = 5;
 const FEED_RETRY_MS = 6000;
+
+// Gmail clips a message past ~102KB behind a "view entire message" link, which
+// buries the footer and the unsubscribe link with it.
+const GMAIL_CLIP_BYTES = 102_000;
+
+type Language = 'en' | 'ko';
+type Section = 'essays' | 'daily';
+
+interface FeedSource {
+  section: Section;
+  language: Language;
+  path: string;
+  /** Several pending items go out as one email rather than a burst. */
+  batch: boolean;
+}
+
+const FEEDS: FeedSource[] = [
+  { section: 'essays', language: 'en', path: '/rss.xml', batch: false },
+  { section: 'essays', language: 'ko', path: '/rss.ko.xml', batch: false },
+  { section: 'daily', language: 'en', path: '/daily-insights/rss.xml', batch: true },
+  { section: 'daily', language: 'ko', path: '/daily-insights/rss.ko.xml', batch: true },
+];
 
 interface FeedItem {
   guid: string;
@@ -31,47 +58,66 @@ interface FeedItem {
   link: string;
   description: string;
   pubDate: string;
+  content: string;
+}
+
+interface StateEntry {
+  key: string;
+  title: string;
+  sentAt: string;
 }
 
 interface State {
-  sent: { guid: string; title: string; sentAt: string }[];
+  sent: StateEntry[];
 }
 
 async function main() {
   const mode = process.argv.includes('--seed')
     ? 'seed'
-    : process.argv.includes('--dry-run')
-      ? 'dry-run'
-      : 'send';
+    : process.argv.includes('--preview')
+      ? 'preview'
+      : process.argv.includes('--dry-run')
+        ? 'dry-run'
+        : 'send';
 
   const state = readState();
-  const items = await fetchFeed();
-  const alreadySent = new Set(state.sent.map((entry) => entry.guid));
-  const pending = items.filter((item) => !alreadySent.has(item.guid));
+  const seen = new Set(state.sent.map((entry) => entry.key));
+  const plan: { feed: FeedSource; items: FeedItem[] }[] = [];
 
-  console.log(`feed: ${items.length} posts, ${pending.length} unsent`);
+  for (const feed of FEEDS) {
+    const items = await fetchFeed(`${SITE}${feed.path}`);
+    const pending = items.filter((item) => !seen.has(stateKey(item, feed)));
+    console.log(
+      `${feed.section}/${feed.language}: ${items.length} in feed, ${pending.length} unsent`,
+    );
+    for (const item of pending) {
+      console.log(`  - ${item.title}`);
+    }
+    if (pending.length > 0) {
+      plan.push({ feed, items: pending });
+    }
+  }
 
   if (mode === 'seed') {
-    // Deliberately records without sending: the first real run must not mail
-    // out the entire back catalogue.
-    writeState({
-      sent: items.map((item) => ({
-        guid: item.guid,
-        title: item.title,
-        sentAt: new Date().toISOString(),
-      })),
-    });
-    console.log(`seeded ${items.length} posts as already sent — nothing emailed`);
+    // Records without sending: the first real run must not mail the archive.
+    const sent: StateEntry[] = [];
+    for (const { feed, items } of plan) {
+      for (const item of items) {
+        sent.push({
+          key: stateKey(item, feed),
+          title: item.title,
+          sentAt: new Date().toISOString(),
+        });
+      }
+    }
+    writeState({ sent: [...state.sent, ...sent] });
+    console.log(`seeded ${sent.length} entries as already sent — nothing emailed`);
     return;
   }
 
-  if (pending.length === 0) {
+  if (plan.length === 0) {
     console.log('nothing to send');
     return;
-  }
-
-  for (const item of pending) {
-    console.log(`  - ${item.title}  (${item.link})`);
   }
 
   if (mode === 'dry-run') {
@@ -79,28 +125,74 @@ async function main() {
     return;
   }
 
-  const apiKey = requireEnv('RESEND_API_KEY');
-  const segmentId = requireEnv('RESEND_SEGMENT_ID');
-
-  // Oldest first, so a backlog arrives in reading order.
-  for (const item of [...pending].reverse()) {
-    await sendPost(item, apiKey, segmentId);
-    state.sent.push({
-      guid: item.guid,
-      title: item.title,
-      sentAt: new Date().toISOString(),
-    });
-    // Written after each send so a mid-run failure cannot resend what already
-    // went out.
-    writeState(state);
-    console.log(`sent: ${item.title}`);
+  if (mode === 'preview') {
+    const outDir = process.env.PREVIEW_DIR ?? '.newsletter-preview';
+    mkdirSync(outDir, { recursive: true });
+    for (const { feed, items } of plan) {
+      const ordered = [...items].reverse();
+      const group = feed.batch ? ordered : [ordered[0]];
+      const { html, subject, bytes } = buildEmail(group, feed);
+      const file = `${outDir}/${feed.section}-${feed.language}.html`;
+      writeFileSync(file, html);
+      console.log(`preview: ${file}  (${bytes} bytes)  subject: ${subject}`);
+    }
+    console.log('preview only — no email sent, state unchanged');
+    return;
   }
+
+  const apiKey = requireEnv('RESEND_API_KEY');
+
+  for (const { feed, items } of plan) {
+    const segmentId = requireEnv(
+      feed.language === 'ko' ? 'RESEND_SEGMENT_KO' : 'RESEND_SEGMENT_EN',
+    );
+    const topicId = requireEnv(
+      feed.section === 'daily' ? 'RESEND_TOPIC_DAILY' : 'RESEND_TOPIC_ESSAYS',
+    );
+
+    // Oldest first, so a backlog arrives in reading order.
+    const ordered = [...items].reverse();
+    const groups = feed.batch ? [ordered] : ordered.map((item) => [item]);
+
+    for (const group of groups) {
+      await sendGroup(group, feed, { apiKey, segmentId, topicId });
+      for (const item of group) {
+        state.sent.push({
+          key: stateKey(item, feed),
+          title: item.title,
+          sentAt: new Date().toISOString(),
+        });
+      }
+      // Written after each send so a mid-run failure cannot resend what has
+      // already gone out.
+      writeState(state);
+      console.log(`sent ${feed.section}/${feed.language}: ${group.length} item(s)`);
+    }
+  }
+}
+
+function stateKey(item: FeedItem, feed: FeedSource): string {
+  return `${item.guid}|${feed.language}`;
 }
 
 function readState(): State {
   try {
-    const parsed = JSON.parse(readFileSync(STATE_PATH, 'utf8')) as Partial<State>;
-    return { sent: parsed.sent ?? [] };
+    const parsed = JSON.parse(readFileSync(STATE_PATH, 'utf8')) as {
+      sent?: (StateEntry | { guid?: string; title?: string; sentAt?: string })[];
+    };
+    const sent = (parsed.sent ?? []).map((entry) => {
+      if ('key' in entry && entry.key) {
+        return entry as StateEntry;
+      }
+      // Pre-language state recorded English-only blog sends.
+      const legacy = entry as { guid?: string; title?: string; sentAt?: string };
+      return {
+        key: `${legacy.guid ?? ''}|en`,
+        title: legacy.title ?? '',
+        sentAt: legacy.sentAt ?? new Date().toISOString(),
+      };
+    });
+    return { sent };
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       return { sent: [] };
@@ -121,19 +213,19 @@ function requireEnv(name: string): string {
   return value;
 }
 
-async function fetchFeed(): Promise<FeedItem[]> {
+async function fetchFeed(url: string): Promise<FeedItem[]> {
   let lastError: unknown;
 
   for (let attempt = 1; attempt <= FEED_ATTEMPTS; attempt += 1) {
     try {
-      const response = await fetch(FEED_URL, { headers: { 'Cache-Control': 'no-cache' } });
+      const response = await fetch(url, { headers: { 'Cache-Control': 'no-cache' } });
       if (!response.ok) {
         throw new Error(`Feed responded ${response.status}`);
       }
       return parseFeed(await response.text());
     } catch (error) {
       lastError = error;
-      console.warn(`feed attempt ${attempt}/${FEED_ATTEMPTS} failed: ${String(error)}`);
+      console.warn(`feed attempt ${attempt}/${FEED_ATTEMPTS} for ${url} failed: ${String(error)}`);
       if (attempt < FEED_ATTEMPTS) {
         await new Promise((resolve) => setTimeout(resolve, FEED_RETRY_MS));
       }
@@ -162,22 +254,87 @@ function parseFeed(xml: string): FeedItem[] {
       title: String(item.title ?? 'Untitled'),
       description: String(item.description ?? ''),
       pubDate: String(item.pubDate ?? ''),
+      content: String(item['content:encoded'] ?? ''),
     };
   });
 }
 
-async function sendPost(item: FeedItem, apiKey: string, segmentId: string): Promise<void> {
-  const created = await resend('/broadcasts', apiKey, {
-    segment_id: segmentId,
-    from: FROM,
-    reply_to: REPLY_TO,
-    subject: item.title,
-    name: `${formatDate(item.pubDate)} — ${item.title}`,
-    html: renderHtml(item),
-    text: renderText(item),
+interface SendContext {
+  apiKey: string;
+  segmentId: string;
+  topicId: string;
+}
+
+function buildEmail(
+  group: FeedItem[],
+  feed: FeedSource,
+): { html: string; subject: string; bytes: number } {
+  const lead = group[group.length - 1];
+  const subject = buildSubject(group, feed);
+  const shared = {
+    language: feed.language,
+    title: subject,
+    link: lead.link,
+    dateLabel: formatDate(lead.pubDate, feed.language),
+  };
+
+  let html = renderEmailHtml({
+    ...shared,
+    bodyHtml: group
+      .map((item) =>
+        group.length > 1
+          ? `<h1>${item.title}</h1>\n${item.content || `<p>${item.description}</p>`}`
+          : item.content || `<p>${item.description}</p>`,
+      )
+      .join('\n<hr />\n'),
   });
 
-  await resend(`/broadcasts/${created.id}/send`, apiKey, {});
+  // Falling back to an excerpt keeps the footer — and the unsubscribe link
+  // inside it — from disappearing behind Gmail's clip.
+  if (Buffer.byteLength(html, 'utf8') > GMAIL_CLIP_BYTES) {
+    console.warn(
+      `  oversized (${Buffer.byteLength(html, 'utf8')} bytes) — falling back to excerpts`,
+    );
+    html = renderEmailHtml({
+      ...shared,
+      bodyHtml: group
+        .map((item) => `<h1>${item.title}</h1>\n<p>${item.description}</p>`)
+        .join('\n<hr />\n'),
+    });
+  }
+
+  return { html, subject, bytes: Buffer.byteLength(html, 'utf8') };
+}
+
+async function sendGroup(
+  group: FeedItem[],
+  feed: FeedSource,
+  context: SendContext,
+): Promise<void> {
+  const lead = group[group.length - 1];
+  const { html, subject } = buildEmail(group, feed);
+
+  const created = await resend('/broadcasts', context.apiKey, {
+    segment_id: context.segmentId,
+    topic_id: context.topicId,
+    from: FROM,
+    reply_to: REPLY_TO,
+    subject,
+    name: `${formatDate(lead.pubDate, 'en')} — ${feed.section}/${feed.language}`,
+    html,
+    text: `${htmlToText(html)}\n\n${EMAIL_COPY[feed.language].unsubscribe}: {{{RESEND_UNSUBSCRIBE_URL}}}`,
+  });
+
+  await resend(`/broadcasts/${created.id}/send`, context.apiKey, {});
+}
+
+function buildSubject(group: FeedItem[], feed: FeedSource): string {
+  if (group.length === 1) {
+    return group[0].title;
+  }
+  return feed.language === 'ko'
+    ? `데일리 인사이트 — ${group.length}건`
+    : `Daily Insights — ${group.length} updates`;
 }
 
 async function resend(
@@ -201,66 +358,17 @@ async function resend(
   return JSON.parse(raw) as { id: string };
 }
 
-function formatDate(pubDate: string): string {
+function formatDate(pubDate: string, language: Language): string {
   const date = new Date(pubDate);
   if (Number.isNaN(date.valueOf())) {
     return '';
   }
-  return date.toLocaleDateString('en-GB', {
+  return date.toLocaleDateString(language === 'ko' ? 'ko-KR' : 'en-GB', {
     day: 'numeric',
-    month: 'short',
+    month: language === 'ko' ? 'long' : 'short',
     year: 'numeric',
     timeZone: 'UTC',
   });
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-function renderHtml(item: FeedItem): string {
-  return `<!doctype html>
-<html>
-  <body style="margin:0;padding:32px 16px;background:#F4F4F0;font-family:Georgia,'Times New Roman',serif;color:#191919;line-height:1.7;">
-    <div style="max-width:560px;margin:0 auto;">
-      <p style="margin:0 0 32px;font-size:13px;color:#8C8C8C;">${SITE_NAME}</p>
-
-      <h1 style="margin:0 0 8px;font-size:24px;font-weight:500;">${escapeHtml(item.title)}</h1>
-      <p style="margin:0 0 24px;font-size:12px;color:#8C8C8C;">${formatDate(item.pubDate)}</p>
-
-      <p style="margin:0 0 24px;font-size:16px;">${escapeHtml(item.description)}</p>
-
-      <p style="margin:0 0 32px;">
-        <a href="${item.link}" style="color:#EA580C;font-size:16px;">Read the full post &rarr;</a>
-      </p>
-
-      <hr style="border:none;border-top:1px solid rgba(140,140,140,0.3);margin:32px 0;" />
-
-      <p style="margin:0;font-size:12px;color:#8C8C8C;">
-        You are receiving this because you subscribed at ${SITE_NAME}.
-        <a href="{{{RESEND_UNSUBSCRIBE_URL}}}" style="color:#8C8C8C;">Unsubscribe</a>
-      </p>
-    </div>
-  </body>
-</html>`;
-}
-
-function renderText(item: FeedItem): string {
-  return [
-    item.title,
-    formatDate(item.pubDate),
-    '',
-    item.description,
-    '',
-    `Read the full post: ${item.link}`,
-    '',
-    `You are receiving this because you subscribed at ${SITE_NAME}.`,
-    'Unsubscribe: {{{RESEND_UNSUBSCRIBE_URL}}}',
-  ].join('\n');
 }
 
 main().catch((error) => {

@@ -15,9 +15,14 @@ directory = "./dist/"
 binding = "ASSETS"
 run_worker_first = ["/api/*"]
 
-# Not a credential — the Resend API key is the thing that must stay secret.
+# Not credentials — the Resend API key is the thing that must stay secret.
+# Language picks the segment, topic picks what they opted into; a broadcast
+# targets one of each.
 [vars]
-RESEND_AUDIENCE_ID = "a263ebb3-76f3-48bd-bfdc-cc4b1fd948d5"
+RESEND_SEGMENT_EN = "7cd6b9d0-6487-4095-b448-96eabf181e82"
+RESEND_SEGMENT_KO = "a45bef24-0b37-4901-b6ad-d8f87f42f9cd"
+RESEND_TOPIC_ESSAYS = "82d8b4be-5f0e-4695-b513-c773a7c474a9"
+RESEND_TOPIC_DAILY = "52cde607-0aef-4096-b665-0b45519f0c96"
 
 # /api/subscribe sends mail on an anonymous request, so it is capped per IP.
 [[ratelimits]]

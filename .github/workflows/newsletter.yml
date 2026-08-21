@@ -46,7 +46,10 @@ jobs:
       - name: Send newsletter for new posts
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-          RESEND_SEGMENT_ID: ${{ secrets.RESEND_SEGMENT_ID }}
+          RESEND_SEGMENT_EN: ${{ vars.RESEND_SEGMENT_EN }}
+          RESEND_SEGMENT_KO: ${{ vars.RESEND_SEGMENT_KO }}
+          RESEND_TOPIC_ESSAYS: ${{ vars.RESEND_TOPIC_ESSAYS }}
+          RESEND_TOPIC_DAILY: ${{ vars.RESEND_TOPIC_DAILY }}
         run: |
           npx tsx scripts/newsletter/send.ts \
             ${{ inputs.dry_run && '--dry-run' || '' }}

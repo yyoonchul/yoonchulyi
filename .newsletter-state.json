@@ -1,34 +1,264 @@
 {
   "sent": [
     {
-      "guid": "https://yoonchulyi.com/blog/MaekNote-Manifesto/",
+      "key": "https://yoonchulyi.com/blog/MaekNote-Manifesto/|en",
       "title": "MaekNote Manifesto",
       "sentAt": "2026-08-21T13:50:25.806Z"
     },
     {
-      "guid": "https://yoonchulyi.com/blog/2025-Recap/",
+      "key": "https://yoonchulyi.com/blog/2025-Recap/|en",
       "title": "2025 Recap",
       "sentAt": "2026-08-21T13:50:25.807Z"
     },
     {
-      "guid": "https://yoonchulyi.com/blog/Why-I-want-to-go-to-US/",
+      "key": "https://yoonchulyi.com/blog/Why-I-want-to-go-to-US/|en",
       "title": "Why I want to go to US",
       "sentAt": "2026-08-21T13:50:25.807Z"
     },
     {
-      "guid": "https://yoonchulyi.com/blog/What-I-want-to-build/",
+      "key": "https://yoonchulyi.com/blog/What-I-want-to-build/|en",
       "title": "What I want to build",
       "sentAt": "2026-08-21T13:50:25.807Z"
     },
     {
-      "guid": "https://yoonchulyi.com/blog/Creating-content-in-the-military/",
+      "key": "https://yoonchulyi.com/blog/Creating-content-in-the-military/|en",
       "title": "Creating content in the military",
       "sentAt": "2026-08-21T13:50:25.807Z"
     },
     {
-      "guid": "https://yoonchulyi.com/blog/Mutant/",
+      "key": "https://yoonchulyi.com/blog/Mutant/|en",
       "title": "Mutant",
       "sentAt": "2026-08-21T13:50:25.807Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/blog/MaekNote-Manifesto/|ko",
+      "title": "MaekNote Manifesto",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/blog/2025-Recap/|ko",
+      "title": "2025 Recap",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/blog/Why-I-want-to-go-to-US/|ko",
+      "title": "Why I want to go to US",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/blog/What-I-want-to-build/|ko",
+      "title": "What I want to build",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/blog/Creating-content-in-the-military/|ko",
+      "title": "Creating content in the military",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/blog/Mutant/|ko",
+      "title": "Mutant",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/21/|en",
+      "title": "📰 Daily Digest — 2026-08-21",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/20/|en",
+      "title": "📰 Daily Digest — 2026-08-20",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/18/|en",
+      "title": "📰 Daily Digest — 2026-08-18",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/16/|en",
+      "title": "📰 Daily Digest — 2026-08-16",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/15/|en",
+      "title": "📰 Daily Digest — 2026-08-15",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/14/|en",
+      "title": "📰 Daily Digest — 2026-08-14",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/12/|en",
+      "title": "📰 Daily Digest — 2026-08-12",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/11/|en",
+      "title": "📰 Daily Digest — 2026-08-11",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/10/|en",
+      "title": "📰 Daily Digest — 2026-08-10",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/07/|en",
+      "title": "📰 Daily Digest — 2026-08-07",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/04/|en",
+      "title": "📰 Daily Digest — 2026-08-04",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/03/|en",
+      "title": "📰 Daily Digest — 2026-08-03",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/01/|en",
+      "title": "📰 Daily Digest — 2026-08-01",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/07/30/|en",
+      "title": "📰 Daily Digest — 2026-07-30",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/07/29/|en",
+      "title": "📰 Daily Digest — 2026-07-29",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/07/28/|en",
+      "title": "📰 Daily Digest — 2026-07-28",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/07/27/|en",
+      "title": "📰 Daily Digest — 2026-07-27",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/07/25/|en",
+      "title": "📰 Daily Digest — 2026-07-25",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/07/23/|en",
+      "title": "📰 Daily Digest — 2026-07-23",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/07/22/|en",
+      "title": "📰 Daily Digest — 2026-07-22",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/21/|ko",
+      "title": "📰 데일리 다이제스트 — 2026-08-21",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/20/|ko",
+      "title": "📰 데일리 다이제스트 — 2026-08-20",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/18/|ko",
+      "title": "📰 데일리 다이제스트 — 2026-08-18",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/16/|ko",
+      "title": "📰 데일리 다이제스트 — 2026-08-16",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/15/|ko",
+      "title": "📰 데일리 다이제스트 — 2026-08-15",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/14/|ko",
+      "title": "📰 데일리 다이제스트 — 2026-08-14",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/12/|ko",
+      "title": "📰 데일리 다이제스트 — 2026-08-12",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/11/|ko",
+      "title": "📰 데일리 다이제스트 — 2026-08-11",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/10/|ko",
+      "title": "📰 데일리 다이제스트 — 2026-08-10",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/07/|ko",
+      "title": "📰 데일리 다이제스트 — 2026-08-07",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/04/|ko",
+      "title": "📰 데일리 다이제스트 — 2026-08-04",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/03/|ko",
+      "title": "📰 데일리 다이제스트 — 2026-08-03",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/08/01/|ko",
+      "title": "📰 데일리 다이제스트 — 2026-08-01",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/07/30/|ko",
+      "title": "📰 데일리 다이제스트 — 2026-07-30",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/07/29/|ko",
+      "title": "📰 데일리 다이제스트 — 2026-07-29",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/07/28/|ko",
+      "title": "📰 데일리 다이제스트 — 2026-07-28",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/07/27/|ko",
+      "title": "📰 데일리 다이제스트 — 2026-07-27",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/07/25/|ko",
+      "title": "📰 데일리 다이제스트 — 2026-07-25",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/07/23/|ko",
+      "title": "📰 데일리 다이제스트 — 2026-07-23",
+      "sentAt": "2026-08-21T14:43:03.159Z"
+    },
+    {
+      "key": "https://yoonchulyi.com/daily-insights/2026/07/22/|ko",
+      "title": "📰 데일리 다이제스트 — 2026-07-22",
+      "sentAt": "2026-08-21T14:43:03.159Z"
     }
   ]
 }

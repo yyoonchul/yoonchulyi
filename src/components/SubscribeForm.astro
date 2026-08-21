@@ -6,43 +6,85 @@ interface Props {
 
 const {
   heading = 'Subscribe',
-  blurb = 'New essays in your inbox. No spam, unsubscribe anytime.',
+  blurb = 'Essays and daily notes in your inbox. Unsubscribe anytime.',
 } = Astro.props;
+
+const topics = [
+  { value: 'essays', label: 'Essays', hint: 'Long-form, a few times a month' },
+  { value: 'daily', label: 'Daily Insights', hint: 'A short digest most days' },
+];
+
+const languages = [
+  { value: 'en', label: 'English' },
+  { value: 'ko', label: '한국어' },
+];
 ---
 
 <section class="py-8 border-t border-sub/20">
   <h2 class="font-serif text-lg mb-1">{heading}</h2>
-  <p class="text-sub text-sm mb-4">{blurb}</p>
+  <p class="text-sub text-sm mb-5">{blurb}</p>
 
-  <form
-    data-subscribe-form
-    action="/api/subscribe"
-    method="post"
-    class="flex flex-col gap-3 sm:flex-row sm:items-start"
-  >
-    <label class="sr-only" for="subscribe-email">Email address</label>
-    <input
-      id="subscribe-email"
-      type="email"
-      name="email"
-      required
-      autocomplete="email"
-      placeholder="you@example.com"
-      class="flex-1 min-w-0 px-3 py-2 font-mono text-sm bg-transparent border border-sub/40 focus:border-accent focus:outline-none transition-colors"
-    />
+  <form data-subscribe-form action="/api/subscribe" method="post" class="flex flex-col gap-5">
+    <fieldset class="flex flex-col gap-2">
+      <legend class="font-mono text-xs text-sub mb-2">What to receive</legend>
+      {topics.map((topic) => (
+        <label class="flex items-baseline gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            name="topics"
+            value={topic.value}
+            checked
+            class="accent-accent"
+          />
+          <span class="font-serif text-base">{topic.label}</span>
+          <span class="text-sub text-xs">{topic.hint}</span>
+        </label>
+      ))}
+    </fieldset>
 
-    {/* Bots fill every field they find; this one is hidden from people. */}
-    <div class="hidden" aria-hidden="true">
-      <label for="subscribe-website">Leave this field empty</label>
-      <input id="subscribe-website" type="text" name="website" tabindex="-1" autocomplete="off" />
+    <fieldset class="flex flex-col gap-2">
+      <legend class="font-mono text-xs text-sub mb-2">Language</legend>
+      <div class="flex gap-5">
+        {languages.map((language, index) => (
+          <label class="flex items-baseline gap-2 cursor-pointer">
+            <input
+              type="radio"
+              name="language"
+              value={language.value}
+              checked={index === 0}
+              class="accent-accent"
+            />
+            <span class="font-serif text-base">{language.label}</span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-start">
+      <label class="sr-only" for="subscribe-email">Email address</label>
+      <input
+        id="subscribe-email"
+        type="email"
+        name="email"
+        required
+        autocomplete="email"
+        placeholder="you@example.com"
+        class="flex-1 min-w-0 px-3 py-2 font-mono text-sm bg-transparent border border-sub/40 focus:border-accent focus:outline-none transition-colors"
+      />
+
+      {/* Bots fill every field they find; this one is hidden from people. */}
+      <div class="hidden" aria-hidden="true">
+        <label for="subscribe-website">Leave this field empty</label>
+        <input id="subscribe-website" type="text" name="website" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <button
+        type="submit"
+        class="px-4 py-2 font-mono text-sm border border-text hover:bg-text hover:text-bg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      >
+        Subscribe
+      </button>
     </div>
-
-    <button
-      type="submit"
-      class="px-4 py-2 font-mono text-sm border border-text hover:bg-text hover:text-bg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-    >
-      Subscribe
-    </button>
   </form>
 
   <p data-subscribe-status role="status" aria-live="polite" class="mt-3 font-mono text-sm text-sub empty:mt-0"></p>
@@ -57,6 +99,12 @@ const {
 
     const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
     const data = new FormData(form);
+    const topics = data.getAll('topics').map(String);
+
+    if (topics.length === 0) {
+      if (status) status.textContent = 'Choose at least one thing to receive.';
+      return;
+    }
 
     if (button) button.disabled = true;
     if (status) status.textContent = 'Sending…';
@@ -68,6 +116,8 @@ const {
         body: JSON.stringify({
           email: data.get('email'),
           website: data.get('website'),
+          language: data.get('language'),
+          topics,
         }),
       });
       const body = (await response.json().catch(() => ({}))) as { error?: string };

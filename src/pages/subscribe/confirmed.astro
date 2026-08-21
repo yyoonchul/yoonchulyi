@@ -1,5 +1,8 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// The confirm redirect carries the language the subscriber picked, so the
+// landing page speaks it too. Read client-side: the page is static.
 ---
 
 <BaseLayout
@@ -9,12 +12,32 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   robots="noindex, nofollow"
 >
   <section class="py-16">
-    <h1 class="font-serif text-2xl mb-3">You're subscribed.</h1>
-    <p class="font-serif text-lg leading-relaxed text-text mb-6">
-      New essays will land in your inbox. Every email has an unsubscribe link.
+    <h1 class="font-serif text-2xl mb-3" data-confirm-heading>You're subscribed.</h1>
+    <p class="font-serif text-lg leading-relaxed text-text mb-6" data-confirm-body>
+      New posts will land in your inbox. Every email has an unsubscribe link.
     </p>
-    <a href="/blog/" class="font-mono text-sm text-sub hover:text-accent transition-colors">
+    <a
+      href="/blog/"
+      class="font-mono text-sm text-sub hover:text-accent transition-colors"
+      data-confirm-link
+    >
       Read the archive ↗
     </a>
   </section>
 </BaseLayout>
+
+<script>
+  if (new URLSearchParams(location.search).get('lang') === 'ko') {
+    const heading = document.querySelector('[data-confirm-heading]');
+    const body = document.querySelector('[data-confirm-body]');
+    const link = document.querySelector('[data-confirm-link]');
+
+    document.documentElement.lang = 'ko';
+    if (heading) heading.textContent = '구독이 완료되었습니다.';
+    if (body) {
+      body.textContent =
+        '새 글이 올라오면 메일로 보내드립니다. 모든 메일에 수신거부 링크가 있습니다.';
+    }
+    if (link) link.textContent = '지난 글 보기 ↗';
+  }
+</script>
