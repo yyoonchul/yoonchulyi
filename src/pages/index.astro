@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import SubscribeForm from '../components/SubscribeForm.astro';
 import {
   createPersonSchema,
   createWebsiteSchema,
@@ -76,4 +77,6 @@ import { DEFAULT_DESCRIPTION } from '../lib/seo';
       </a>
     </div>
   </section>
+
+  <SubscribeForm />
 </BaseLayout>

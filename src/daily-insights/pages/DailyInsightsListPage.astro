@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import SubscribeForm from '../../components/SubscribeForm.astro';
 import {
   getDailyInsightDescription,
   getDailyInsightEntriesSorted,
@@ -135,6 +136,12 @@ const groupedDailyInsights = dailyInsights.reduce(
       ))}
     </div>
   </section>
+
+  <SubscribeForm
+    topics={['daily']}
+    heading="Get Daily Insights by email"
+    blurb="A short digest of what I read, most days. Nothing else, unsubscribe anytime."
+  />
 </BaseLayout>
 
 <style>
