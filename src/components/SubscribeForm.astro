@@ -15,13 +15,13 @@ interface Props {
 
 const {
   heading = 'Subscribe',
-  blurb = 'Essays and daily notes in your inbox. Unsubscribe anytime.',
+  blurb = '',
   topics: fixedTopics,
 } = Astro.props;
 
 const TOPIC_OPTIONS: { value: Topic; label: string; hint: string }[] = [
-  { value: 'essays', label: 'Essays', hint: 'Long-form, a few times a month' },
-  { value: 'daily', label: 'Daily Insights', hint: 'A short digest most days' },
+  { value: 'essays', label: 'Essays', hint: 'a few times a month' },
+  { value: 'daily', label: 'Daily Insights', hint: 'most days' },
 ];
 
 const languages = [
