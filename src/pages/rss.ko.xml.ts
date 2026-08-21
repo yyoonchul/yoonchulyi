@@ -8,10 +8,10 @@ import { renderFeed } from '../lib/rss';
 
 export async function GET(context: APIContext) {
   return renderFeed({
-    title: getFeedTitle('en', 'blog'),
-    description: getFeedDescription('en', 'blog'),
+    title: getFeedTitle('ko', 'blog'),
+    description: getFeedDescription('ko', 'blog'),
     site: context.site!,
-    language: 'en',
-    entries: await getBlogFeedEntries('en'),
+    language: 'ko',
+    entries: await getBlogFeedEntries('ko'),
   });
 }

@@ -21,6 +21,22 @@ export function getAbsoluteUrl(path = '/'): string {
   return new URL(path, SITE_URL).toString();
 }
 
+/**
+ * Strips markdown syntax from a single heading.
+ *
+ * Unlike `stripMarkdown`, punctuation that only carries structural meaning in
+ * block context is left alone — a heading's hyphens are part of the words
+ * (`2026-08-21`), not list markers.
+ */
+export function stripMarkdownHeading(markdown: string): string {
+  return markdown
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/[*_~]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 export function stripMarkdown(markdown: string): string {
   return markdown
     .replace(/<!--[\s\S]*?-->/g, ' ')

@@ -37,7 +37,10 @@ const jsonLdItems = Array.isArray(jsonLd) ? jsonLd : [jsonLd];
   {robots && <meta name="robots" content={robots} />}
   <meta name="generator" content={Astro.generator} />
   <link rel="canonical" href={canonicalUrl} />
-  <link rel="alternate" type="application/rss+xml" title={SITE_NAME} href="/rss.xml" />
+  <link rel="alternate" type="application/rss+xml" title={`${SITE_NAME} — Essays`} href="/rss.xml" />
+  <link rel="alternate" type="application/rss+xml" title={`${SITE_NAME} — 글`} href="/rss.ko.xml" />
+  <link rel="alternate" type="application/rss+xml" title={`${SITE_NAME} — Daily Insights`} href="/daily-insights/rss.xml" />
+  <link rel="alternate" type="application/rss+xml" title={`${SITE_NAME} — 데일리 인사이트`} href="/daily-insights/rss.ko.xml" />
 
   <meta property="og:type" content={ogType} />
   <meta property="og:site_name" content={SITE_NAME} />

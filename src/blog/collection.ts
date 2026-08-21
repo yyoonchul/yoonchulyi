@@ -8,6 +8,8 @@ export const blogCollection = defineCollection({
   }),
   schema: z.object({
     title: z.string().min(1),
+    // Korean feed and newsletter subject fall back to `title` when unset.
+    titleKo: z.string().min(1).optional(),
     date: z.coerce.date(),
     seoTitle: z.string().min(1).optional(),
     description: z.string().min(1).optional(),
