@@ -1,10 +1,10 @@
 /// <reference types="@cloudflare/workers-types" />
 
 /**
- * Subscription endpoints for the newsletter.
+ * Subscription endpoints for the newsletter, plus the password gate on /admin/.
  *
- * Everything outside `/api/*` never reaches this code — `run_worker_first`
- * in wrangler.toml keeps the rest of the site on the static asset path.
+ * Only the paths listed in `run_worker_first` in wrangler.toml reach this
+ * code; the rest of the site is served straight from the CDN.
  *
  * Confirmation state lives entirely in a signed token rather than storage:
  * the token carries the address, the chosen language and topics, and an
@@ -22,6 +22,9 @@ interface Env {
   RESEND_TOPIC_DAILY: string;
   SUBSCRIBE_SECRET: string;
   SUBSCRIBE_LIMITER: RateLimit;
+  ADMIN_PASSWORD: string;
+  ADMIN_SECRET: string;
+  ADMIN_LIMITER: RateLimit;
 }
 
 type Language = 'en' | 'ko';
@@ -40,6 +43,23 @@ const FROM = 'Yoonchul Yi <yc@mail.yoonchulyi.com>';
 const REPLY_TO = 'hi@yoonchulyi.com';
 const TOKEN_TTL_SECONDS = 60 * 60 * 24;
 
+// A browser session, not a remember-me. The admin pages read the Resend
+// account, so a stale cookie on a shared machine is the thing to avoid.
+const ADMIN_SESSION_TTL_SECONDS = 60 * 60 * 12;
+const ADMIN_COOKIE = 'admin_session';
+
+// Resend keeps 30 days of history on this plan, so every number below is a
+// snapshot of that window and nothing older exists to ask for.
+const RESEND = 'https://api.resend.com';
+const RESEND_PAGE_SIZE = 100;
+const EMAIL_PAGE_LIMIT = 5;
+const CONTACT_PAGE_LIMIT = 5;
+// Topics are only readable one contact at a time, and the account is capped at
+// 10 requests/second. Past this many contacts the topic split is dropped
+// rather than spending the whole rate limit on it.
+const TOPIC_LOOKUP_LIMIT = 100;
+const TOPIC_CONCURRENCY = 4;
+
 // Deliberately conservative: this endpoint sends mail on a stranger's
 // request, so abuse here costs sending reputation, not just CPU.
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -55,8 +75,21 @@ export default {
     if (url.pathname === '/api/confirm') {
       return handleConfirm(url, env);
     }
+    if (url.pathname === '/api/admin/login') {
+      return handleAdminLogin(request, env);
+    }
+    if (url.pathname === '/api/admin/logout') {
+      return handleAdminLogout();
+    }
+    if (url.pathname === '/api/admin/stats') {
+      return handleAdminStats(request, env);
+    }
     if (url.pathname.startsWith('/api/')) {
       return json({ error: 'Not found' }, 404);
+    }
+
+    if (url.pathname === '/admin' || url.pathname.startsWith('/admin/')) {
+      return handleAdmin(request, env);
     }
 
     // /about/ was the combined profile page before it was split. Keep the
@@ -144,6 +177,515 @@ async function handleConfirm(url: URL, env: Env): Promise<Response> {
   }
 
   return Response.redirect(`${SITE}/subscribe/confirmed/?lang=${subscription.language}`, 302);
+}
+
+/**
+ * The gate on every /admin/* request.
+ *
+ * The pages themselves are ordinary static assets, so the Worker has to sit in
+ * front of them — `run_worker_first` in wrangler.toml is what guarantees the
+ * CDN never hands one out on its own. Without a valid session we return the
+ * login form under the requested URL rather than redirecting, so signing in
+ * lands you back where you were.
+ */
+async function handleAdmin(request: Request, env: Env): Promise<Response> {
+  if (await hasAdminSession(request, env)) {
+    const asset = await env.ASSETS.fetch(request);
+    return withAdminHeaders(new Response(asset.body, asset));
+  }
+
+  const next = new URL(request.url).pathname;
+  return withAdminHeaders(
+    new Response(loginHtml('', next), {
+      status: 401,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    }),
+  );
+}
+
+async function handleAdminLogin(request: Request, env: Env): Promise<Response> {
+  if (request.method !== 'POST') {
+    return json({ error: 'Method not allowed' }, 405);
+  }
+
+  const form = await request.formData().catch(() => new FormData());
+  const next = String(form.get('next') ?? '');
+
+  // Guessing a password is cheap; this is what makes it expensive.
+  const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
+  const { success } = await env.ADMIN_LIMITER.limit({ key: ip });
+  if (!success) {
+    return withAdminHeaders(
+      new Response(loginHtml('Too many attempts. Try again in a minute.', next), {
+        status: 429,
+        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      }),
+    );
+  }
+
+  const password = String(form.get('password') ?? '');
+
+  if (!(await passwordMatches(password, env))) {
+    return withAdminHeaders(
+      new Response(loginHtml('Wrong password.', next), {
+        status: 401,
+        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      }),
+    );
+  }
+
+  const target = adminRedirectTarget(next);
+  const response = new Response(null, {
+    status: 303,
+    headers: { Location: target },
+  });
+  response.headers.set('Set-Cookie', await adminCookie(env));
+  return withAdminHeaders(response);
+}
+
+/**
+ * Everything the admin page shows, in one request.
+ *
+ * Resend's aggregate `metrics` endpoints are still private beta, so the counts
+ * here are derived from the plain list endpoints instead. The API key never
+ * leaves the Worker — the browser only ever sees the totals.
+ */
+async function handleAdminStats(request: Request, env: Env): Promise<Response> {
+  if (!(await hasAdminSession(request, env))) {
+    return json({ error: 'Unauthorized' }, 401);
+  }
+
+  const [subscribers, emails, broadcasts] = await Promise.all([
+    settle(() => subscriberStats(env)),
+    settle(() => emailStats(env)),
+    settle(() => broadcastStats(env)),
+  ]);
+
+  return withAdminHeaders(
+    json({
+      fetched_at: new Date().toISOString(),
+      retention_days: 30,
+      subscribers,
+      emails,
+      broadcasts,
+    }),
+  );
+}
+
+/** One failing Resend call should cost you that panel, not the whole page. */
+async function settle<T>(load: () => Promise<T>): Promise<T | { error: string }> {
+  try {
+    return await load();
+  } catch (cause) {
+    return { error: cause instanceof Error ? cause.message : 'Request failed' };
+  }
+}
+
+async function resendGet<T>(path: string, env: Env): Promise<T> {
+  const response = await fetch(`${RESEND}${path}`, {
+    headers: { Authorization: `Bearer ${env.RESEND_API_KEY}` },
+  });
+  if (!response.ok) {
+    // The path is safe to surface; the key it was signed with is not.
+    throw new Error(`Resend returned ${response.status} for ${path.split('?')[0]}`);
+  }
+  return (await response.json()) as T;
+}
+
+interface ResendPage<T> {
+  data?: T[];
+  has_more?: boolean;
+}
+
+/**
+ * Cursor pagination with a page cap. The cap is what stops a large account
+ * from turning one button press into hundreds of upstream requests; when it
+ * bites, `truncated` says so rather than quietly under-reporting.
+ */
+async function resendList<T extends { id: string }>(
+  path: string,
+  env: Env,
+  maxPages: number,
+): Promise<{ items: T[]; truncated: boolean }> {
+  const items: T[] = [];
+  let after = '';
+
+  for (let page = 0; page < maxPages; page += 1) {
+    const separator = path.includes('?') ? '&' : '?';
+    const query = `${path}${separator}limit=${RESEND_PAGE_SIZE}${
+      after ? `&after=${encodeURIComponent(after)}` : ''
+    }`;
+    const body = await resendGet<ResendPage<T>>(query, env);
+    const batch = body.data ?? [];
+    items.push(...batch);
+
+    if (!body.has_more || batch.length === 0) {
+      return { items, truncated: false };
+    }
+    after = batch[batch.length - 1].id;
+  }
+
+  return { items, truncated: true };
+}
+
+interface ResendContact {
+  id: string;
+  email: string;
+  created_at?: string;
+  unsubscribed?: boolean;
+}
+
+async function subscriberStats(env: Env) {
+  const { items: contacts, truncated } = await resendList<ResendContact>(
+    '/contacts',
+    env,
+    CONTACT_PAGE_LIMIT,
+  );
+  const active = contacts.filter((contact) => !contact.unsubscribed);
+
+  const [languages, topics] = await Promise.all([
+    settle(() => languageCounts(env)),
+    settle(() => topicCounts(active, env)),
+  ]);
+
+  return {
+    total: contacts.length,
+    active: active.length,
+    unsubscribed: contacts.length - active.length,
+    truncated,
+    languages,
+    topics,
+  };
+}
+
+/** The two segments the subscribe flow writes to: one per language. */
+async function languageCounts(env: Env) {
+  const [en, ko] = await Promise.all([
+    segmentSize(env.RESEND_SEGMENT_EN, env),
+    segmentSize(env.RESEND_SEGMENT_KO, env),
+  ]);
+  return { en, ko };
+}
+
+async function segmentSize(
+  segmentId: string,
+  env: Env,
+): Promise<{ count: number; truncated: boolean }> {
+  if (!segmentId) {
+    return { count: 0, truncated: false };
+  }
+  const { items, truncated } = await resendList<ResendContact>(
+    `/segments/${segmentId}/contacts`,
+    env,
+    CONTACT_PAGE_LIMIT,
+  );
+  return { count: items.length, truncated };
+}
+
+interface ResendTopic {
+  id: string;
+  subscription?: string;
+}
+
+/**
+ * essays vs daily, which is the split the subscribe form actually asks about.
+ * There is no bulk endpoint for it, so this is one request per contact, run a
+ * few at a time and skipped entirely once the list outgrows the rate limit.
+ */
+async function topicCounts(contacts: ResendContact[], env: Env) {
+  if (contacts.length > TOPIC_LOOKUP_LIMIT) {
+    return { skipped: true as const, essays: 0, daily: 0 };
+  }
+
+  const counts = { essays: 0, daily: 0 };
+  const queue = [...contacts];
+
+  const worker = async () => {
+    for (let contact = queue.pop(); contact; contact = queue.pop()) {
+      const body = await resendGet<ResendPage<ResendTopic>>(
+        `/contacts/${contact.id}/topics`,
+        env,
+      );
+      for (const topic of body.data ?? []) {
+        if (topic.subscription !== 'opt_in') {
+          continue;
+        }
+        if (topic.id === env.RESEND_TOPIC_ESSAYS) {
+          counts.essays += 1;
+        } else if (topic.id === env.RESEND_TOPIC_DAILY) {
+          counts.daily += 1;
+        }
+      }
+    }
+  };
+
+  await Promise.all(
+    Array.from({ length: Math.min(TOPIC_CONCURRENCY, contacts.length) }, worker),
+  );
+
+  return { skipped: false as const, ...counts };
+}
+
+interface ResendEmail {
+  id: string;
+  to?: string[];
+  subject?: string;
+  created_at?: string;
+  last_event?: string;
+}
+
+/**
+ * `last_event` records only the furthest stage an email reached, so the funnel
+ * is reconstructed by rolling later stages back into earlier ones: anything
+ * that was opened was necessarily delivered. The one place this under-counts
+ * is a spam complaint, which overwrites `opened` — hence `complained` counting
+ * toward delivered but not toward opened.
+ */
+async function emailStats(env: Env) {
+  const { items, truncated } = await resendList<ResendEmail>(
+    '/emails',
+    env,
+    EMAIL_PAGE_LIMIT,
+  );
+
+  const byEvent: Record<string, number> = {};
+  for (const email of items) {
+    const event = email.last_event ?? 'unknown';
+    byEvent[event] = (byEvent[event] ?? 0) + 1;
+  }
+  const total = (...events: string[]) =>
+    events.reduce((sum, event) => sum + (byEvent[event] ?? 0), 0);
+
+  return {
+    sent: items.length,
+    truncated,
+    by_event: byEvent,
+    delivered: total('delivered', 'opened', 'clicked', 'complained'),
+    opened: total('opened', 'clicked'),
+    clicked: total('clicked'),
+    bounced: total('bounced'),
+    complained: total('complained'),
+    failed: total('failed'),
+    pending: total('sent', 'queued', 'scheduled', 'delivery_delayed'),
+    recent: items.slice(0, 10).map((email) => ({
+      id: email.id,
+      to: email.to?.[0] ?? '',
+      subject: email.subject ?? '',
+      created_at: email.created_at ?? '',
+      last_event: email.last_event ?? 'unknown',
+    })),
+  };
+}
+
+interface ResendBroadcast {
+  id: string;
+  name?: string;
+  status?: string;
+  created_at?: string;
+  sent_at?: string | null;
+}
+
+async function broadcastStats(env: Env) {
+  const { items, truncated } = await resendList<ResendBroadcast>(
+    '/broadcasts',
+    env,
+    2,
+  );
+
+  const ordered = [...items].sort((a, b) =>
+    (b.sent_at ?? b.created_at ?? '').localeCompare(a.sent_at ?? a.created_at ?? ''),
+  );
+
+  return {
+    total: items.length,
+    truncated,
+    recent: ordered.slice(0, 10).map((broadcast) => ({
+      id: broadcast.id,
+      name: broadcast.name ?? '(untitled)',
+      status: broadcast.status ?? 'unknown',
+      sent_at: broadcast.sent_at ?? null,
+      created_at: broadcast.created_at ?? '',
+    })),
+  };
+}
+
+function handleAdminLogout(): Response {
+  const response = new Response(null, {
+    status: 303,
+    headers: { Location: '/admin/' },
+  });
+  response.headers.set(
+    'Set-Cookie',
+    `${ADMIN_COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict`,
+  );
+  return withAdminHeaders(response);
+}
+
+/**
+ * Only ever send the browser back to a path on this site. `next` arrives from
+ * a form field, so an attacker could otherwise use the login page as an open
+ * redirect onto a lookalike domain.
+ *
+ * Relative on purpose: the site answers on both the apex and www, and an
+ * absolute redirect would hand the browser to the other host, where the
+ * session cookie it was just given does not exist.
+ */
+function adminRedirectTarget(next: string): string {
+  if (next.startsWith('/admin/') && !next.startsWith('//')) {
+    return next;
+  }
+  return '/admin/';
+}
+
+async function passwordMatches(candidate: string, env: Env): Promise<boolean> {
+  if (!env.ADMIN_PASSWORD || !env.ADMIN_SECRET) {
+    return false;
+  }
+  const [a, b] = await Promise.all([
+    sign(candidate, env.ADMIN_SECRET),
+    sign(env.ADMIN_PASSWORD, env.ADMIN_SECRET),
+  ]);
+  return timingSafeEqual(a, b);
+}
+
+async function adminCookie(env: Env): Promise<string> {
+  const payload = JSON.stringify({
+    x: Math.floor(Date.now() / 1000) + ADMIN_SESSION_TTL_SECONDS,
+  });
+  const token = `${base64UrlEncode(payload)}.${await sign(payload, env.ADMIN_SECRET)}`;
+  return [
+    `${ADMIN_COOKIE}=${token}`,
+    'Path=/',
+    `Max-Age=${ADMIN_SESSION_TTL_SECONDS}`,
+    'HttpOnly',
+    'Secure',
+    'SameSite=Strict',
+  ].join('; ');
+}
+
+async function hasAdminSession(request: Request, env: Env): Promise<boolean> {
+  if (!env.ADMIN_SECRET) {
+    return false;
+  }
+
+  const token = readCookie(request.headers.get('Cookie') ?? '', ADMIN_COOKIE);
+  const [encodedPayload, signature] = token.split('.');
+  if (!encodedPayload || !signature) {
+    return false;
+  }
+
+  let payload: string;
+  try {
+    payload = base64UrlDecode(encodedPayload);
+  } catch {
+    return false;
+  }
+
+  if (!timingSafeEqual(signature, await sign(payload, env.ADMIN_SECRET))) {
+    return false;
+  }
+
+  try {
+    const expiry = Number((JSON.parse(payload) as { x?: unknown }).x);
+    return Number.isFinite(expiry) && expiry > Math.floor(Date.now() / 1000);
+  } catch {
+    return false;
+  }
+}
+
+function readCookie(header: string, name: string): string {
+  for (const part of header.split(';')) {
+    const separator = part.indexOf('=');
+    if (separator > 0 && part.slice(0, separator).trim() === name) {
+      return part.slice(separator + 1).trim();
+    }
+  }
+  return '';
+}
+
+/** Nothing behind the gate should be cached by the CDN or indexed. */
+function withAdminHeaders(response: Response): Response {
+  response.headers.set('Cache-Control', 'private, no-store');
+  response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+  return response;
+}
+
+function loginHtml(error = '', next = ''): string {
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Admin - Yoonchul Yi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,wght@0,400;0,500;1,400;1,500&display=swap"
+    />
+    <style>
+      body {
+        background: #f4f4f0;
+        color: #191919;
+        font-family: 'IBM Plex Mono', ui-monospace, monospace;
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+      }
+      form { width: 100%; max-width: 20rem; }
+      h1 {
+        font-family: Newsreader, Georgia, serif;
+        font-size: 1.5rem;
+        font-weight: 400;
+        margin: 0 0 1.5rem;
+      }
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.5rem 0.75rem;
+        font: inherit;
+        font-size: 0.875rem;
+        background: transparent;
+        border: 1px solid rgba(140, 140, 140, 0.4);
+        color: inherit;
+      }
+      input:focus { border-color: #ea580c; outline: none; }
+      button {
+        width: 100%;
+        margin-top: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        font: inherit;
+        font-size: 0.875rem;
+        background: #191919;
+        color: #f4f4f0;
+        border: 1px solid #191919;
+        cursor: pointer;
+      }
+      button:hover { background: #ea580c; border-color: #ea580c; }
+      p.error { color: #ea580c; font-size: 0.75rem; margin: 0.75rem 0 0; }
+    </style>
+  </head>
+  <body>
+    <form method="post" action="/api/admin/login">
+      <h1>Admin</h1>
+      <input type="hidden" name="next" value="${escapeHtml(next)}" />
+      <input
+        type="password"
+        name="password"
+        placeholder="Password"
+        autocomplete="current-password"
+        autofocus
+        required
+      />
+      <button type="submit">Enter</button>
+      ${error ? `<p class="error">${error}</p>` : ''}
+    </form>
+  </body>
+</html>`;
 }
 
 interface Submission {
@@ -333,6 +875,14 @@ function base64UrlDecode(value: string): string {
   return new TextDecoder().decode(
     Uint8Array.from(atob(padded), (char) => char.charCodeAt(0)),
   );
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 function json(body: unknown, status = 200): Response {

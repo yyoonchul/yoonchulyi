@@ -8,12 +8,14 @@ routes = [
   { pattern = "www.yoonchulyi.com", custom_domain = true },
 ]
 
-# Only /api/* reaches the Worker; everything else is served straight from
-# the CDN without running any code.
+# Only these paths reach the Worker; everything else is served straight from
+# the CDN without running any code. /admin is here for a second reason: the
+# password gate lives in the Worker, so any admin path the CDN could answer on
+# its own would be a path around the gate.
 [assets]
 directory = "./dist/"
 binding = "ASSETS"
-run_worker_first = ["/api/*", "/about", "/about/"]
+run_worker_first = ["/api/*", "/about", "/about/", "/admin", "/admin/*"]
 
 # Not credentials — the Resend API key is the thing that must stay secret.
 # Language picks the segment, topic picks what they opted into; a broadcast
@@ -31,4 +33,13 @@ namespace_id = "1001"
 
 [ratelimits.simple]
 limit = 5
+period = 60
+
+# Password guessing is only expensive if we make it expensive.
+[[ratelimits]]
+name = "ADMIN_LIMITER"
+namespace_id = "1002"
+
+[ratelimits.simple]
+limit = 10
 period = 60

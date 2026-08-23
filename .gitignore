@@ -33,3 +33,6 @@ src/daily-insights/card-news/assets/cache/
 # daily-insights local automation logs
 src/daily-insights/automation-logs/
 .newsletter-preview/
+
+# local Worker secrets for `wrangler dev`
+.dev.vars

@@ -1,0 +1,253 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// Nothing here is secret in itself — this is a plain static page, and the
+// numbers arrive later from /api/admin/stats. The password gate lives in the
+// Worker (`handleAdmin`), which is the only thing standing between the CDN and
+// this file. See run_worker_first in wrangler.toml.
+---
+
+<BaseLayout
+  title="Admin - Yoonchul Yi"
+  description="Private."
+  robots="noindex, nofollow"
+>
+  <section class="py-8">
+    <div class="flex items-baseline justify-between gap-4 mb-2">
+      <h1 class="font-serif text-2xl">Admin</h1>
+      <div class="flex items-baseline gap-4 font-mono text-sm">
+        <button
+          type="button"
+          data-refresh
+          class="text-sub hover:text-accent transition-colors"
+        >
+          Refresh
+        </button>
+        <form method="post" action="/api/admin/logout">
+          <button type="submit" class="text-sub hover:text-accent transition-colors">
+            Sign out
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <p class="font-mono text-xs text-sub mb-8" data-status>Loading…</p>
+
+    <div data-panels class="space-y-10"></div>
+  </section>
+</BaseLayout>
+
+<script>
+  const statusLine = document.querySelector('[data-status]') as HTMLElement;
+  const panels = document.querySelector('[data-panels]') as HTMLElement;
+  const refreshButton = document.querySelector('[data-refresh]') as HTMLButtonElement;
+
+  function el(tag: string, className = '', text = ''): HTMLElement {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    // textContent, never innerHTML: subjects and addresses come from outside.
+    if (text) node.textContent = text;
+    return node;
+  }
+
+  function section(title: string): HTMLElement {
+    const wrapper = el('section');
+    wrapper.append(
+      el('h2', 'font-mono text-xs uppercase tracking-wider text-sub mb-4', title),
+    );
+    return wrapper;
+  }
+
+  function failed(title: string, message: string): HTMLElement {
+    const wrapper = section(title);
+    wrapper.append(el('p', 'font-mono text-sm text-accent', message));
+    return wrapper;
+  }
+
+  function stat(label: string, value: string, note = ''): HTMLElement {
+    const item = el('div');
+    item.append(el('div', 'font-serif text-2xl leading-none', value));
+    item.append(el('div', 'font-mono text-xs text-sub mt-2', label));
+    if (note) item.append(el('div', 'font-mono text-xs text-sub/70 mt-1', note));
+    return item;
+  }
+
+  function row(cells: string[], muted = false): HTMLElement {
+    const line = el(
+      'div',
+      `flex gap-4 py-2 border-t border-sub/20 font-mono text-xs ${
+        muted ? 'text-sub' : ''
+      }`,
+    );
+    line.append(el('span', 'w-28 shrink-0 text-sub', cells[0]));
+    line.append(el('span', 'flex-1 min-w-0 truncate', cells[1]));
+    if (cells[2] !== undefined) {
+      line.append(el('span', 'shrink-0 text-sub', cells[2]));
+    }
+    return line;
+  }
+
+  function percent(part: number, whole: number): string {
+    if (!whole) return '—';
+    return `${Math.round((part / whole) * 100)}%`;
+  }
+
+  function shortDate(value: string): string {
+    if (!value) return '—';
+    // Resend returns "2026-08-23 01:02:03.456+00"; the date is the useful part.
+    return value.slice(0, 10);
+  }
+
+  function subscriberPanel(data: any): HTMLElement {
+    if (data.error) return failed('Subscribers', data.error);
+
+    const wrapper = section('Subscribers');
+    const grid = el('div', 'grid grid-cols-2 sm:grid-cols-4 gap-6 mb-6');
+    grid.append(stat('active', String(data.active)));
+    grid.append(stat('unsubscribed', String(data.unsubscribed)));
+
+    if (data.languages?.error) {
+      grid.append(stat('by language', '—', data.languages.error));
+    } else if (data.languages) {
+      grid.append(
+        stat('EN / KO', `${data.languages.en.count} / ${data.languages.ko.count}`),
+      );
+    }
+
+    if (data.topics?.error) {
+      grid.append(stat('by topic', '—', data.topics.error));
+    } else if (data.topics?.skipped) {
+      grid.append(stat('essays / daily', '—', 'too many contacts to count'));
+    } else if (data.topics) {
+      grid.append(
+        stat('essays / daily', `${data.topics.essays} / ${data.topics.daily}`),
+      );
+    }
+
+    wrapper.append(grid);
+    if (data.truncated) {
+      wrapper.append(
+        el('p', 'font-mono text-xs text-sub', 'Contact list was truncated at the page cap.'),
+      );
+    }
+    return wrapper;
+  }
+
+  function emailPanel(data: any): HTMLElement {
+    if (data.error) return failed('Email · last 30 days', data.error);
+
+    const wrapper = section('Email · last 30 days');
+    const grid = el('div', 'grid grid-cols-2 sm:grid-cols-4 gap-6 mb-6');
+    grid.append(stat('sent', String(data.sent)));
+    grid.append(
+      stat('delivered', String(data.delivered), percent(data.delivered, data.sent)),
+    );
+    grid.append(
+      stat('opened', String(data.opened), percent(data.opened, data.delivered)),
+    );
+    grid.append(
+      stat('clicked', String(data.clicked), percent(data.clicked, data.delivered)),
+    );
+    wrapper.append(grid);
+
+    const problems = el('p', 'font-mono text-xs text-sub mb-6');
+    problems.textContent =
+      `bounced ${data.bounced} · complained ${data.complained} · ` +
+      `failed ${data.failed} · in flight ${data.pending}`;
+    wrapper.append(problems);
+
+    const events = Object.entries(data.by_event as Record<string, number>).sort(
+      (a, b) => b[1] - a[1],
+    );
+    if (events.length) {
+      wrapper.append(
+        el('h3', 'font-mono text-xs text-sub mt-8 mb-1', 'Raw last_event'),
+      );
+      for (const [event, count] of events) {
+        wrapper.append(row([event, '', String(count)], true));
+      }
+    }
+
+    if (data.recent?.length) {
+      wrapper.append(el('h3', 'font-mono text-xs text-sub mt-8 mb-1', 'Latest'));
+      for (const email of data.recent) {
+        wrapper.append(
+          row([
+            shortDate(email.created_at),
+            `${email.to} — ${email.subject}`,
+            email.last_event,
+          ]),
+        );
+      }
+    }
+
+    if (data.truncated) {
+      wrapper.append(
+        el(
+          'p',
+          'font-mono text-xs text-sub mt-4',
+          'Email list was truncated at the page cap; counts are a floor, not a total.',
+        ),
+      );
+    }
+    return wrapper;
+  }
+
+  function broadcastPanel(data: any): HTMLElement {
+    if (data.error) return failed('Broadcasts', data.error);
+
+    const wrapper = section('Broadcasts');
+    if (!data.recent?.length) {
+      wrapper.append(el('p', 'font-mono text-sm text-sub', 'None yet.'));
+      return wrapper;
+    }
+    for (const broadcast of data.recent) {
+      wrapper.append(
+        row([
+          shortDate(broadcast.sent_at ?? broadcast.created_at),
+          broadcast.name,
+          broadcast.status,
+        ]),
+      );
+    }
+    return wrapper;
+  }
+
+  async function load() {
+    refreshButton.disabled = true;
+    statusLine.textContent = 'Loading…';
+
+    try {
+      const response = await fetch('/api/admin/stats', { cache: 'no-store' });
+
+      // The session is 12 hours; when it lapses, reloading puts the login
+      // form back on screen instead of leaving a dead button here.
+      if (response.status === 401) {
+        location.reload();
+        return;
+      }
+      if (!response.ok) {
+        throw new Error(`Request failed with ${response.status}`);
+      }
+
+      const data = await response.json();
+      panels.replaceChildren(
+        subscriberPanel(data.subscribers),
+        emailPanel(data.emails),
+        broadcastPanel(data.broadcasts),
+      );
+      statusLine.textContent =
+        `as of ${new Date(data.fetched_at).toLocaleString()} · ` +
+        `Resend keeps ${data.retention_days} days`;
+    } catch (cause) {
+      statusLine.textContent =
+        cause instanceof Error ? cause.message : 'Could not load stats.';
+      panels.replaceChildren();
+    } finally {
+      refreshButton.disabled = false;
+    }
+  }
+
+  refreshButton.addEventListener('click', load);
+  load();
+</script>
