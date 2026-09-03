@@ -29,6 +29,7 @@ src/daily-insights/card-news/output/
 
 # card-news downloaded image cache (라이선스 자료 재배포 회피)
 src/daily-insights/card-news/assets/cache/
+src/daily-insights/card-news/assets/prepared/
 
 # daily-insights local automation logs
 src/daily-insights/automation-logs/

@@ -84,7 +84,7 @@ function splitByH3(section: string): { title: string; body: string }[] {
   let current: { title: string; lines: string[] } | null = null;
 
   for (const line of lines) {
-    if (line.startsWith('### ') && !line.match(/^### \d+\./)) {
+    if (line.startsWith('### ')) {
       if (current) blocks.push({ title: current.title, body: current.lines.join('\n') });
       current = { title: line.slice(4).trim(), lines: [] };
     } else if (current) {

@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { basename, join, resolve } from 'node:path';
 import sharp from 'sharp';
 import { parseDigest } from './parser.js';
 import { resolveImage, type ResolvedImage } from './image-resolver.js';
@@ -58,6 +58,27 @@ async function svgToJpeg(svg: string): Promise<Buffer> {
     .resize(1080, 1350)
     .jpeg({ quality: 92, mozjpeg: true })
     .toBuffer();
+}
+
+async function prepareBackgroundImage(filePath?: string | null): Promise<string | undefined> {
+  if (!filePath) return undefined;
+
+  const preparedDir = resolve(import.meta.dirname, 'assets', 'prepared');
+  mkdirSync(preparedDir, { recursive: true });
+  const preparedPath = join(preparedDir, `${basename(filePath)}.bg.jpg`);
+  if (existsSync(preparedPath)) return preparedPath;
+
+  try {
+    await sharp(filePath)
+      .rotate()
+      .resize(1080, 1350, { fit: 'cover' })
+      .jpeg({ quality: 82, mozjpeg: true })
+      .toFile(preparedPath);
+    return preparedPath;
+  } catch (err) {
+    console.warn(`[card-news] background image skipped: ${(err as Error).message}`);
+    return undefined;
+  }
 }
 
 function articleHeadline(article: ArticleData, headlines: ArticleHeadlines): string {
@@ -123,7 +144,7 @@ async function renderArticleDeck(
   const coverQuery = articleCoverQuery(article, queries);
   const coverImage = await resolveImage(coverQuery, { avoidSourceUrls: usedSourceUrls });
   if (coverImage) usedSourceUrls.add(coverImage.sourceUrl);
-  const coverBg = coverImage?.filePath;
+  const coverBg = await prepareBackgroundImage(coverImage?.filePath);
   const totalPages = 1 + detailSections.length;
   const outDir = resolve(
     import.meta.dirname,
@@ -155,8 +176,9 @@ async function renderArticleDeck(
     const sectionQuery = articleSectionQuery(article, queries, i);
     const sectionImage = await resolveImage(sectionQuery, { avoidSourceUrls: usedSourceUrls });
     if (sectionImage) usedSourceUrls.add(sectionImage.sourceUrl);
+    const sectionBg = await prepareBackgroundImage(sectionImage?.filePath);
     slides.push({
-      svg: renderArticleContent(section, i + 2, totalPages, sectionImage?.filePath),
+      svg: renderArticleContent(section, i + 2, totalPages, sectionBg),
       credit: sectionImage,
       query: sectionQuery,
     });
