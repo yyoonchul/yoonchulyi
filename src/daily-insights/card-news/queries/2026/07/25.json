@@ -5,50 +5,50 @@
       "cover": "Artifipedia",
       "sections": [
         "Bengali language",
-        "Indigenous languages Americas",
-        "non-Latin scripts",
-        "cross-lingual semantics",
-        "multilingual language evaluation"
+        "Indigenous languages of the Americas",
+        "language tokenizer",
+        "cross-lingual transfer",
+        "multilingual AI evaluation"
       ]
     },
     {
-      "cover": "Cursor",
+      "cover": "Cursor Router",
       "sections": [
-        "Cursor Router",
-        "software developers coding",
-        "Anthropic Claude Opus",
-        "Cursor Teams",
-        "Cursor SDK"
+        "Cursor",
+        "Cursor AFC",
+        "Fable 5",
+        "GPT-5.6 Sol",
+        "Cursor Teams"
       ]
     },
     {
       "cover": "OpenAI Presence",
       "sections": [
-        "enterprise voice agent",
-        "business policy governance",
+        "customer support agent",
+        "standard operating procedure",
         "OpenAI Codex",
         "BBVA",
-        "OpenAI API"
+        "ChatGPT Workspace Agents"
       ]
     },
     {
-      "cover": "Alphabet",
+      "cover": "Google",
       "sections": [
-        "Google data center",
+        "Alphabet",
         "Nvidia",
         "Google Cloud",
-        "Google Gemini",
+        "Anthropic",
         "Google Gemini 4"
       ]
     },
     {
-      "cover": "OpenAI ChatGPT Health",
+      "cover": "ChatGPT Health",
       "sections": [
-        "Apple iOS",
+        "OpenAI",
         "Apple Health",
-        "OpenAI ChatGPT",
+        "ChatGPT",
         "HealthBench",
-        "medical consultation"
+        "The New York Times"
       ]
     }
   ]
