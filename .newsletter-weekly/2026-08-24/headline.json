@@ -1,0 +1,19 @@
+{
+  "lead": "Previewing the Model Hardware Standard",
+  "subject": {
+    "en": "Anthropic previews the Model Hardware Standard",
+    "ko": "앤트로픽, AI 장치 제어 위한 MHS 공개"
+  },
+  "tldr": {
+    "en": [
+      "Anthropic opened a research preview of the Model Hardware Standard, which gives AI agents a shared way to control physical devices through MCP, a CLI, and code APIs.",
+      "DeepSeek released V4-Flash-Vision-Exp, an experimental vision model it says approaches Claude Opus 4.8 on multimodal agent benchmarks.",
+      "Perplexity and Nvidia launched Portable Computer, a fully local AI agent for Linux subscribers with an RTX GPU carrying at least 24 GB of VRAM."
+    ],
+    "ko": [
+      "앤트로픽은 AI 에이전트가 MCP, CLI, 코드 API로 물리 장치를 제어하도록 하는 공통 규격 MHS의 연구 미리보기를 공개했다.",
+      "딥시크는 멀티모달 에이전트 벤치마크에서 Claude Opus 4.8에 근접한다고 밝힌 실험적 비전 모델 V4-Flash-Vision-Exp를 출시했다.",
+      "퍼플렉시티와 엔비디아는 최소 24GB VRAM의 RTX GPU에서 작동하는 리눅스용 완전 로컬 AI 에이전트 Portable Computer를 출시했다."
+    ]
+  }
+}

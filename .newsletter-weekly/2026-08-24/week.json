@@ -1,0 +1,240 @@
+{
+  "window": {
+    "start": "2026-08-24",
+    "end": "2026-08-30"
+  },
+  "weeks": {
+    "en": [
+      {
+        "isoDate": "2026-08-25",
+        "href": "https://yoonchulyi.com/daily-insights/2026/08/25/",
+        "articles": [
+          {
+            "title": "Deepseek releases experimental Flash vision model that rivals Opus 4.8 on agent benchmarks",
+            "meta": "Source: The Decoder · Category: AI",
+            "link": "https://the-decoder.com/deepseek-releases-experimental-flash-vision-model-that-rivals-opus-4-8-on-agent-benchmarks/",
+            "bullets": [
+              "DeepSeek released V4-Flash-Vision-Exp, an experimental multimodal extension of V4-Flash that adds image understanding while retaining the base model’s text capabilities.",
+              "DeepSeek positions the model for visual agent workflows; on the company’s internal multimodal agent benchmarks, it comes close to Claude Opus 4.8 and occasionally exceeds it.",
+              "The release supports OpenAI-compatible and Anthropic-compatible endpoints, accepts up to 600 images per request, and caps image processing at 384 tokens per image."
+            ]
+          }
+        ]
+      },
+      {
+        "isoDate": "2026-08-27",
+        "href": "https://yoonchulyi.com/daily-insights/2026/08/27/",
+        "articles": [
+          {
+            "title": "Bill Gates proposes ‘Human Reserved’ jobs and a tax on AI tokens",
+            "meta": "Source: The Next Web · Category: AI",
+            "link": "https://thenextweb.com/news/bill-gates-human-reserved-jobs-ai?_bhlid=7fb0485da2a0de6f8d4534f1c57cbc5409662e64",
+            "bullets": [
+              "Bill Gates proposes reserving selected occupations for people even where AI can perform the work.",
+              "He names childcare and jury service, sets a possible 40% ceiling, and calls for task-level choices in healthcare and education.",
+              "He also proposes taxes on AI tokens and robots, while acknowledging difficult policy and enforcement questions."
+            ]
+          },
+          {
+            "title": "SpaceX will build a $100 billion Starbase in Louisiana, a 195-square-mile spaceport designed for thousands of annual launches",
+            "meta": "Source: TechSpot · Category: Misc",
+            "link": "https://www.techspot.com/news/113620-spacex-build-100-billion-starbase-louisiana-195-square.html",
+            "bullets": [
+              "SpaceX plans a $100 billion, 125,000-acre Starbase Louisiana at Pecan Island; construction could begin in 2027 and a first launch is targeted for 2029.",
+              "The design includes five launch complexes, 10 pads, fuel production, power generation, shipping facilities, and an airport.",
+              "Officials expect 3,000 direct jobs, but the coastal location has prompted environmental and public-process concerns."
+            ]
+          },
+          {
+            "title": "Perplexity partners with Nvidia to launch Portable Computer, a fully local AI agent with zero token costs",
+            "meta": "Source: VentureBeat · Category: AI",
+            "link": "https://venturebeat.com/infrastructure/perplexity-partners-with-nvidia-to-launch-portable-computer-a-fully-local-ai-agent-with-zero-token-costs",
+            "bullets": [
+              "Portable Computer packages local models, an agent harness, tools, connectors, inference, and OS-level sandboxing into a local-first application.",
+              "It launches on Linux for eligible paid subscribers and needs an Nvidia RTX GPU with at least 24 GB of VRAM; Windows support is planned for September.",
+              "Perplexity reports strong internal Qwen-based benchmark results while offering an opt-in cloud advisor for harder tasks."
+            ]
+          },
+          {
+            "title": "How do we explain OpenAI’s executive exodus?",
+            "meta": "Source: TechCrunch · Category: Business",
+            "link": "https://techcrunch.com/2026/08/26/how-do-we-explain-openais-executive-exodus/",
+            "bullets": [
+              "More than a dozen OpenAI executives have left this year, including senior operating, revenue, marketing, and infrastructure leaders.",
+              "The report links exits to reorganization, cost discipline, and responsibility concentrating under president Greg Brockman.",
+              "A confidential IPO filing increases the pressure to grow revenue, control costs, and stabilize leadership before a possible 2027 listing."
+            ]
+          },
+          {
+            "title": "Google’s Gemini has a branding problem, and so does the rest of AI",
+            "meta": "Source: TechCrunch · Category: AI",
+            "link": "https://techcrunch.com/2026/08/26/googles-gemini-has-a-branding-problem-and-so-does-the-rest-of-ai/",
+            "bullets": [
+              "TechCrunch argues that Gemini’s Chat, Spark, and Daily Brief labels make users learn product architecture instead of state their intent.",
+              "Daily Brief can surface Gmail, Calendar, chat, and search information in ways that may feel intrusive; Spark’s agent capability need not be a separate brand.",
+              "The critique includes Claude and ChatGPT, while Apple’s integrated approach and text-message agents are presented as simpler models."
+            ]
+          },
+          {
+            "title": "Nvidia has been in talks to buy Hugging Face for more than $13 billion",
+            "meta": "Source: Business Insider · Category: Business",
+            "link": "https://www.businessinsider.com/nvidia-in-talks-to-buy-hugging-face-13-billion-dollars-2026-8",
+            "bullets": [
+              "Nvidia and Hugging Face have discussed an acquisition valuing the open-source AI platform above $13 billion, though no deal has been reached.",
+              "The report says Nvidia has $18 billion committed to further equity investments this fiscal year and $47.9 billion already in private companies.",
+              "A takeover could deepen Nvidia’s developer reach but could also challenge Hugging Face’s hardware- and model-neutral position."
+            ]
+          }
+        ]
+      },
+      {
+        "isoDate": "2026-08-28",
+        "href": "https://yoonchulyi.com/daily-insights/2026/08/28/",
+        "articles": [
+          {
+            "title": "How I run multiple teams of Grok Bots",
+            "meta": "Source: X · Author: eric zakariasson · Category: AI",
+            "link": "https://x.com/ericzakariasson/status/2092982710465970425?s=12&t=pApL0pqNivz58hjhExc9aw",
+            "bullets": [
+              "Eric Zakariasson describes an experimental setup for coordinating several Grok Bot teams across concurrent projects.",
+              "Each project gets a dedicated bot channel and entries in Notion Projects and Tasks databases, managed by a higher-level Projects Manager bot.",
+              "The design favors reusing existing specialist bots, caps each channel at six bots, and escalates blocked work to the human operator."
+            ]
+          }
+        ]
+      },
+      {
+        "isoDate": "2026-08-29",
+        "href": "https://yoonchulyi.com/daily-insights/2026/08/29/",
+        "articles": [
+          {
+            "title": "Previewing the Model Hardware Standard",
+            "meta": "Source: Anthropic · Category: AI",
+            "link": "https://www.anthropic.com/news/model-hardware-standard-research-preview?utm_source=tldrai",
+            "bullets": [
+              "Anthropic opened a research preview of the Model Hardware Standard (MHS), a shared specification intended to let AI agents operate programmable physical devices safely.",
+              "MHS standardizes device drivers and exposes controls through MCP, a command-line interface, and code APIs so an agent can coordinate heterogeneous instruments.",
+              "Early pilots span lab automation, microscopy, quantum computing, and qPCR; Anthropic is using the preview to develop safety evaluations and best practices before open-sourcing the standard."
+            ]
+          }
+        ]
+      }
+    ],
+    "ko": [
+      {
+        "isoDate": "2026-08-25",
+        "href": "https://yoonchulyi.com/daily-insights/2026/08/25/",
+        "articles": [
+          {
+            "title": "DeepSeek, 에이전트 벤치마크에서 Opus 4.8에 맞서는 실험적 Flash 비전 모델 출시",
+            "meta": "출처: 더 디코더(The Decoder) · 카테고리: 인공지능(AI)",
+            "link": "https://the-decoder.com/deepseek-releases-experimental-flash-vision-model-that-rivals-opus-4-8-on-agent-benchmarks/",
+            "bullets": [
+              "딥시크(DeepSeek)는 이미지 이해 기능을 더하면서 기존 V4-Flash의 텍스트 역량을 유지한 실험적 멀티모달 모델 V4-Flash-Vision-Exp를 출시했다.",
+              "딥시크는 이 모델을 시각 정보를 다루는 에이전트 작업흐름에 맞춰 내놓았다. 회사 내부 멀티모달 에이전트 벤치마크에서는 클로드 오퍼스 4.8(Claude Opus 4.8)에 근접하고 일부 항목에서 앞선다고 밝혔다.",
+              "이 모델은 OpenAI 호환 및 Anthropic 호환 엔드포인트를 지원하며, 요청당 최대 600장의 이미지를 받을 수 있고 이미지 한 장의 처리 비용은 최대 384토큰으로 제한된다."
+            ]
+          }
+        ]
+      },
+      {
+        "isoDate": "2026-08-27",
+        "href": "https://yoonchulyi.com/daily-insights/2026/08/27/",
+        "articles": [
+          {
+            "title": "빌 게이츠, ‘인간 전용(Human Reserved)’ 일자리와 AI 토큰 세금 제안",
+            "meta": "출처: 더 넥스트 웹(The Next Web) · 카테고리: 인공지능(AI)",
+            "link": "https://thenextweb.com/news/bill-gates-human-reserved-jobs-ai?_bhlid=7fb0485da2a0de6f8d4534f1c57cbc5409662e64",
+            "bullets": [
+              "빌 게이츠(Bill Gates)는 AI가 수행할 수 있더라도 일부 직업은 사람이 맡도록 남기자고 제안했다.",
+              "보육과 배심원 업무를 예로 들고, 상한을 40%로 제시했으며 의료와 교육은 업무별로 판단하자고 말했다.",
+              "AI 토큰과 로봇 과세도 제안했지만, 정책·집행상의 어려운 문제를 인정했다."
+            ]
+          },
+          {
+            "title": "스페이스X, 연간 수천 회 발사를 목표로 루이지애나에 1,000억 달러 규모·195제곱마일 우주항 건설",
+            "meta": "출처: 테크스팟(TechSpot) · 카테고리: 기타(Misc)",
+            "link": "https://www.techspot.com/news/113620-spacex-build-100-billion-starbase-louisiana-195-square.html",
+            "bullets": [
+              "스페이스X(SpaceX)는 페칸 아일랜드(Pecan Island)에 1,000억 달러를 들여 12만5,000에이커 규모의 스타베이스 루이지애나(Starbase Louisiana)를 지을 계획이다. 2027년 착공, 2029년 첫 발사가 목표다.",
+              "설계에는 발사 단지 5곳, 발사대 10기, 연료 생산, 발전, 해상 운송 시설, 공항이 들어간다.",
+              "직접 일자리 3,000개가 기대되지만, 해안 입지 때문에 환경·공공 절차 우려가 제기된다."
+            ]
+          },
+          {
+            "title": "퍼플렉시티와 엔비디아, 토큰 비용 없이 완전 로컬에서 작동하는 AI 에이전트 ‘포터블 컴퓨터’ 출시",
+            "meta": "출처: 벤처비트(VentureBeat) · 카테고리: 인공지능(AI)",
+            "link": "https://venturebeat.com/infrastructure/perplexity-partners-with-nvidia-to-launch-portable-computer-a-fully-local-ai-agent-with-zero-token-costs",
+            "bullets": [
+              "포터블 컴퓨터(Portable Computer)는 로컬 모델, 에이전트 하니스(agent harness), 도구, 커넥터, 추론, 운영체제 수준 샌드박싱을 로컬 우선 애플리케이션에 묶는다.",
+              "이 제품은 조건을 충족하는 유료 구독자의 리눅스(Linux) 환경에서 출시되며, 최소 24GB VRAM의 엔비디아 RTX GPU가 필요하다. 윈도우(Windows) 지원은 9월 예정이다.",
+              "퍼플렉시티(Perplexity)는 Qwen 기반 내부 벤치마크 성과를 제시하면서, 어려운 작업에는 선택형 클라우드 조언자를 제공한다."
+            ]
+          },
+          {
+            "title": "오픈AI 임원들의 연쇄 퇴사는 어떻게 설명할 수 있나?",
+            "meta": "출처: 테크크런치(TechCrunch) · 카테고리: 비즈니스(Business)",
+            "link": "https://techcrunch.com/2026/08/26/how-do-we-explain-openais-executive-exodus/",
+            "bullets": [
+              "올해 오픈AI(OpenAI)에서는 운영·매출·마케팅·인프라의 고위 임원을 포함해 12명 이상이 떠났다.",
+              "기사는 조직 개편, 비용 절제, 그레그 브록먼(Greg Brockman) 사장 아래로의 책임 집중을 배경으로 제시한다.",
+              "비공개 IPO 신청은 2027년 상장 가능성에 앞서 매출 성장, 비용 관리, 리더십 안정화 압박을 높인다."
+            ]
+          },
+          {
+            "title": "구글 제미나이의 브랜딩 문제와 AI 업계 전반의 문제",
+            "meta": "출처: 테크크런치(TechCrunch) · 카테고리: 인공지능(AI)",
+            "link": "https://techcrunch.com/2026/08/26/googles-gemini-has-a-branding-problem-and-so-does-the-rest-of-ai/",
+            "bullets": [
+              "테크크런치는 제미나이(Gemini)의 채팅, 스파크(Spark), 데일리 브리프(Daily Brief) 구분이 사용자가 제품 구조를 배우게 만든다고 비판했다.",
+              "데일리 브리프는 Gmail, 캘린더(Calendar), 대화, 검색 정보를 침해적으로 느껴질 방식으로 다시 띄울 수 있다. 스파크의 에이전트 기능도 별도 브랜드일 필요가 없다는 주장이다.",
+              "이 비판은 클로드(Claude)와 챗GPT(ChatGPT)에도 적용되며, 애플(Apple)의 통합 방식과 문자 메시지 에이전트가 더 단순한 모델로 제시된다."
+            ]
+          },
+          {
+            "title": "엔비디아, 130억 달러 이상에 허깅 페이스 인수 논의",
+            "meta": "출처: 비즈니스 인사이더(Business Insider) · 카테고리: 비즈니스(Business)",
+            "link": "https://www.businessinsider.com/nvidia-in-talks-to-buy-hugging-face-13-billion-dollars-2026-8",
+            "bullets": [
+              "엔비디아(Nvidia)와 허깅 페이스(Hugging Face)는 오픈소스 AI 플랫폼의 기업가치를 130억 달러 이상으로 보는 인수를 논의했지만 합의하지 못했다.",
+              "보도에 따르면 엔비디아는 이번 회계연도 지분 투자에 180억 달러를 약정했고, 비상장 기업에 이미 479억 달러를 보유한다.",
+              "인수는 엔비디아의 개발자 접점을 넓힐 수 있지만, 허깅 페이스의 하드웨어·모델 중립성을 해칠 수 있다."
+            ]
+          }
+        ]
+      },
+      {
+        "isoDate": "2026-08-28",
+        "href": "https://yoonchulyi.com/daily-insights/2026/08/28/",
+        "articles": [
+          {
+            "title": "How I run multiple teams of Grok Bots",
+            "meta": "출처: X · 작성자: eric zakariasson · 카테고리: AI",
+            "link": "https://x.com/ericzakariasson/status/2092982710465970425?s=12&t=pApL0pqNivz58hjhExc9aw",
+            "bullets": [
+              "Eric Zakariasson은 동시에 진행하는 여러 프로젝트에서 그록 봇(Grok Bot) 팀을 조율하기 위한 실험적 구성을 소개한다.",
+              "프로젝트마다 전용 봇 채널을 만들고 Notion의 프로젝트(Projects)·작업(Tasks) 데이터베이스에 기록하며, 상위 수준의 프로젝트 매니저 봇(Projects Manager bot)이 이를 관리한다.",
+              "이 설계는 기존 전문 봇을 우선 재사용하고 채널당 봇 수를 6개로 제한하며, 막힌 작업은 사람 운영자에게 올리도록 한다."
+            ]
+          }
+        ]
+      },
+      {
+        "isoDate": "2026-08-29",
+        "href": "https://yoonchulyi.com/daily-insights/2026/08/29/",
+        "articles": [
+          {
+            "title": "모델 하드웨어 표준(Model Hardware Standard) 미리보기",
+            "meta": "출처: Anthropic · 카테고리: AI",
+            "link": "https://www.anthropic.com/news/model-hardware-standard-research-preview?utm_source=tldrai",
+            "bullets": [
+              "앤트로픽(Anthropic)은 AI 에이전트가 프로그래밍 가능한 물리 장치를 안전하게 작동하도록 돕는 공통 규격인 모델 하드웨어 표준(Model Hardware Standard, MHS)의 연구 미리보기를 공개했다.",
+              "MHS는 장치 드라이버를 표준화하고 MCP, 명령줄 인터페이스(command-line interface), 코드 API를 통해 제어 기능을 노출해 에이전트가 이질적인 장비를 조율하게 한다.",
+              "초기 실증은 실험실 자동화, 현미경 연구, 양자 컴퓨팅, 정량 PCR(qPCR)을 아우르며, 앤트로픽은 표준을 오픈 소스(open source)로 공개하기 전 안전성 평가와 모범 운영 방식을 마련하고 있다."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
