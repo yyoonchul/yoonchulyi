@@ -28,6 +28,18 @@ const canonicalUrl = canonicalPath
   : new URL(Astro.url.pathname, siteUrl);
 const ogImageUrl = new URL(image, siteUrl);
 const jsonLdItems = Array.isArray(jsonLd) ? jsonLd : [jsonLd];
+
+// Cloudflare Web Analytics, which is where the /admin traffic tab gets its
+// numbers. The token is public by design — it ships in the HTML of every page
+// it measures — so it lives here rather than in a build secret, and while it
+// is empty no beacon is emitted at all. Annotated as a string so that filling
+// it in stays a one-line change.
+//
+// The admin pages are left out: they are the one corner of the site whose
+// traffic is me looking at the traffic.
+const WEB_ANALYTICS_TOKEN: string = '';
+const measured =
+  WEB_ANALYTICS_TOKEN !== '' && !Astro.url.pathname.startsWith('/admin');
 ---
 
 <head>
@@ -72,6 +84,16 @@ const jsonLdItems = Array.isArray(jsonLd) ? jsonLd : [jsonLd];
   />
   
   <title>{title}</title>
+
+  {
+    measured && (
+      <script
+        defer
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon={JSON.stringify({ token: WEB_ANALYTICS_TOKEN })}
+      />
+    )
+  }
 
   {
     jsonLdItems.map((item) => (

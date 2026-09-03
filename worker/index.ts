@@ -25,6 +25,9 @@ interface Env {
   ADMIN_PASSWORD: string;
   ADMIN_SECRET: string;
   ADMIN_LIMITER: RateLimit;
+  CF_ACCOUNT_ID: string;
+  CF_RUM_SITE_TAG: string;
+  CF_ANALYTICS_TOKEN: string;
 }
 
 type Language = 'en' | 'ko';
@@ -59,6 +62,25 @@ const CONTACT_PAGE_LIMIT = 5;
 // rather than spending the whole rate limit on it.
 const TOPIC_LOOKUP_LIMIT = 100;
 const TOPIC_CONCURRENCY = 4;
+const BROADCAST_PAGE_LIMIT = 5;
+// The id goes into a URL path upstream, so it is matched rather than trusted.
+const BROADCAST_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
+
+// Page analytics come from Cloudflare Web Analytics, the only first-party
+// source that knows which page was viewed and where the visitor came from —
+// the zone datasets stop at request counts, and the Worker itself never sees
+// an ordinary page request because the CDN answers those on its own.
+//
+// It is a browser beacon, so what it counts is real browsers running
+// JavaScript: crawlers and feed readers never appear, and neither does anyone
+// blocking the script. Treat every number here as a floor.
+const CF_GRAPHQL = 'https://api.cloudflare.com/client/v4/graphql';
+const RUM_RANGES = { '1d': 1, '7d': 7, '30d': 30 } as const;
+const RUM_ROWS = 12;
+// 30 days of hourly buckets is 720; the cap leaves room and bounds the query.
+const RUM_HOUR_LIMIT = 800;
+// A referral from our own pages is a real pageview but not a source of one.
+const OWN_HOSTS = new Set(['yoonchulyi.com', 'www.yoonchulyi.com']);
 
 // Deliberately conservative: this endpoint sends mail on a stranger's
 // request, so abuse here costs sending reputation, not just CPU.
@@ -83,6 +105,16 @@ export default {
     }
     if (url.pathname === '/api/admin/stats') {
       return handleAdminStats(request, env);
+    }
+    if (url.pathname === '/api/admin/traffic') {
+      return handleAdminTraffic(request, env, url);
+    }
+    if (url.pathname.startsWith('/api/admin/broadcasts/')) {
+      return handleAdminBroadcast(
+        request,
+        env,
+        url.pathname.slice('/api/admin/broadcasts/'.length),
+      );
     }
     if (url.pathname.startsWith('/api/')) {
       return json({ error: 'Not found' }, 404);
@@ -244,11 +276,11 @@ async function handleAdminLogin(request: Request, env: Env): Promise<Response> {
 }
 
 /**
- * Everything the admin page shows, in one request.
+ * Everything the newsletter tab shows, in one request.
  *
  * Resend's aggregate `metrics` endpoints are still private beta, so the counts
  * here are derived from the plain list endpoints instead. The API key never
- * leaves the Worker — the browser only ever sees the totals.
+ * leaves the Worker — the browser only ever sees what is rendered.
  */
 async function handleAdminStats(request: Request, env: Env): Promise<Response> {
   if (!(await hasAdminSession(request, env))) {
@@ -272,7 +304,64 @@ async function handleAdminStats(request: Request, env: Env): Promise<Response> {
   );
 }
 
-/** One failing Resend call should cost you that panel, not the whole page. */
+/** One issue, fetched when its row in the broadcast list is opened. */
+async function handleAdminBroadcast(
+  request: Request,
+  env: Env,
+  id: string,
+): Promise<Response> {
+  if (!(await hasAdminSession(request, env))) {
+    return json({ error: 'Unauthorized' }, 401);
+  }
+  if (!BROADCAST_ID_PATTERN.test(id)) {
+    return json({ error: 'Not found' }, 404);
+  }
+
+  return withAdminHeaders(json(await settle(() => broadcastDetail(id, env))));
+}
+
+/**
+ * The page analytics tab.
+ *
+ * Answers 200 with `configured: false` rather than an error when the
+ * Cloudflare credentials are absent, because "this needs setting up" is a
+ * different thing to say than "the request failed" and the page says both.
+ */
+async function handleAdminTraffic(request: Request, env: Env, url: URL): Promise<Response> {
+  if (!(await hasAdminSession(request, env))) {
+    return json({ error: 'Unauthorized' }, 401);
+  }
+
+  const asked = url.searchParams.get('range') ?? '7d';
+  const range: RumRange = asked in RUM_RANGES ? (asked as RumRange) : '7d';
+
+  if (!env.CF_ANALYTICS_TOKEN || !env.CF_ACCOUNT_ID) {
+    return withAdminHeaders(
+      json({
+        configured: false,
+        range,
+        reason: 'The Worker has no CF_ANALYTICS_TOKEN or CF_ACCOUNT_ID.',
+      }),
+    );
+  }
+
+  const until = new Date();
+  const since = new Date(until.getTime() - RUM_RANGES[range] * 24 * 60 * 60 * 1000);
+  const traffic = await settle(() => rumTraffic(range, since, until, env));
+
+  return withAdminHeaders(
+    json({
+      configured: true,
+      fetched_at: until.toISOString(),
+      range,
+      since: since.toISOString(),
+      until: until.toISOString(),
+      traffic,
+    }),
+  );
+}
+
+/** One failing upstream call should cost you that panel, not the whole page. */
 async function settle<T>(load: () => Promise<T>): Promise<T | { error: string }> {
   try {
     return await load();
@@ -280,6 +369,200 @@ async function settle<T>(load: () => Promise<T>): Promise<T | { error: string }>
     return { error: cause instanceof Error ? cause.message : 'Request failed' };
   }
 }
+
+// ---------------------------------------------------------------------------
+// Cloudflare Web Analytics
+// ---------------------------------------------------------------------------
+
+type RumRange = keyof typeof RUM_RANGES;
+
+interface RumGroup {
+  count?: number;
+  sum?: { visits?: number };
+  dimensions?: Record<string, string>;
+}
+
+interface TrafficRow {
+  label: string;
+  pageviews: number;
+  visits: number;
+}
+
+/**
+ * Every breakdown the tab shows, in one GraphQL request.
+ *
+ * The dataset is grouped, so each alias below is the same window sliced by a
+ * different dimension; asking for them separately would be the same work over
+ * six round trips. `datetimeHour` is the finest bucket available and is rolled
+ * up here rather than upstream, which is what lets one query serve both the
+ * hourly view of a day and the daily view of a month.
+ */
+async function rumTraffic(range: RumRange, since: Date, until: Date, env: Env) {
+  const siteTag = env.CF_RUM_SITE_TAG?.trim() ?? '';
+
+  // Restricting to a site tag is optional: with a single Web Analytics site
+  // there is nothing else in the account for the query to pick up.
+  const filter = siteTag
+    ? '{ AND: [{ datetime_geq: $since }, { datetime_leq: $until }, { siteTag: $siteTag }] }'
+    : '{ AND: [{ datetime_geq: $since }, { datetime_leq: $until }] }';
+
+  const breakdown = (alias: string, dimension: string, limit: number) => `
+      ${alias}: rumPageloadEventsAdaptiveGroups(
+        limit: ${limit}
+        filter: ${filter}
+        orderBy: [count_DESC]
+      ) {
+        count
+        sum { visits }
+        dimensions { ${dimension} }
+      }`;
+
+  const query = `query AdminTraffic($accountTag: String!, $since: Time!, $until: Time!${
+    siteTag ? ', $siteTag: String!' : ''
+  }) {
+  viewer {
+    accounts(filter: { accountTag: $accountTag }) {
+      totals: rumPageloadEventsAdaptiveGroups(limit: 1, filter: ${filter}) {
+        count
+        sum { visits }
+      }
+      hours: rumPageloadEventsAdaptiveGroups(
+        limit: ${RUM_HOUR_LIMIT}
+        filter: ${filter}
+        orderBy: [datetimeHour_ASC]
+      ) {
+        count
+        sum { visits }
+        dimensions { datetimeHour }
+      }${breakdown('pages', 'requestPath', RUM_ROWS)}${breakdown(
+        'referrers',
+        'refererHost',
+        RUM_ROWS * 2,
+      )}${breakdown('countries', 'countryName', RUM_ROWS)}${breakdown(
+        'devices',
+        'deviceType',
+        8,
+      )}${breakdown('browsers', 'userAgentBrowser', 8)}${breakdown(
+        'systems',
+        'userAgentOS',
+        8,
+      )}
+    }
+  }
+}`;
+
+  const variables: Record<string, string> = {
+    accountTag: env.CF_ACCOUNT_ID,
+    since: since.toISOString(),
+    until: until.toISOString(),
+  };
+  if (siteTag) {
+    variables.siteTag = siteTag;
+  }
+
+  const response = await fetch(CF_GRAPHQL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${env.CF_ANALYTICS_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ query, variables }),
+  });
+  if (!response.ok) {
+    throw new Error(`Cloudflare returned ${response.status}`);
+  }
+
+  const payload = (await response.json()) as {
+    data?: { viewer?: { accounts?: Record<string, RumGroup[]>[] } };
+    errors?: { message?: string }[];
+  };
+  if (payload.errors?.length) {
+    // Almost always the token: `viewer.accounts` needs Account Analytics Read,
+    // and a zone-scoped token fails here rather than at the door.
+    throw new Error(payload.errors[0]?.message ?? 'GraphQL request failed');
+  }
+
+  const account = payload.data?.viewer?.accounts?.[0];
+  if (!account) {
+    throw new Error('No account in the response — check CF_ACCOUNT_ID.');
+  }
+
+  const totals = account.totals?.[0];
+  const hours = account.hours ?? [];
+
+  return {
+    totals: {
+      pageviews: totals?.count ?? 0,
+      visits: totals?.sum?.visits ?? 0,
+    },
+    series: {
+      granularity: range === '1d' ? 'hour' : ('day' as const),
+      points: rollUp(hours, range === '1d' ? 13 : 10),
+    },
+    pages: rumRows(account.pages, 'requestPath'),
+    referrers: splitReferrers(rumRows(account.referrers, 'refererHost')),
+    countries: rumRows(account.countries, 'countryName'),
+    devices: rumRows(account.devices, 'deviceType'),
+    browsers: rumRows(account.browsers, 'userAgentBrowser'),
+    systems: rumRows(account.systems, 'userAgentOS'),
+  };
+}
+
+function rumRows(groups: RumGroup[] | undefined, dimension: string): TrafficRow[] {
+  return (groups ?? []).map((group) => ({
+    label: group.dimensions?.[dimension] ?? '',
+    pageviews: group.count ?? 0,
+    visits: group.sum?.visits ?? 0,
+  }));
+}
+
+/**
+ * Hourly buckets into whatever the chart is drawing. `width` is how much of
+ * the timestamp identifies a bucket: 13 characters is "2026-08-23T14", 10 is
+ * the date — so the same rows serve an hourly day and a daily month.
+ */
+function rollUp(groups: RumGroup[], width: number): TrafficRow[] {
+  const buckets = new Map<string, TrafficRow>();
+
+  for (const group of groups) {
+    const stamp = group.dimensions?.datetimeHour ?? '';
+    if (!stamp) {
+      continue;
+    }
+    const key = stamp.slice(0, width);
+    const bucket = buckets.get(key) ?? { label: key, pageviews: 0, visits: 0 };
+    bucket.pageviews += group.count ?? 0;
+    bucket.visits += group.sum?.visits ?? 0;
+    buckets.set(key, bucket);
+  }
+
+  return [...buckets.values()].sort((a, b) => a.label.localeCompare(b.label));
+}
+
+/**
+ * Our own pages fold into the direct bucket rather than being dropped: an
+ * internal link is a real pageview, it just is not somewhere a visitor came
+ * from, and discarding it would make the sources add up to less than the
+ * traffic they are meant to explain.
+ */
+function splitReferrers(rows: TrafficRow[]) {
+  let direct = 0;
+  const external: TrafficRow[] = [];
+
+  for (const row of rows) {
+    if (!row.label || OWN_HOSTS.has(row.label)) {
+      direct += row.pageviews;
+    } else {
+      external.push(row);
+    }
+  }
+
+  return { direct, external: external.slice(0, RUM_ROWS) };
+}
+
+// ---------------------------------------------------------------------------
+// Resend
+// ---------------------------------------------------------------------------
 
 async function resendGet<T>(path: string, env: Env): Promise<T> {
   const response = await fetch(`${RESEND}${path}`, {
@@ -335,51 +618,84 @@ interface ResendContact {
   unsubscribed?: boolean;
 }
 
-async function subscriberStats(env: Env) {
-  const { items: contacts, truncated } = await resendList<ResendContact>(
-    '/contacts',
-    env,
-    CONTACT_PAGE_LIMIT,
-  );
-  const active = contacts.filter((contact) => !contact.unsubscribed);
+interface RosterContact {
+  id: string;
+  email: string;
+  created_at: string;
+  unsubscribed: boolean;
+  language: Language | 'unknown';
+  topics: Topic[] | null;
+}
 
-  const [languages, topics] = await Promise.all([
-    settle(() => languageCounts(env)),
-    settle(() => topicCounts(active, env)),
+type TopicNote = 'ok' | 'skipped' | 'failed';
+
+/**
+ * The contact list, annotated with the two things the list endpoint will not
+ * return alongside it: which language a contact chose, and which topics they
+ * opted into.
+ *
+ * Language is membership in the two segments the subscribe flow writes to, so
+ * it costs two extra list calls. Topics have no bulk endpoint at all — one
+ * request per contact — so they are only attempted while the list is short
+ * enough that the account's rate limit can absorb it, and their absence is
+ * reported rather than shown as zero.
+ *
+ * Built once per request and read twice: the summary counts and the subscriber
+ * table are two views of the same fetch.
+ */
+async function loadRoster(env: Env) {
+  const [contacts, en, ko] = await Promise.all([
+    resendList<ResendContact>('/contacts', env, CONTACT_PAGE_LIMIT),
+    segmentMembers(env.RESEND_SEGMENT_EN, env),
+    segmentMembers(env.RESEND_SEGMENT_KO, env),
   ]);
 
+  const active = contacts.items.filter((contact) => !contact.unsubscribed);
+  let topics: Map<string, Topic[]> | null = null;
+  let note: TopicNote = 'skipped';
+
+  if (active.length <= TOPIC_LOOKUP_LIMIT) {
+    const looked = await settle(() => topicsByContact(active, env));
+    if (looked instanceof Map) {
+      topics = looked;
+      note = 'ok';
+    } else {
+      note = 'failed';
+    }
+  }
+
+  const rows: RosterContact[] = contacts.items.map((contact) => ({
+    id: contact.id,
+    email: contact.email,
+    created_at: contact.created_at ?? '',
+    unsubscribed: Boolean(contact.unsubscribed),
+    language: en.ids.has(contact.id) ? 'en' : ko.ids.has(contact.id) ? 'ko' : 'unknown',
+    topics: topics?.get(contact.id) ?? null,
+  }));
+
+  // Newest first: the useful question of a subscriber list is who just joined.
+  rows.sort((a, b) => b.created_at.localeCompare(a.created_at));
+
   return {
-    total: contacts.length,
-    active: active.length,
-    unsubscribed: contacts.length - active.length,
-    truncated,
-    languages,
-    topics,
+    rows,
+    truncated: contacts.truncated || en.truncated || ko.truncated,
+    note,
   };
 }
 
-/** The two segments the subscribe flow writes to: one per language. */
-async function languageCounts(env: Env) {
-  const [en, ko] = await Promise.all([
-    segmentSize(env.RESEND_SEGMENT_EN, env),
-    segmentSize(env.RESEND_SEGMENT_KO, env),
-  ]);
-  return { en, ko };
-}
-
-async function segmentSize(
+async function segmentMembers(
   segmentId: string,
   env: Env,
-): Promise<{ count: number; truncated: boolean }> {
+): Promise<{ ids: Set<string>; truncated: boolean }> {
   if (!segmentId) {
-    return { count: 0, truncated: false };
+    return { ids: new Set<string>(), truncated: false };
   }
   const { items, truncated } = await resendList<ResendContact>(
     `/segments/${segmentId}/contacts`,
     env,
     CONTACT_PAGE_LIMIT,
   );
-  return { count: items.length, truncated };
+  return { ids: new Set(items.map((item) => item.id)), truncated };
 }
 
 interface ResendTopic {
@@ -387,17 +703,20 @@ interface ResendTopic {
   subscription?: string;
 }
 
-/**
- * essays vs daily, which is the split the subscribe form actually asks about.
- * There is no bulk endpoint for it, so this is one request per contact, run a
- * few at a time and skipped entirely once the list outgrows the rate limit.
- */
-async function topicCounts(contacts: ResendContact[], env: Env) {
-  if (contacts.length > TOPIC_LOOKUP_LIMIT) {
-    return { skipped: true as const, essays: 0, daily: 0 };
+/** essays vs daily, a few contacts at a time so the rate limit holds. */
+async function topicsByContact(
+  contacts: ResendContact[],
+  env: Env,
+): Promise<Map<string, Topic[]>> {
+  const labels = new Map<string, Topic>();
+  if (env.RESEND_TOPIC_ESSAYS) {
+    labels.set(env.RESEND_TOPIC_ESSAYS, 'essays');
+  }
+  if (env.RESEND_TOPIC_DAILY) {
+    labels.set(env.RESEND_TOPIC_DAILY, 'daily');
   }
 
-  const counts = { essays: 0, daily: 0 };
+  const byContact = new Map<string, Topic[]>();
   const queue = [...contacts];
 
   const worker = async () => {
@@ -406,16 +725,14 @@ async function topicCounts(contacts: ResendContact[], env: Env) {
         `/contacts/${contact.id}/topics`,
         env,
       );
+      const opted: Topic[] = [];
       for (const topic of body.data ?? []) {
-        if (topic.subscription !== 'opt_in') {
-          continue;
-        }
-        if (topic.id === env.RESEND_TOPIC_ESSAYS) {
-          counts.essays += 1;
-        } else if (topic.id === env.RESEND_TOPIC_DAILY) {
-          counts.daily += 1;
+        const label = labels.get(topic.id);
+        if (label && topic.subscription === 'opt_in') {
+          opted.push(label);
         }
       }
+      byContact.set(contact.id, opted);
     }
   };
 
@@ -423,7 +740,31 @@ async function topicCounts(contacts: ResendContact[], env: Env) {
     Array.from({ length: Math.min(TOPIC_CONCURRENCY, contacts.length) }, worker),
   );
 
-  return { skipped: false as const, ...counts };
+  return byContact;
+}
+
+async function subscriberStats(env: Env) {
+  const roster = await loadRoster(env);
+  const active = roster.rows.filter((row) => !row.unsubscribed);
+
+  const languages = { en: 0, ko: 0, unknown: 0 };
+  const topics = { essays: 0, daily: 0 };
+  for (const row of active) {
+    languages[row.language] += 1;
+    for (const topic of row.topics ?? []) {
+      topics[topic] += 1;
+    }
+  }
+
+  return {
+    total: roster.rows.length,
+    active: active.length,
+    unsubscribed: roster.rows.length - active.length,
+    truncated: roster.truncated,
+    languages,
+    topics: { ...topics, note: roster.note },
+    contacts: roster.rows,
+  };
 }
 
 interface ResendEmail {
@@ -480,16 +821,19 @@ async function emailStats(env: Env) {
 interface ResendBroadcast {
   id: string;
   name?: string;
+  subject?: string;
   status?: string;
   created_at?: string;
+  scheduled_at?: string | null;
   sent_at?: string | null;
 }
 
+/** Every issue, newest first — the list endpoint returns them unordered. */
 async function broadcastStats(env: Env) {
   const { items, truncated } = await resendList<ResendBroadcast>(
     '/broadcasts',
     env,
-    2,
+    BROADCAST_PAGE_LIMIT,
   );
 
   const ordered = [...items].sort((a, b) =>
@@ -498,15 +842,75 @@ async function broadcastStats(env: Env) {
 
   return {
     total: items.length,
+    sent: items.filter((broadcast) => broadcast.sent_at).length,
     truncated,
-    recent: ordered.slice(0, 10).map((broadcast) => ({
+    issues: ordered.map((broadcast) => ({
       id: broadcast.id,
       name: broadcast.name ?? '(untitled)',
+      subject: broadcast.subject ?? '',
       status: broadcast.status ?? 'unknown',
-      sent_at: broadcast.sent_at ?? null,
       created_at: broadcast.created_at ?? '',
+      scheduled_at: broadcast.scheduled_at ?? null,
+      sent_at: broadcast.sent_at ?? null,
     })),
   };
+}
+
+interface ResendBroadcastDetail extends ResendBroadcast {
+  from?: string;
+  reply_to?: string | string[] | null;
+  preview_text?: string;
+  segment_id?: string;
+  audience_id?: string;
+  topic_id?: string;
+  html?: string;
+  text?: string;
+}
+
+/**
+ * What one issue was: who it went to, what it said, when it left. The body is
+ * cut down to an excerpt here rather than in the browser — sending a whole
+ * newsletter over the wire to show its first paragraph is the kind of thing
+ * that only shows up as a slow page much later.
+ */
+async function broadcastDetail(id: string, env: Env) {
+  const broadcast = await resendGet<ResendBroadcastDetail>(`/broadcasts/${id}`, env);
+
+  const segmentId = broadcast.segment_id ?? broadcast.audience_id ?? '';
+  const segments: Record<string, string> = {
+    [env.RESEND_SEGMENT_EN]: 'EN',
+    [env.RESEND_SEGMENT_KO]: 'KO',
+  };
+  const topics: Record<string, string> = {
+    [env.RESEND_TOPIC_ESSAYS]: 'essays',
+    [env.RESEND_TOPIC_DAILY]: 'daily',
+  };
+
+  return {
+    id: broadcast.id,
+    name: broadcast.name ?? '(untitled)',
+    subject: broadcast.subject ?? '',
+    from: broadcast.from ?? '',
+    preview_text: broadcast.preview_text ?? '',
+    status: broadcast.status ?? 'unknown',
+    created_at: broadcast.created_at ?? '',
+    scheduled_at: broadcast.scheduled_at ?? null,
+    sent_at: broadcast.sent_at ?? null,
+    segment: segmentId ? (segments[segmentId] ?? segmentId) : '',
+    topic: broadcast.topic_id ? (topics[broadcast.topic_id] ?? broadcast.topic_id) : '',
+    excerpt: excerpt(broadcast.text ?? stripTags(broadcast.html ?? '')),
+  };
+}
+
+function stripTags(html: string): string {
+  return html
+    .replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ')
+    .replace(/<[^>]*>/g, ' ');
+}
+
+function excerpt(body: string): string {
+  const flat = body.replace(/\s+/g, ' ').trim();
+  return flat.length > 480 ? `${flat.slice(0, 480)}…` : flat;
 }
 
 function handleAdminLogout(): Response {

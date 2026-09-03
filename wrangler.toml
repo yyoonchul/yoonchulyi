@@ -26,6 +26,14 @@ RESEND_SEGMENT_KO = "a45bef24-0b37-4901-b6ad-d8f87f42f9cd"
 RESEND_TOPIC_ESSAYS = "82d8b4be-5f0e-4695-b513-c773a7c474a9"
 RESEND_TOPIC_DAILY = "52cde607-0aef-4096-b665-0b45519f0c96"
 
+# Page analytics. The account id is an identifier, not a credential — it is in
+# every dashboard URL — and the site tag only narrows the query when the
+# account holds more than one Web Analytics site. The token that makes them
+# useful is a secret: `wrangler secret put CF_ANALYTICS_TOKEN`, scoped to
+# Account · Account Analytics · Read.
+CF_ACCOUNT_ID = "a35a145c184d1aea933c52815216b06d"
+CF_RUM_SITE_TAG = ""
+
 # /api/subscribe sends mail on an anonymous request, so it is capped per IP.
 [[ratelimits]]
 name = "SUBSCRIBE_LIMITER"

@@ -1,10 +1,14 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
-// Nothing here is secret in itself — this is a plain static page, and the
-// numbers arrive later from /api/admin/stats. The password gate lives in the
+// Nothing here is secret in itself — this is a plain static page, and every
+// number arrives later from /api/admin/*. The password gate lives in the
 // Worker (`handleAdmin`), which is the only thing standing between the CDN and
 // this file. See run_worker_first in wrangler.toml.
+//
+// Two tabs, two sources: page traffic comes from Cloudflare Web Analytics,
+// newsletter numbers from Resend. Each loads on first view, so opening the
+// page only pays for the tab you are looking at.
 ---
 
 <BaseLayout
@@ -13,7 +17,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   robots="noindex, nofollow"
 >
   <section class="py-8">
-    <div class="flex items-baseline justify-between gap-4 mb-2">
+    <div class="flex items-baseline justify-between gap-4 mb-6">
       <h1 class="font-serif text-2xl">Admin</h1>
       <div class="flex items-baseline gap-4 font-mono text-sm">
         <button
@@ -31,30 +35,88 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       </div>
     </div>
 
-    <p class="font-mono text-xs text-sub mb-8" data-status>Loading…</p>
+    <nav
+      role="tablist"
+      class="flex gap-6 font-mono text-sm border-b border-sub/20 mb-6"
+    >
+      <button
+        type="button"
+        role="tab"
+        data-tab="pages"
+        class="-mb-px border-b py-2 transition-colors"
+      >
+        Pages
+      </button>
+      <button
+        type="button"
+        role="tab"
+        data-tab="mail"
+        class="-mb-px border-b py-2 transition-colors"
+      >
+        Newsletter
+      </button>
+    </nav>
 
-    <div data-panels class="space-y-10"></div>
+    <div data-panel="pages">
+      <div class="flex items-baseline justify-between gap-4 mb-6">
+        <p class="font-mono text-xs text-sub" data-status="pages">Loading…</p>
+        <div class="flex gap-3 font-mono text-xs shrink-0" data-ranges>
+          <button type="button" data-range="1d" class="transition-colors">24h</button>
+          <button type="button" data-range="7d" class="transition-colors">7d</button>
+          <button type="button" data-range="30d" class="transition-colors">30d</button>
+        </div>
+      </div>
+      <div data-body="pages" class="space-y-10"></div>
+    </div>
+
+    <div data-panel="mail">
+      <p class="font-mono text-xs text-sub mb-6" data-status="mail">Loading…</p>
+      <div data-body="mail" class="space-y-10"></div>
+    </div>
   </section>
 </BaseLayout>
 
 <script>
-  const statusLine = document.querySelector('[data-status]') as HTMLElement;
-  const panels = document.querySelector('[data-panels]') as HTMLElement;
+  type TabName = 'pages' | 'mail';
+
   const refreshButton = document.querySelector('[data-refresh]') as HTMLButtonElement;
+  const tabButtons = Array.from(
+    document.querySelectorAll('[data-tab]'),
+  ) as HTMLButtonElement[];
+  const rangeButtons = Array.from(
+    document.querySelectorAll('[data-range]'),
+  ) as HTMLButtonElement[];
+
+  const ACTIVE_TAB = 'border-text text-text';
+  const IDLE_TAB = 'border-transparent text-sub hover:text-accent';
+
+  let activeTab: TabName = location.hash === '#mail' ? 'mail' : 'pages';
+  let activeRange = '7d';
+  const loaded = new Set<TabName>();
+
+  // ---------------------------------------------------------------------
+  // Building blocks. textContent everywhere, never innerHTML: paths, referrer
+  // hosts, subjects and addresses all arrive from outside.
+  // ---------------------------------------------------------------------
 
   function el(tag: string, className = '', text = ''): HTMLElement {
     const node = document.createElement(tag);
     if (className) node.className = className;
-    // textContent, never innerHTML: subjects and addresses come from outside.
     if (text) node.textContent = text;
     return node;
   }
 
-  function section(title: string): HTMLElement {
+  function section(title: string, note = ''): HTMLElement {
     const wrapper = el('section');
-    wrapper.append(
-      el('h2', 'font-mono text-xs uppercase tracking-wider text-sub mb-4', title),
+    const heading = el(
+      'div',
+      'flex items-baseline justify-between gap-4 mb-4',
     );
+    heading.append(
+      el('h2', 'font-mono text-xs uppercase tracking-wider text-sub', title),
+    );
+    if (note) heading.append(el('span', 'font-mono text-xs text-sub/70', note));
+    wrapper.append(heading);
     return wrapper;
   }
 
@@ -72,6 +134,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     return item;
   }
 
+  function statGrid(...items: HTMLElement[]): HTMLElement {
+    const grid = el('div', 'grid grid-cols-2 sm:grid-cols-4 gap-6 mb-6');
+    grid.append(...items);
+    return grid;
+  }
+
   function row(cells: string[], muted = false): HTMLElement {
     const line = el(
       'div',
@@ -87,6 +155,39 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     return line;
   }
 
+  interface Bar {
+    label: string;
+    value: number;
+    note?: string;
+  }
+
+  /**
+   * A ranked list where each row carries its own share as a background. The
+   * bar is proportional to the largest row, not the total, because the useful
+   * comparison in a top-ten list is against the leader.
+   */
+  function barList(bars: Bar[], empty = 'Nothing yet.'): HTMLElement {
+    const wrapper = el('div');
+    if (!bars.length) {
+      wrapper.append(el('p', 'font-mono text-sm text-sub', empty));
+      return wrapper;
+    }
+
+    const peak = Math.max(...bars.map((bar) => bar.value), 1);
+    for (const bar of bars) {
+      const line = el('div', 'relative border-t border-sub/20');
+      const fill = el('div', 'absolute inset-y-0 left-0 bg-accent/10');
+      fill.style.width = `${Math.max((bar.value / peak) * 100, 1)}%`;
+      const content = el('div', 'relative flex gap-3 py-2 font-mono text-xs');
+      content.append(el('span', 'flex-1 min-w-0 truncate', bar.label));
+      if (bar.note) content.append(el('span', 'shrink-0 text-sub/70', bar.note));
+      content.append(el('span', 'shrink-0 text-sub tabular-nums', String(bar.value)));
+      line.append(fill, content);
+      wrapper.append(line);
+    }
+    return wrapper;
+  }
+
   function percent(part: number, whole: number): string {
     if (!whole) return '—';
     return `${Math.round((part / whole) * 100)}%`;
@@ -98,71 +199,323 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     return value.slice(0, 10);
   }
 
+  function number(value: number): string {
+    return value.toLocaleString();
+  }
+
+  // ---------------------------------------------------------------------
+  // Pages tab — Cloudflare Web Analytics
+  // ---------------------------------------------------------------------
+
+  function setupNotice(reason: string): HTMLElement {
+    const wrapper = section('Not configured yet');
+    wrapper.append(el('p', 'font-mono text-xs text-sub mb-4', reason));
+    const steps = el('ol', 'font-mono text-xs text-sub space-y-2 list-decimal pl-4');
+    for (const step of [
+      'Add yoonchulyi.com under Web Analytics in the Cloudflare dashboard.',
+      'Put its beacon token in WEB_ANALYTICS_TOKEN in src/components/BaseHead.astro.',
+      'Create an API token with Account · Account Analytics · Read.',
+      'wrangler secret put CF_ANALYTICS_TOKEN',
+    ]) {
+      steps.append(el('li', '', step));
+    }
+    wrapper.append(steps);
+    return wrapper;
+  }
+
+  /**
+   * The trend. Bars are drawn against the busiest bucket in the window, so the
+   * shape is a comparison within the range rather than an absolute scale — a
+   * quiet week and a busy one look the same height, which is the point when
+   * the question is "which day".
+   */
+  function trendPanel(series: any): HTMLElement {
+    const points: any[] = series?.points ?? [];
+    const hourly = series?.granularity === 'hour';
+    const wrapper = section(
+      hourly ? 'By hour' : 'By day',
+      points.length ? '' : 'no data in this window',
+    );
+    if (!points.length) return wrapper;
+
+    const peak = Math.max(...points.map((point: any) => point.pageviews), 1);
+    const chart = el('div', 'flex items-end gap-px h-20');
+    for (const point of points) {
+      const bar = el('div', 'flex-1 bg-accent/30 hover:bg-accent/60 transition-colors');
+      bar.style.height = `${Math.max((point.pageviews / peak) * 100, 2)}%`;
+      bar.title = `${point.label} · ${point.pageviews} views · ${point.visits} visits`;
+      chart.append(bar);
+    }
+    wrapper.append(chart);
+
+    const axis = el('div', 'flex justify-between font-mono text-xs text-sub/70 mt-2');
+    axis.append(el('span', '', points[0].label));
+    axis.append(el('span', '', points[points.length - 1].label));
+    wrapper.append(axis);
+    return wrapper;
+  }
+
+  /**
+   * The busiest bucket in the window, labelled the way the chart under it is:
+   * a date when the chart is daily, an hour when it is hourly.
+   */
+  function busiest(series: any): { label: string; note: string } {
+    const points: any[] = series?.points ?? [];
+    if (!points.length) return { label: '—', note: '' };
+
+    const peak = points.reduce((best: any, point: any) =>
+      point.pageviews > best.pageviews ? point : best,
+    );
+    const hourly = series.granularity === 'hour';
+    return {
+      label: hourly ? `${peak.label.slice(11, 13)}:00` : peak.label.slice(5),
+      note: `${peak.pageviews} views`,
+    };
+  }
+
+  function trafficPanels(traffic: any): HTMLElement[] {
+    const totals = traffic.totals ?? { pageviews: 0, visits: 0 };
+    const peak = busiest(traffic.series);
+    const overview = section('Overview');
+    overview.append(
+      statGrid(
+        stat('pageviews', number(totals.pageviews)),
+        stat('visits', number(totals.visits), 'sessions, not people'),
+        stat(
+          'per visit',
+          totals.visits ? (totals.pageviews / totals.visits).toFixed(1) : '—',
+          'pages read in a sitting',
+        ),
+        stat('busiest', peak.label, peak.note),
+      ),
+    );
+
+    const pages = section('Top pages');
+    pages.append(
+      barList(
+        (traffic.pages ?? []).map((page: any) => ({
+          label: page.label || '/',
+          value: page.pageviews,
+          note: `${page.visits} visits`,
+        })),
+      ),
+    );
+
+    const referrers = section('Sources');
+    const external = traffic.referrers?.external ?? [];
+    referrers.append(
+      barList([
+        {
+          label: 'Direct / typed / own links',
+          value: traffic.referrers?.direct ?? 0,
+        },
+        ...external.map((source: any) => ({
+          label: source.label,
+          value: source.pageviews,
+        })),
+      ]),
+    );
+
+    const places = section('Countries');
+    places.append(
+      barList(
+        (traffic.countries ?? []).map((country: any) => ({
+          label: country.label || 'unknown',
+          value: country.pageviews,
+        })),
+      ),
+    );
+
+    const clients = section('Devices, browsers, systems');
+    const columns = el('div', 'grid sm:grid-cols-3 gap-6');
+    for (const key of ['devices', 'browsers', 'systems']) {
+      columns.append(
+        barList(
+          (traffic[key] ?? []).map((item: any) => ({
+            label: item.label || 'unknown',
+            value: item.pageviews,
+          })),
+          '—',
+        ),
+      );
+    }
+    clients.append(columns);
+
+    return [
+      overview,
+      trendPanel(traffic.series),
+      pages,
+      referrers,
+      places,
+      clients,
+    ];
+  }
+
+  async function loadPages(): Promise<void> {
+    const status = document.querySelector('[data-status="pages"]') as HTMLElement;
+    const body = document.querySelector('[data-body="pages"]') as HTMLElement;
+    status.textContent = 'Loading…';
+
+    const data = await request(`/api/admin/traffic?range=${activeRange}`);
+    if (!data) return;
+
+    if (!data.configured) {
+      body.replaceChildren(setupNotice(data.reason ?? 'No credentials.'));
+      status.textContent = 'Cloudflare Web Analytics is not wired up yet.';
+      return;
+    }
+    if (data.traffic?.error) {
+      body.replaceChildren(failed('Traffic', data.traffic.error));
+      status.textContent = 'Could not read Cloudflare Web Analytics.';
+      return;
+    }
+
+    body.replaceChildren(...trafficPanels(data.traffic));
+    status.textContent =
+      `as of ${new Date(data.fetched_at).toLocaleString()} · ` +
+      'counts browsers that ran the beacon';
+  }
+
+  // ---------------------------------------------------------------------
+  // Newsletter tab — Resend
+  // ---------------------------------------------------------------------
+
+  const TOPIC_NOTES: Record<string, string> = {
+    skipped: 'too many contacts to read topics',
+    failed: 'topic lookup failed',
+  };
+
   function subscriberPanel(data: any): HTMLElement {
     if (data.error) return failed('Subscribers', data.error);
 
     const wrapper = section('Subscribers');
-    const grid = el('div', 'grid grid-cols-2 sm:grid-cols-4 gap-6 mb-6');
-    grid.append(stat('active', String(data.active)));
-    grid.append(stat('unsubscribed', String(data.unsubscribed)));
+    const languages = data.languages ?? { en: 0, ko: 0, unknown: 0 };
+    const topics = data.topics ?? { essays: 0, daily: 0, note: 'skipped' };
 
-    if (data.languages?.error) {
-      grid.append(stat('by language', '—', data.languages.error));
-    } else if (data.languages) {
-      grid.append(
-        stat('EN / KO', `${data.languages.en.count} / ${data.languages.ko.count}`),
-      );
-    }
+    wrapper.append(
+      statGrid(
+        stat('active', number(data.active)),
+        stat('unsubscribed', number(data.unsubscribed)),
+        stat(
+          'EN / KO',
+          `${languages.en} / ${languages.ko}`,
+          languages.unknown ? `${languages.unknown} in neither segment` : '',
+        ),
+        topics.note === 'ok'
+          ? stat('essays / daily', `${topics.essays} / ${topics.daily}`)
+          : stat('essays / daily', '—', TOPIC_NOTES[topics.note] ?? ''),
+      ),
+    );
 
-    if (data.topics?.error) {
-      grid.append(stat('by topic', '—', data.topics.error));
-    } else if (data.topics?.skipped) {
-      grid.append(stat('essays / daily', '—', 'too many contacts to count'));
-    } else if (data.topics) {
-      grid.append(
-        stat('essays / daily', `${data.topics.essays} / ${data.topics.daily}`),
-      );
-    }
-
-    wrapper.append(grid);
     if (data.truncated) {
       wrapper.append(
-        el('p', 'font-mono text-xs text-sub', 'Contact list was truncated at the page cap.'),
+        el(
+          'p',
+          'font-mono text-xs text-sub',
+          'Contact list was truncated at the page cap.',
+        ),
       );
     }
     return wrapper;
   }
 
+  /**
+   * The list itself. Filtering happens here rather than upstream because the
+   * whole roster already arrived with the counts — a search box that costs a
+   * round trip would be slower and would spend the Resend rate limit twice.
+   */
+  function subscriberList(data: any): HTMLElement {
+    if (data.error) return el('div');
+
+    const contacts: any[] = data.contacts ?? [];
+    const wrapper = section('Subscriber list', `${contacts.length} on file`);
+
+    const search = document.createElement('input');
+    search.type = 'search';
+    search.placeholder = 'Filter by address…';
+    search.className =
+      'w-full mb-4 px-3 py-2 font-mono text-xs bg-transparent border ' +
+      'border-sub/40 focus:border-accent focus:outline-none';
+    wrapper.append(search);
+
+    const list = el('div');
+    const footer = el('p', 'font-mono text-xs text-sub mt-3');
+    wrapper.append(list, footer);
+
+    let limit = 25;
+
+    const draw = () => {
+      const needle = search.value.trim().toLowerCase();
+      const matches = needle
+        ? contacts.filter((contact) => contact.email.toLowerCase().includes(needle))
+        : contacts;
+      const shown = matches.slice(0, limit);
+
+      list.replaceChildren();
+      for (const contact of shown) {
+        const marks = [contact.language === 'unknown' ? '—' : contact.language];
+        if (contact.topics?.length) marks.push(contact.topics.join('+'));
+        if (contact.unsubscribed) marks.push('unsubscribed');
+
+        list.append(
+          row(
+            [shortDate(contact.created_at), contact.email, marks.join(' · ')],
+            contact.unsubscribed,
+          ),
+        );
+      }
+
+      footer.replaceChildren();
+      if (!matches.length) {
+        footer.textContent = 'No match.';
+        return;
+      }
+      footer.textContent = `Showing ${shown.length} of ${matches.length}. `;
+      if (matches.length > shown.length) {
+        const more = el('button', 'text-accent hover:underline', 'Show more');
+        more.addEventListener('click', () => {
+          limit += 100;
+          draw();
+        });
+        footer.append(more);
+      }
+    };
+
+    search.addEventListener('input', () => {
+      limit = 25;
+      draw();
+    });
+    draw();
+    return wrapper;
+  }
+
   function emailPanel(data: any): HTMLElement {
-    if (data.error) return failed('Email · last 30 days', data.error);
+    if (data.error) return failed('Delivery · last 30 days', data.error);
 
-    const wrapper = section('Email · last 30 days');
-    const grid = el('div', 'grid grid-cols-2 sm:grid-cols-4 gap-6 mb-6');
-    grid.append(stat('sent', String(data.sent)));
-    grid.append(
-      stat('delivered', String(data.delivered), percent(data.delivered, data.sent)),
+    const wrapper = section('Delivery · last 30 days');
+    wrapper.append(
+      statGrid(
+        stat('sent', number(data.sent)),
+        stat('delivered', number(data.delivered), percent(data.delivered, data.sent)),
+        stat('opened', number(data.opened), percent(data.opened, data.delivered)),
+        stat('clicked', number(data.clicked), percent(data.clicked, data.delivered)),
+      ),
     );
-    grid.append(
-      stat('opened', String(data.opened), percent(data.opened, data.delivered)),
-    );
-    grid.append(
-      stat('clicked', String(data.clicked), percent(data.clicked, data.delivered)),
-    );
-    wrapper.append(grid);
 
-    const problems = el('p', 'font-mono text-xs text-sub mb-6');
-    problems.textContent =
-      `bounced ${data.bounced} · complained ${data.complained} · ` +
-      `failed ${data.failed} · in flight ${data.pending}`;
-    wrapper.append(problems);
+    wrapper.append(
+      el(
+        'p',
+        'font-mono text-xs text-sub mb-6',
+        `bounced ${data.bounced} · complained ${data.complained} · ` +
+          `failed ${data.failed} · in flight ${data.pending}`,
+      ),
+    );
 
     const events = Object.entries(data.by_event as Record<string, number>).sort(
       (a, b) => b[1] - a[1],
     );
     if (events.length) {
-      wrapper.append(
-        el('h3', 'font-mono text-xs text-sub mt-8 mb-1', 'Raw last_event'),
-      );
+      wrapper.append(el('h3', 'font-mono text-xs text-sub mt-8 mb-1', 'Raw last_event'));
       for (const [event, count] of events) {
         wrapper.append(row([event, '', String(count)], true));
       }
@@ -193,61 +546,213 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     return wrapper;
   }
 
-  function broadcastPanel(data: any): HTMLElement {
-    if (data.error) return failed('Broadcasts', data.error);
+  /** One issue's detail, fetched the first time its row is opened and kept. */
+  const issueCache = new Map<string, any>();
 
-    const wrapper = section('Broadcasts');
-    if (!data.recent?.length) {
+  function issueDetail(detail: any): HTMLElement {
+    const box = el('div', 'py-3 pl-4 border-l border-accent/40 space-y-1');
+    if (detail.error) {
+      box.append(el('p', 'font-mono text-xs text-accent', detail.error));
+      return box;
+    }
+
+    const line = (label: string, value: string) => {
+      if (!value) return;
+      const item = el('div', 'flex gap-3 font-mono text-xs');
+      item.append(el('span', 'w-20 shrink-0 text-sub', label));
+      item.append(el('span', 'flex-1 min-w-0 break-words', value));
+      box.append(item);
+    };
+
+    line('subject', detail.subject);
+    line('from', detail.from);
+    line(
+      'audience',
+      [detail.segment, detail.topic].filter(Boolean).join(' · '),
+    );
+    line('preview', detail.preview_text);
+    line('created', shortDate(detail.created_at));
+    line('scheduled', detail.scheduled_at ? shortDate(detail.scheduled_at) : '');
+    line('sent', detail.sent_at ? shortDate(detail.sent_at) : 'not sent');
+    if (detail.excerpt) {
+      box.append(
+        el('p', 'font-mono text-xs text-sub leading-relaxed pt-2', detail.excerpt),
+      );
+    }
+    return box;
+  }
+
+  function issuesPanel(data: any): HTMLElement {
+    if (data.error) return failed('Issues', data.error);
+
+    const wrapper = section(
+      'Issues',
+      `${data.sent ?? 0} sent of ${data.total ?? 0}`,
+    );
+    const issues: any[] = data.issues ?? [];
+    if (!issues.length) {
       wrapper.append(el('p', 'font-mono text-sm text-sub', 'None yet.'));
       return wrapper;
     }
-    for (const broadcast of data.recent) {
+
+    for (const issue of issues) {
+      const block = el('div');
+      const button = el(
+        'button',
+        'w-full flex gap-4 py-2 border-t border-sub/20 font-mono text-xs text-left ' +
+          'hover:text-accent transition-colors',
+      );
+      button.append(
+        el('span', 'w-28 shrink-0 text-sub', shortDate(issue.sent_at ?? issue.created_at)),
+      );
+      button.append(
+        el('span', 'flex-1 min-w-0 truncate', issue.subject || issue.name),
+      );
+      button.append(el('span', 'shrink-0 text-sub', issue.status));
+
+      const slot = el('div');
+      slot.hidden = true;
+
+      button.addEventListener('click', async () => {
+        if (!slot.hidden) {
+          slot.hidden = true;
+          return;
+        }
+        slot.hidden = false;
+        if (!issueCache.has(issue.id)) {
+          slot.replaceChildren(el('p', 'font-mono text-xs text-sub py-2', 'Loading…'));
+          const detail = await request(`/api/admin/broadcasts/${issue.id}`);
+          if (!detail) return;
+          issueCache.set(issue.id, detail);
+        }
+        slot.replaceChildren(issueDetail(issueCache.get(issue.id)));
+      });
+
+      block.append(button, slot);
+      wrapper.append(block);
+    }
+
+    if (data.truncated) {
       wrapper.append(
-        row([
-          shortDate(broadcast.sent_at ?? broadcast.created_at),
-          broadcast.name,
-          broadcast.status,
-        ]),
+        el(
+          'p',
+          'font-mono text-xs text-sub mt-4',
+          'Broadcast list was truncated at the page cap.',
+        ),
       );
     }
     return wrapper;
   }
 
-  async function load() {
-    refreshButton.disabled = true;
-    statusLine.textContent = 'Loading…';
+  async function loadMail(): Promise<void> {
+    const status = document.querySelector('[data-status="mail"]') as HTMLElement;
+    const body = document.querySelector('[data-body="mail"]') as HTMLElement;
+    status.textContent = 'Loading…';
 
+    const data = await request('/api/admin/stats');
+    if (!data) return;
+
+    issueCache.clear();
+    body.replaceChildren(
+      subscriberPanel(data.subscribers),
+      subscriberList(data.subscribers),
+      issuesPanel(data.broadcasts),
+      emailPanel(data.emails),
+    );
+    status.textContent =
+      `as of ${new Date(data.fetched_at).toLocaleString()} · ` +
+      `Resend keeps ${data.retention_days} days`;
+  }
+
+  // ---------------------------------------------------------------------
+  // Plumbing
+  // ---------------------------------------------------------------------
+
+  /**
+   * The session is 12 hours; when it lapses, reloading puts the login form
+   * back on screen instead of leaving dead buttons here. A null return means
+   * the caller has nothing to draw and should stop.
+   */
+  async function request(path: string): Promise<any | null> {
     try {
-      const response = await fetch('/api/admin/stats', { cache: 'no-store' });
-
-      // The session is 12 hours; when it lapses, reloading puts the login
-      // form back on screen instead of leaving a dead button here.
+      const response = await fetch(path, { cache: 'no-store' });
       if (response.status === 401) {
         location.reload();
-        return;
+        return null;
       }
       if (!response.ok) {
         throw new Error(`Request failed with ${response.status}`);
       }
-
-      const data = await response.json();
-      panels.replaceChildren(
-        subscriberPanel(data.subscribers),
-        emailPanel(data.emails),
-        broadcastPanel(data.broadcasts),
-      );
-      statusLine.textContent =
-        `as of ${new Date(data.fetched_at).toLocaleString()} · ` +
-        `Resend keeps ${data.retention_days} days`;
+      return await response.json();
     } catch (cause) {
-      statusLine.textContent =
-        cause instanceof Error ? cause.message : 'Could not load stats.';
-      panels.replaceChildren();
+      const status = document.querySelector(
+        `[data-status="${activeTab}"]`,
+      ) as HTMLElement;
+      status.textContent =
+        cause instanceof Error ? cause.message : 'Could not load.';
+      return null;
+    }
+  }
+
+  const loaders: Record<TabName, () => Promise<void>> = {
+    pages: loadPages,
+    mail: loadMail,
+  };
+
+  async function reload(tab: TabName): Promise<void> {
+    refreshButton.disabled = true;
+    try {
+      await loaders[tab]();
+      loaded.add(tab);
     } finally {
       refreshButton.disabled = false;
     }
   }
 
-  refreshButton.addEventListener('click', load);
-  load();
+  function paint(): void {
+    for (const button of tabButtons) {
+      const isActive = button.dataset.tab === activeTab;
+      button.className = `-mb-px border-b py-2 transition-colors ${
+        isActive ? ACTIVE_TAB : IDLE_TAB
+      }`;
+      button.setAttribute('aria-selected', String(isActive));
+    }
+    for (const panel of ['pages', 'mail'] as TabName[]) {
+      const node = document.querySelector(`[data-panel="${panel}"]`) as HTMLElement;
+      node.hidden = panel !== activeTab;
+    }
+    for (const button of rangeButtons) {
+      button.className = `transition-colors ${
+        button.dataset.range === activeRange
+          ? 'text-text underline underline-offset-4'
+          : 'text-sub hover:text-accent'
+      }`;
+    }
+  }
+
+  function show(tab: TabName): void {
+    activeTab = tab;
+    location.hash = tab;
+    paint();
+    if (!loaded.has(tab)) void reload(tab);
+  }
+
+  for (const button of tabButtons) {
+    button.addEventListener('click', () => show(button.dataset.tab as TabName));
+  }
+  for (const button of rangeButtons) {
+    button.addEventListener('click', () => {
+      activeRange = button.dataset.range ?? '7d';
+      paint();
+      void reload('pages');
+    });
+  }
+  refreshButton.addEventListener('click', () => void reload(activeTab));
+  window.addEventListener('hashchange', () => {
+    const tab: TabName = location.hash === '#mail' ? 'mail' : 'pages';
+    if (tab !== activeTab) show(tab);
+  });
+
+  paint();
+  void reload(activeTab);
 </script>
