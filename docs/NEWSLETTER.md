@@ -5,7 +5,7 @@ Two mailings, two schedules, one sent-log.
 | Mailing | Trigger | Runner | Topic |
 | --- | --- | --- | --- |
 | Essays | after a successful deploy, one email per new post | GitHub Actions (`.github/workflows/newsletter.yml`) | `RESEND_TOPIC_ESSAYS` |
-| Daily Insights letter | Monday morning, covering the week that just closed | launchd on the Mac (`run-weekly-letter-{codex,claude}.sh`) | `RESEND_TOPIC_DAILY` |
+| Daily Insights letter | Monday morning, covering the week that just closed | launchd prepares, GitHub Actions sends | `RESEND_TOPIC_DAILY` |
 
 Each mailing goes out twice, once per language segment (`RESEND_SEGMENT_EN`,
 `RESEND_SEGMENT_KO`).
@@ -26,10 +26,16 @@ It runs in two deterministic phases with one agent step between them. The agent
 writes the subject line and three TL;DR lines. Nothing else.
 
 ```
-plan   collect the week's published summaries → .newsletter-weekly/<monday>/
-  ↓    agent reads brief.md, writes headline.json (weekly-letter skill)
-send   render both letters from that and hand them to Resend
+Mac      plan   collect the week's summaries → .newsletter-weekly/<monday>/
+  ↓      agent  reads brief.md, writes headline.json (weekly-letter skill)
+  ↓      push   commit the workspace — this is the handoff
+Actions  send   render from the committed week and hand it to Resend
 ```
+
+Only the middle step needs to be on the Mac: it is the one that needs a local
+agent CLI. Rendering and sending are pure scripts, so they run in Actions next
+to the essay mailing, where the Resend key already is. Nothing has to put a
+Resend key on the laptop.
 
 **plan** (`weekly.ts plan`) resolves the window — the seven days ending on the
 Sunday before the most recent Monday — and for each day reads
@@ -55,8 +61,10 @@ the other, and the mechanics of both live in scripts. Unattended Monday runs
 skip the second skill and call the script directly, the way `run-daily-flow.sh`
 calls `run-daily-insights-publish.sh`.
 
-**send** (`weekly.ts send`, shared with the essay mailing through
-`shared.ts`) validates `headline.json` field by field — both
+**send** (`.github/workflows/weekly-letter.yml`, sharing `shared.ts` with the
+essay mailing) renders from the committed `week.json` and `headline.json`
+rather than re-planning, so what goes out is exactly what the agent was shown.
+It validates `headline.json` field by field — both
 subjects present and under 120 characters, exactly three non-empty TL;DR lines
 per language — and refuses to send otherwise. The wrapper treats the validation,
 not the agent's exit code, as the contract: a run that exits 0 with an unusable
@@ -90,7 +98,7 @@ Useful overrides when running the wrapper by hand:
 | --- | --- | --- |
 | `WEEKLY_LETTER_DRY_RUN` | `false` | Stop after validating; send nothing |
 | `WEEKLY_LETTER_WEEK_OF` | last week | Monday of the week to build |
-| `WEEKLY_LETTER_PUSH_STATE` | `true` | Commit and push `.newsletter-state.json` after sending |
+| `WEEKLY_LETTER_PUSH` | `true` | Commit and push the workspace, which is what triggers the send |
 | `WEEKLY_LETTER_AGENT_RETRY_MAX_ATTEMPTS` | `3` | Retries before giving up on a usable headline |
 
 An existing `headline.json` is reused rather than regenerated, so a run that
@@ -110,17 +118,9 @@ and left nothing recorded, so the same backlog was retried and failed nightly.
 The essay workflow reads them from GitHub Actions: secret `RESEND_API_KEY`,
 variables `RESEND_SEGMENT_EN`, `RESEND_SEGMENT_KO`, `RESEND_TOPIC_ESSAYS`.
 
-The weekly letter runs on the Mac and reads the same names out of `.dev.vars`,
-the site's existing gitignored local secrets file. The four list IDs are already
-there, copied from the repository's GitHub Actions variables — they identify
-lists, not credentials, and the repository is public, so they stay out of source
-but need no protecting beyond that.
+The weekly letter reads the same names from the same place, because its send
+step runs in Actions too. The Mac never touches Resend.
 
-Only `RESEND_API_KEY` is a real secret, and GitHub secrets cannot be read back,
-so that one value has to be pasted into `.dev.vars` once. The wrapper checks all
-four names are set *and* that the key starts with `re_` before it starts, so a
-placeholder fails immediately instead of after an agent run.
-
-Only `RESEND_*` names are read out of that file. The same file holds the admin
-and subscribe secrets, and the agent runs as a child of the wrapper; nothing it
-does not need belongs in its environment.
+`.dev.vars` carries a placeholder `RESEND_API_KEY` and the four list IDs for
+local work. Only the `weekly-letter-send` skill — a human sending by hand —
+needs a real key there; the scheduled path does not.

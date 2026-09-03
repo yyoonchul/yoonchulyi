@@ -49,6 +49,8 @@ than writing it yourself.
   it is what stops a week from going out twice.
 - A week already in the sent-log is reported as such and skipped. That is the
   correct outcome, not an error to work around.
-- Unattended Monday runs do not use this skill — `run-weekly-letter.sh` calls
-  the same script directly, the way `run-daily-flow.sh` calls
-  `run-daily-insights-publish.sh`.
+- Unattended Monday runs do not use this skill. The Mac pushes the prepared
+  week and `.github/workflows/weekly-letter.yml` sends it, so the scheduled path
+  needs no Resend key locally. This skill is the by-hand alternative, and it does
+  need a real `RESEND_API_KEY` in `.dev.vars`; if there is only the placeholder
+  there, say so and point at the workflow's `workflow_dispatch` instead.

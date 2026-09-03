@@ -47,8 +47,17 @@ export function writePlan(plan: WeekPlan): void {
 }
 
 export function readPlan(window: WeekWindow): WeekPlan {
-  const raw = readFileSync(`${workspaceDir(window)}week.json`, 'utf8');
-  return JSON.parse(raw) as WeekPlan;
+  const path = `${workspaceDir(window)}week.json`;
+  try {
+    return JSON.parse(readFileSync(path, 'utf8')) as WeekPlan;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      throw new Error(
+        `No week prepared at ${path} — run \`weekly.ts plan\` first, or wait for the Mac to push one.`,
+      );
+    }
+    throw error;
+  }
 }
 
 /**

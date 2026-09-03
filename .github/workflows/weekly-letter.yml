@@ -1,0 +1,72 @@
+name: Send weekly letter
+
+# The Mac prepares the week — it is the only step that needs a local agent CLI —
+# and pushes `.newsletter-weekly/<monday>/`. Sending is a pure script, so it runs
+# here, next to the essay mailing and the Resend key.
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.newsletter-weekly/**'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Report what would be sent without sending"
+        type: boolean
+        default: true
+      week_of:
+        description: "Monday the week starts on (YYYY-MM-DD). Blank = last week."
+        type: string
+        required: false
+
+permissions:
+  contents: write
+
+# Shares a group with the essay sender: both read and commit the same sent-log,
+# so they must not run at the same time.
+concurrency:
+  group: newsletter
+  cancel-in-progress: false
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout your repository using git
+        uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Renders from the committed week.json and headline.json rather than
+      # re-planning, so what goes out is exactly what the agent was shown.
+      - name: Send the weekly Daily Insights letter
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_SEGMENT_EN: ${{ vars.RESEND_SEGMENT_EN }}
+          RESEND_SEGMENT_KO: ${{ vars.RESEND_SEGMENT_KO }}
+          RESEND_TOPIC_DAILY: ${{ vars.RESEND_TOPIC_DAILY }}
+        run: |
+          npx tsx scripts/newsletter/weekly.ts send \
+            ${{ inputs.dry_run && '--dry-run' || '' }} \
+            ${{ inputs.week_of && format('--week-of {0}', inputs.week_of) || '' }}
+
+      - name: Record what was sent
+        run: |
+          if git diff --quiet -- .newsletter-state.json; then
+            echo "no new sends to record"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .newsletter-state.json
+          git commit -m "chore(newsletter): record weekly letter send"
+          git push

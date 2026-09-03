@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Sends the weekly Daily Insights letter.
+# Prepares the weekly Daily Insights letter and hands it to GitHub Actions.
 #
-# Deterministic scripts do everything except choose the lead story and write the
-# TL;DR; an agent does only that, through the `weekly-letter` skill, by writing
-# one small JSON file. This wrapper runs the two phases around it and owns
-# sending, the sent-log, and the commit.
+# Only the middle step needs to be here: choosing the lead story and writing the
+# TL;DR needs a local agent CLI. Rendering and sending are pure scripts with no
+# agent in them, so they stay in Actions next to the essay mailing, where the
+# Resend key already lives. This wrapper stops once the week is pushed.
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=./common.sh
@@ -28,7 +28,7 @@ require_command "${ENGINE}"
 
 WEEK_OF="${WEEKLY_LETTER_WEEK_OF:-}"
 DRY_RUN="${WEEKLY_LETTER_DRY_RUN:-false}"
-PUSH_STATE="${WEEKLY_LETTER_PUSH_STATE:-true}"
+PUSH="${WEEKLY_LETTER_PUSH:-true}"
 AGENT_TIMEOUT_SECONDS="${WEEKLY_LETTER_AGENT_TIMEOUT_SECONDS:-1800}"
 AGENT_RETRY_MAX_ATTEMPTS="${WEEKLY_LETTER_AGENT_RETRY_MAX_ATTEMPTS:-3}"
 AGENT_RETRY_INTERVAL_SECONDS="${WEEKLY_LETTER_AGENT_RETRY_INTERVAL_SECONDS:-300}"
@@ -42,35 +42,6 @@ if [[ ! "${AGENT_RETRY_INTERVAL_SECONDS}" =~ ^[0-9]+$ ]]; then
   AGENT_RETRY_INTERVAL_SECONDS="300"
 fi
 
-# Resend credentials already live in the site's gitignored local secrets file,
-# so there is nothing to keep in sync by hand and launchd — which inherits
-# almost no environment — sees what a shell sees.
-#
-# Only the RESEND_* keys are read. The same file holds the admin and subscribe
-# secrets, and the agent runs as a child of this script; nothing it does not
-# need should be in its environment.
-load_resend_env() {
-  local file="$1" line name value
-  [[ -f "${file}" ]] || return 0
-
-  while IFS= read -r line || [[ -n "${line}" ]]; do
-    line="${line%$'\r'}"
-    [[ "${line}" =~ ^[[:space:]]*# ]] && continue
-    [[ "${line}" == *=* ]] || continue
-
-    name="${line%%=*}"
-    name="${name//[[:space:]]/}"
-    [[ "${name}" == RESEND_* ]] || continue
-
-    value="${line#*=}"
-    value="${value%\"}" ; value="${value#\"}"
-    value="${value%\'}" ; value="${value#\'}"
-    export "${name}=${value}"
-  done < "${file}"
-}
-
-load_resend_env "${SITE_ROOT}/.dev.vars"
-
 if [[ "${ENGINE}" == "codex" ]]; then
   codex_login_ok || {
     echo "ERROR: Codex is not logged in. Run: codex login" >&2
@@ -81,24 +52,6 @@ else
     echo "ERROR: Claude Code is not logged in. Run: claude auth login" >&2
     exit 1
   }
-fi
-
-# Checked before the agent runs, so a missing secret costs nothing.
-if [[ "${DRY_RUN}" != "true" ]]; then
-  missing=()
-  for name in RESEND_API_KEY RESEND_TOPIC_DAILY RESEND_SEGMENT_EN RESEND_SEGMENT_KO; do
-    [[ -n "${!name:-}" ]] || missing+=("${name}")
-  done
-  if [[ "${#missing[@]}" -gt 0 ]]; then
-    run_log_event "Missing Resend configuration" "Unset: \`${missing[*]}\`."
-    echo "ERROR: missing ${missing[*]}. Set them in ${SITE_ROOT}/.dev.vars" >&2
-    exit 1
-  fi
-  if [[ "${RESEND_API_KEY}" != re_* ]]; then
-    run_log_event "Resend key looks wrong" "\`RESEND_API_KEY\` does not start with \`re_\`."
-    echo "ERROR: RESEND_API_KEY in ${SITE_ROOT}/.dev.vars is not a Resend key (expected re_...)." >&2
-    exit 1
-  fi
 fi
 
 # Both phases must agree on which week they are working on, so the override
@@ -219,29 +172,35 @@ fi
 
 run_log_file_snapshot "Headline chosen for ${week_start}" "${headline_path}"
 
-# --- Phase 3: send ------------------------------------------------------------
+# --- Phase 3: hand the week to the send workflow ------------------------------
 
 if [[ "${DRY_RUN}" == "true" ]]; then
-  print_header "Dry run. Reporting what would be sent."
+  print_header "Dry run. Reporting what would be handed off."
   weekly send --dry-run
-  run_log_finish_success "Dry run for week \`${week_start}\`; nothing sent."
+  run_log_finish_success "Dry run for week \`${week_start}\`; nothing committed."
   exit 0
 fi
 
-print_header "Sending the weekly letter"
-weekly send
-run_log_event "Weekly letter sent" "Week: \`${week_start}\`."
-
-if [[ "${PUSH_STATE}" == "true" ]]; then
-  if git -C "${SITE_ROOT}" diff --quiet -- .newsletter-state.json; then
-    print_header "Sent-log unchanged. Nothing to commit."
-  else
-    print_header "Committing the sent-log"
-    git -C "${SITE_ROOT}" add .newsletter-state.json
-    git -C "${SITE_ROOT}" commit -m "chore(newsletter): record weekly letter for ${week_start}"
-    git -C "${SITE_ROOT}" push "${DIGEST_PUSH_REMOTE}" "HEAD:${DIGEST_PUSH_BRANCH}"
-    run_log_event "Sent-log pushed" "Branch: \`${DIGEST_PUSH_BRANCH}\`."
-  fi
+if [[ "${PUSH}" != "true" ]]; then
+  print_header "Push disabled. The week is prepared but not handed off."
+  run_log_finish_success "Week \`${week_start}\` prepared; push disabled."
+  exit 0
 fi
 
-run_log_finish_success "Weekly letter completed for week \`${week_start}\`."
+# Pushing the workspace is the handoff: `.github/workflows/weekly-letter.yml`
+# watches this path and does the sending, where the Resend key already lives.
+workspace=".newsletter-weekly/${week_start}"
+print_header "Handing ${week_start} to the send workflow"
+git -C "${SITE_ROOT}" add "${workspace}"
+
+if git -C "${SITE_ROOT}" diff --cached --quiet -- "${workspace}"; then
+  print_header "Workspace unchanged. Nothing to hand off."
+  run_log_finish_success "Week \`${week_start}\` was already pushed; nothing to do."
+  exit 0
+fi
+
+git -C "${SITE_ROOT}" commit -m "chore(newsletter): weekly letter for ${week_start}"
+git -C "${SITE_ROOT}" push "${DIGEST_PUSH_REMOTE}" "HEAD:${DIGEST_PUSH_BRANCH}"
+run_log_event "Week handed off" "Pushed \`${workspace}\` to \`${DIGEST_PUSH_BRANCH}\`."$'\n'"GitHub Actions sends from here."
+
+run_log_finish_success "Weekly letter for \`${week_start}\` handed off to GitHub Actions."

@@ -8,6 +8,7 @@ on:
     # (재배포 → 발송 워크플로우 재실행 루프 방지)
     paths-ignore:
       - '.newsletter-state.json'
+      - '.newsletter-weekly/**'
   # 수동으로도 실행 가능하게 설정
   workflow_dispatch:
 
