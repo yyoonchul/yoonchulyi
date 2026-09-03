@@ -38,5 +38,6 @@ src/daily-insights/automation-logs/
 # weekly letter working directories (brief + agent-written headline)
 .newsletter-weekly/
 
-# local Worker secrets for `wrangler dev`
+# local Worker secrets and state for `wrangler dev`
 .dev.vars
+.wrangler/
