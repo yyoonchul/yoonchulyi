@@ -1,11 +1,13 @@
 /**
- * Emails subscribers about posts that have not been sent yet.
+ * Emails subscribers about essays that have not been sent yet.
  *
- * Four feeds are checked — essays and Daily Insights, each in English and
- * Korean — and each maps to one segment (language) and one topic (what they
- * opted into). Feeds are read over HTTP rather than from `dist/`, so a post is
- * only ever announced once it is actually live: an email whose link 404s
- * cannot be unsent.
+ * Two feeds are checked — English and Korean — and each maps to one segment
+ * (language) and the essays topic. Feeds are read over HTTP rather than from
+ * `dist/`, so a post is only ever announced once it is actually live: an email
+ * whose link 404s cannot be unsent.
+ *
+ * Daily Insights are not sent from here. They go out once a week from
+ * `weekly.ts`, which runs on its own schedule rather than on deploy.
  *
  * Sends are recorded in a state file committed to the repo, keyed by URL and
  * language, so the history is reviewable in git and a rerun is a no-op.
@@ -17,11 +19,19 @@
  *   tsx scripts/newsletter/send.ts             send
  */
 
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { XMLParser } from 'fast-xml-parser';
 import { EMAIL_COPY, htmlToText, renderEmailHtml } from './email.ts';
+import {
+  readState,
+  requireEnv,
+  segmentIdFor,
+  sendBroadcast,
+  writeState,
+  type Language,
+  type StateEntry,
+} from './shared.ts';
 
-const STATE_PATH = new URL('../../.newsletter-state.json', import.meta.url);
 const SITE = process.env.SITE_URL ?? 'https://yoonchulyi.com';
 const FROM = process.env.NEWSLETTER_FROM ?? 'Yoonchul Yi <yc@mail.yoonchulyi.com>';
 const REPLY_TO = process.env.NEWSLETTER_REPLY_TO ?? 'hi@yoonchulyi.com';
@@ -34,22 +44,14 @@ const FEED_RETRY_MS = 6000;
 // buries the footer and the unsubscribe link with it.
 const GMAIL_CLIP_BYTES = 102_000;
 
-type Language = 'en' | 'ko';
-type Section = 'essays' | 'daily';
-
 interface FeedSource {
-  section: Section;
   language: Language;
   path: string;
-  /** Several pending items go out as one email rather than a burst. */
-  batch: boolean;
 }
 
 const FEEDS: FeedSource[] = [
-  { section: 'essays', language: 'en', path: '/rss.xml', batch: false },
-  { section: 'essays', language: 'ko', path: '/rss.ko.xml', batch: false },
-  { section: 'daily', language: 'en', path: '/daily-insights/rss.xml', batch: true },
-  { section: 'daily', language: 'ko', path: '/daily-insights/rss.ko.xml', batch: true },
+  { language: 'en', path: '/rss.xml' },
+  { language: 'ko', path: '/rss.ko.xml' },
 ];
 
 interface FeedItem {
@@ -59,16 +61,6 @@ interface FeedItem {
   description: string;
   pubDate: string;
   content: string;
-}
-
-interface StateEntry {
-  key: string;
-  title: string;
-  sentAt: string;
-}
-
-interface State {
-  sent: StateEntry[];
 }
 
 async function main() {
@@ -87,9 +79,7 @@ async function main() {
   for (const feed of FEEDS) {
     const items = await fetchFeed(`${SITE}${feed.path}`);
     const pending = items.filter((item) => !seen.has(stateKey(item, feed)));
-    console.log(
-      `${feed.section}/${feed.language}: ${items.length} in feed, ${pending.length} unsent`,
-    );
+    console.log(`essays/${feed.language}: ${items.length} in feed, ${pending.length} unsent`);
     for (const item of pending) {
       console.log(`  - ${item.title}`);
     }
@@ -129,10 +119,9 @@ async function main() {
     const outDir = process.env.PREVIEW_DIR ?? '.newsletter-preview';
     mkdirSync(outDir, { recursive: true });
     for (const { feed, items } of plan) {
-      const ordered = [...items].reverse();
-      const group = feed.batch ? ordered : [ordered[0]];
-      const { html, subject, bytes } = buildEmail(group, feed);
-      const file = `${outDir}/${feed.section}-${feed.language}.html`;
+      // Oldest first, so a backlog is previewed in reading order.
+      const { html, subject, bytes } = buildEmail([...items].reverse()[0], feed);
+      const file = `${outDir}/essays-${feed.language}.html`;
       writeFileSync(file, html);
       console.log(`preview: ${file}  (${bytes} bytes)  subject: ${subject}`);
     }
@@ -141,76 +130,40 @@ async function main() {
   }
 
   const apiKey = requireEnv('RESEND_API_KEY');
+  const topicId = requireEnv('RESEND_TOPIC_ESSAYS');
 
   for (const { feed, items } of plan) {
-    const segmentId = requireEnv(
-      feed.language === 'ko' ? 'RESEND_SEGMENT_KO' : 'RESEND_SEGMENT_EN',
-    );
-    const topicId = requireEnv(
-      feed.section === 'daily' ? 'RESEND_TOPIC_DAILY' : 'RESEND_TOPIC_ESSAYS',
-    );
-
     // Oldest first, so a backlog arrives in reading order.
-    const ordered = [...items].reverse();
-    const groups = feed.batch ? [ordered] : ordered.map((item) => [item]);
+    for (const item of [...items].reverse()) {
+      const { html, subject } = buildEmail(item, feed);
 
-    for (const group of groups) {
-      await sendGroup(group, feed, { apiKey, segmentId, topicId });
-      for (const item of group) {
-        state.sent.push({
-          key: stateKey(item, feed),
-          title: item.title,
-          sentAt: new Date().toISOString(),
-        });
-      }
+      const outcome = await sendBroadcast({
+        apiKey,
+        segmentId: segmentIdFor(feed.language),
+        topicId,
+        from: FROM,
+        replyTo: REPLY_TO,
+        name: `${formatDate(item.pubDate, 'en')} — essays/${feed.language}`,
+        subject,
+        html,
+        text: `${htmlToText(html)}\n\n${EMAIL_COPY[feed.language].unsubscribe}: {{{RESEND_UNSUBSCRIBE_URL}}}`,
+      });
+
+      state.sent.push({
+        key: stateKey(item, feed),
+        title: item.title,
+        sentAt: new Date().toISOString(),
+      });
       // Written after each send so a mid-run failure cannot resend what has
       // already gone out.
       writeState(state);
-      console.log(`sent ${feed.section}/${feed.language}: ${group.length} item(s)`);
+      console.log(`${outcome} essays/${feed.language}: ${item.title}`);
     }
   }
 }
 
 function stateKey(item: FeedItem, feed: FeedSource): string {
   return `${item.guid}|${feed.language}`;
-}
-
-function readState(): State {
-  try {
-    const parsed = JSON.parse(readFileSync(STATE_PATH, 'utf8')) as {
-      sent?: (StateEntry | { guid?: string; title?: string; sentAt?: string })[];
-    };
-    const sent = (parsed.sent ?? []).map((entry) => {
-      if ('key' in entry && entry.key) {
-        return entry as StateEntry;
-      }
-      // Pre-language state recorded English-only blog sends.
-      const legacy = entry as { guid?: string; title?: string; sentAt?: string };
-      return {
-        key: `${legacy.guid ?? ''}|en`,
-        title: legacy.title ?? '',
-        sentAt: legacy.sentAt ?? new Date().toISOString(),
-      };
-    });
-    return { sent };
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      return { sent: [] };
-    }
-    throw error;
-  }
-}
-
-function writeState(state: State): void {
-  writeFileSync(STATE_PATH, `${JSON.stringify(state, null, 2)}\n`);
-}
-
-function requireEnv(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${name}`);
-  }
-  return value;
 }
 
 async function fetchFeed(url: string): Promise<FeedItem[]> {
@@ -259,103 +212,32 @@ function parseFeed(xml: string): FeedItem[] {
   });
 }
 
-interface SendContext {
-  apiKey: string;
-  segmentId: string;
-  topicId: string;
-}
-
 function buildEmail(
-  group: FeedItem[],
+  item: FeedItem,
   feed: FeedSource,
 ): { html: string; subject: string; bytes: number } {
-  const lead = group[group.length - 1];
-  const subject = buildSubject(group, feed);
   const shared = {
     language: feed.language,
-    title: subject,
-    link: lead.link,
-    dateLabel: formatDate(lead.pubDate, feed.language),
+    title: item.title,
+    link: item.link,
+    dateLabel: formatDate(item.pubDate, feed.language),
   };
 
   let html = renderEmailHtml({
     ...shared,
-    bodyHtml: group
-      .map((item) =>
-        group.length > 1
-          ? `<h1>${item.title}</h1>\n${item.content || `<p>${item.description}</p>`}`
-          : item.content || `<p>${item.description}</p>`,
-      )
-      .join('\n<hr />\n'),
+    bodyHtml: item.content || `<p>${item.description}</p>`,
   });
 
   // Falling back to an excerpt keeps the footer — and the unsubscribe link
   // inside it — from disappearing behind Gmail's clip.
   if (Buffer.byteLength(html, 'utf8') > GMAIL_CLIP_BYTES) {
     console.warn(
-      `  oversized (${Buffer.byteLength(html, 'utf8')} bytes) — falling back to excerpts`,
+      `  oversized (${Buffer.byteLength(html, 'utf8')} bytes) — falling back to an excerpt`,
     );
-    html = renderEmailHtml({
-      ...shared,
-      bodyHtml: group
-        .map((item) => `<h1>${item.title}</h1>\n<p>${item.description}</p>`)
-        .join('\n<hr />\n'),
-    });
+    html = renderEmailHtml({ ...shared, bodyHtml: `<p>${item.description}</p>` });
   }
 
-  return { html, subject, bytes: Buffer.byteLength(html, 'utf8') };
-}
-
-async function sendGroup(
-  group: FeedItem[],
-  feed: FeedSource,
-  context: SendContext,
-): Promise<void> {
-  const lead = group[group.length - 1];
-  const { html, subject } = buildEmail(group, feed);
-
-  const created = await resend('/broadcasts', context.apiKey, {
-    segment_id: context.segmentId,
-    topic_id: context.topicId,
-    from: FROM,
-    reply_to: REPLY_TO,
-    subject,
-    name: `${formatDate(lead.pubDate, 'en')} — ${feed.section}/${feed.language}`,
-    html,
-    text: `${htmlToText(html)}\n\n${EMAIL_COPY[feed.language].unsubscribe}: {{{RESEND_UNSUBSCRIBE_URL}}}`,
-  });
-
-  await resend(`/broadcasts/${created.id}/send`, context.apiKey, {});
-}
-
-function buildSubject(group: FeedItem[], feed: FeedSource): string {
-  if (group.length === 1) {
-    return group[0].title;
-  }
-  return feed.language === 'ko'
-    ? `데일리 인사이트 — ${group.length}건`
-    : `Daily Insights — ${group.length} updates`;
-}
-
-async function resend(
-  path: string,
-  apiKey: string,
-  body: Record<string, unknown>,
-): Promise<{ id: string }> {
-  const response = await fetch(`https://api.resend.com${path}`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
-
-  const raw = await response.text();
-  if (!response.ok) {
-    throw new Error(`Resend ${path} failed (${response.status}): ${raw}`);
-  }
-  return JSON.parse(raw) as { id: string };
+  return { html, subject: item.title, bytes: Buffer.byteLength(html, 'utf8') };
 }
 
 function formatDate(pubDate: string, language: Language): string {

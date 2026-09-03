@@ -15,6 +15,9 @@
 - `run-daily-insights-publish.sh`: digest/card news 산출물을 한 번에 커밋/푸시해 GitHub Pages 배포를 트리거합니다.
 - `digest-launchd.sh`: 스케줄 설정/켜기/끄기/상태/즉시실행
 - `cardnews-launchd.sh`: card news 개별 스케줄 설정/켜기/끄기/상태/즉시실행
+- `run-weekly-letter-codex.sh` / `run-weekly-letter-claude.sh`: 주간 뉴스레터 발송. 지난 한 주 요약을 모으고, 에이전트가 `weekly-letter` 스킬로 제목·TL;DR만 쓰고, 스크립트가 Resend로 보냅니다.
+- `run-weekly-letter.sh`: 주간 뉴스레터 공통 구현. 직접 실행보다 위 엔진별 래퍼 사용을 권장합니다.
+- `weekly-letter-launchd.sh`: 주간(기본 월요일 08:30) 스케줄 설정/켜기/끄기/상태/즉시실행. 자세한 내용은 [docs/NEWSLETTER.md](../../../../docs/NEWSLETTER.md).
 - `setup-digest-schedule.sh`: 빠른 설정 래퍼
 - `disable-digest-schedule.sh`: 빠른 끄기 래퍼
 

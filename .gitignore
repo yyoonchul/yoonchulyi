@@ -35,5 +35,8 @@ src/daily-insights/card-news/assets/prepared/
 src/daily-insights/automation-logs/
 .newsletter-preview/
 
+# weekly letter working directories (brief + agent-written headline)
+.newsletter-weekly/
+
 # local Worker secrets for `wrangler dev`
 .dev.vars

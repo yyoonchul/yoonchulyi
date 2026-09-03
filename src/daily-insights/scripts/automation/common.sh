@@ -3,6 +3,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../.." && pwd)"
+# The Astro site that contains this directory. Newsletter code and the sent-log
+# live there, not under src/daily-insights.
+SITE_ROOT="$(cd -- "${REPO_ROOT}/../.." && pwd)"
 
 export TZ="${DIGEST_TIMEZONE:-Asia/Seoul}"
 

@@ -133,3 +133,165 @@ export function htmlToText(html: string): string {
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
+
+/* -------------------------------------------------------------------------
+ * Weekly Daily Insights digest
+ *
+ * A different shape from a post announcement: a TL;DR up top, then the week's
+ * three-bullet summaries grouped by day, each linking back to the full write-up.
+ * ---------------------------------------------------------------------- */
+
+export interface WeeklyCopy {
+  tldr: string;
+  kicker: string;
+  readDay: string;
+  readAll: string;
+  itemCount: (count: number) => string;
+}
+
+export const WEEKLY_COPY: Record<'en' | 'ko', WeeklyCopy> = {
+  en: {
+    tldr: 'TL;DR',
+    kicker: 'Daily Insights — the week in review',
+    readDay: 'Read the full notes',
+    readAll: 'Browse every Daily Insight',
+    itemCount: (count) => `${count} ${count === 1 ? 'story' : 'stories'}`,
+  },
+  ko: {
+    tldr: '3줄 요약',
+    kicker: '데일리 인사이트 — 이번 주 정리',
+    readDay: '전체 정리 보기',
+    readAll: '데일리 인사이트 전체 보기',
+    itemCount: (count) => `${count}건`,
+  },
+};
+
+export interface WeeklyDigestArticle {
+  title: string;
+  meta: string;
+  link: string | null;
+  bullets: string[];
+}
+
+export interface WeeklyDigestDay {
+  isoDate: string;
+  href: string;
+  articles: WeeklyDigestArticle[];
+}
+
+interface WeeklyDigestOptions {
+  language: 'en' | 'ko';
+  subject: string;
+  tldr: string[];
+  days: WeeklyDigestDay[];
+  window: { start: string; end: string };
+  archiveUrl: string;
+}
+
+export function renderWeeklyDigestHtml({
+  language,
+  subject,
+  tldr,
+  days,
+  window,
+  archiveUrl,
+}: WeeklyDigestOptions): string {
+  const copy = EMAIL_COPY[language];
+  const weekly = WEEKLY_COPY[language];
+  const articleCount = days.reduce((total, day) => total + day.articles.length, 0);
+
+  return `<!doctype html>
+<html lang="${language}">
+  <body style="margin:0;padding:32px 16px;background:#F4F4F0;font-family:Georgia,'Times New Roman',serif;color:#191919;line-height:1.7;">
+    <div style="max-width:600px;margin:0 auto;">
+      <p style="margin:0 0 32px;font-size:13px;color:#8C8C8C;">yoonchulyi.com</p>
+
+      <p style="margin:0 0 8px;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#EA580C;">${escapeHtml(weekly.kicker)}</p>
+      <h1 style="margin:0 0 6px;font-size:25px;font-weight:500;line-height:1.25;">${escapeHtml(subject)}</h1>
+      <p style="margin:0 0 32px;font-size:12px;color:#8C8C8C;">${escapeHtml(formatRange(window, language))} · ${escapeHtml(weekly.itemCount(articleCount))}</p>
+
+      <div style="margin:0 0 40px;padding:20px 22px;background:#EDEDE7;border-left:2px solid #EA580C;">
+        <p style="margin:0 0 12px;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#8C8C8C;">${escapeHtml(weekly.tldr)}</p>
+        ${tldr
+          .map(
+            (line) =>
+              `<p style="margin:0 0 10px;font-size:16px;line-height:1.65;">${escapeHtml(line)}</p>`,
+          )
+          .join('\n        ')}
+      </div>
+
+      ${days.map((day) => renderDay(day, language)).join('\n      ')}
+
+      <hr style="border:none;border-top:1px solid rgba(140,140,140,0.3);margin:40px 0 20px;" />
+
+      <p style="margin:0 0 6px;font-size:12px;color:#8C8C8C;">
+        <a href="${archiveUrl}" style="color:#8C8C8C;">${escapeHtml(weekly.readAll)}</a>
+      </p>
+      <p style="margin:0;font-size:12px;color:#8C8C8C;">
+        ${copy.footerNote}
+        <a href="{{{RESEND_UNSUBSCRIBE_URL}}}" style="color:#8C8C8C;">${copy.unsubscribe}</a>
+      </p>
+    </div>
+  </body>
+</html>`;
+}
+
+function renderDay(day: WeeklyDigestDay, language: 'en' | 'ko'): string {
+  const weekly = WEEKLY_COPY[language];
+
+  return `<div style="margin:0 0 36px;">
+        <p style="margin:0 0 16px;padding-bottom:8px;border-bottom:1px solid rgba(140,140,140,0.3);font-size:13px;letter-spacing:0.04em;text-transform:uppercase;color:#8C8C8C;">${escapeHtml(formatDay(day.isoDate, language))}</p>
+        ${day.articles.map((article) => renderArticle(article)).join('\n        ')}
+        <p style="margin:0;font-size:12px;">
+          <a href="${day.href}" style="color:#EA580C;">${escapeHtml(weekly.readDay)} →</a>
+        </p>
+      </div>`;
+}
+
+function renderArticle(article: WeeklyDigestArticle): string {
+  const heading = article.link
+    ? `<a href="${article.link}" style="color:#191919;text-decoration:none;border-bottom:1px solid rgba(234,88,12,0.5);">${escapeHtml(article.title)}</a>`
+    : escapeHtml(article.title);
+
+  return `<div style="margin:0 0 24px;">
+          <h2 style="margin:0 0 4px;font-size:18px;font-weight:500;line-height:1.35;">${heading}</h2>
+          ${article.meta ? `<p style="margin:0 0 10px;font-size:12px;color:#8C8C8C;">${escapeHtml(article.meta)}</p>` : ''}
+          <ul style="margin:0;padding-left:20px;">
+            ${article.bullets
+              .map(
+                (bullet) =>
+                  `<li style="margin:0 0 8px;font-size:15px;line-height:1.65;">${escapeHtml(bullet)}</li>`,
+              )
+              .join('\n            ')}
+          </ul>
+        </div>`;
+}
+
+function formatDay(isoDate: string, language: 'en' | 'ko'): string {
+  return new Date(`${isoDate}T00:00:00Z`).toLocaleDateString(
+    language === 'ko' ? 'ko-KR' : 'en-GB',
+    {
+      weekday: language === 'ko' ? 'short' : 'long',
+      day: 'numeric',
+      month: language === 'ko' ? 'numeric' : 'long',
+      timeZone: 'UTC',
+    },
+  );
+}
+
+function formatRange(
+  window: { start: string; end: string },
+  language: 'en' | 'ko',
+): string {
+  const format = (isoDate: string) =>
+    new Date(`${isoDate}T00:00:00Z`).toLocaleDateString(
+      language === 'ko' ? 'ko-KR' : 'en-GB',
+      {
+        day: 'numeric',
+        month: language === 'ko' ? 'long' : 'short',
+        year: 'numeric',
+        timeZone: 'UTC',
+      },
+    );
+  return `${format(window.start)} – ${format(window.end)}`;
+}
