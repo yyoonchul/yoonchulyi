@@ -21,20 +21,8 @@ if [[ ! -f "${digest_path}" ]]; then
   exit 1
 fi
 
-cardnews_output_dir="${REPO_ROOT}/card-news/output/${DATE_PATH}"
-if [[ ! -d "${cardnews_output_dir}" ]] || ! compgen -G "${cardnews_output_dir}/*.jpg" >/dev/null; then
-  echo "ERROR: card news JPEGs not found: card-news/output/${DATE_PATH}" >&2
-  exit 1
-fi
-
-public_cardnews_dir="${REPO_ROOT}/../../public/daily-insights/${DATE_PATH}/cardnews"
-if [[ ! -d "${public_cardnews_dir}" ]] || ! compgen -G "${public_cardnews_dir}/*" >/dev/null; then
-  echo "ERROR: public card news assets not found: public/daily-insights/${DATE_PATH}/cardnews" >&2
-  exit 1
-fi
-
 run_log_event "Publishing daily insight" \
-  "Digest: \`content/${DATE_PATH}.md\`"$'\n'"Card news: \`card-news/output/${DATE_PATH}/\`"$'\n'"Public route: \`/daily-insights/${DATE_PATH}/cardnews/1-1\`."
+  "Digest: \`content/${DATE_PATH}.md\`."
 
 run_daily_insights_publish_commit_and_push "${DATE_PATH}"
 run_log_finish_success "Daily Insights publish completed for \`${DATE_PATH}\`."

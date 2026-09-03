@@ -18,7 +18,6 @@ acquire_lock "daily-flow-${ENGINE}"
 run_log_init "daily-flow" "${ENGINE}"
 
 digest_runner="${SCRIPT_DIR}/run-digest-${ENGINE}.sh"
-cardnews_runner="${SCRIPT_DIR}/run-cardnews-${ENGINE}.sh"
 publish_runner="${SCRIPT_DIR}/run-daily-insights-publish.sh"
 local_inbox_path="${REPO_ROOT}/${LOCAL_INBOX_RELATIVE_PATH}"
 digest_path="${REPO_ROOT}/${DIGEST_RELATIVE_PATH}"
@@ -33,10 +32,6 @@ set +a
 
 [[ -x "${digest_runner}" ]] || {
   echo "ERROR: digest runner is not executable: ${digest_runner}" >&2
-  exit 1
-}
-[[ -x "${cardnews_runner}" ]] || {
-  echo "ERROR: card news runner is not executable: ${cardnews_runner}" >&2
   exit 1
 }
 [[ -x "${publish_runner}" ]] || {
@@ -90,9 +85,9 @@ digest_hash_before="$(file_hash_or_missing "${digest_path}")"
 valid_url_count="$(count_valid_inbox_urls "${local_inbox_path}")"
 run_log_event "Repo inbox URL check" "Valid URL lines: \`${valid_url_count}\`."
 if [[ "${valid_url_count}" -eq 0 ]]; then
-  print_header "Local inbox is empty. Skip digest and card news."
+  print_header "Local inbox is empty. Skip digest."
   rm -f "${inbox_backup_path}"
-  run_log_finish_success "No valid URLs found in \`${LOCAL_INBOX_RELATIVE_PATH}\`; skipped digest and card news."
+  run_log_finish_success "No valid URLs found in \`${LOCAL_INBOX_RELATIVE_PATH}\`; skipped digest."
   exit 0
 fi
 
@@ -106,7 +101,7 @@ set -e
 
 if [[ "${digest_status}" -ne 0 ]]; then
   print_header "Digest failed. Restoring local inbox and stopping daily flow."
-  run_log_event "Digest step failed" "Exit status: \`${digest_status}\`."$'\n'"Card news will not run."
+  run_log_event "Digest step failed" "Exit status: \`${digest_status}\`."
   restore_local_inbox "${inbox_backup_path}"
   rm -f "${inbox_backup_path}"
   exit "${digest_status}"
@@ -115,7 +110,7 @@ fi
 digest_hash_after="$(file_hash_or_missing "${digest_path}")"
 if [[ "${digest_hash_after}" == "__missing__" ]]; then
   print_header "Digest step completed but today's digest is missing. Restoring local inbox."
-  run_log_event "Digest output missing" "Expected path: \`${DIGEST_RELATIVE_PATH}\`."$'\n'"Card news will not run."
+  run_log_event "Digest output missing" "Expected path: \`${DIGEST_RELATIVE_PATH}\`."
   restore_local_inbox "${inbox_backup_path}"
   rm -f "${inbox_backup_path}"
   exit 1
@@ -123,7 +118,7 @@ fi
 
 if [[ "${digest_hash_before}" == "${digest_hash_after}" ]]; then
   print_header "Today's digest did not change. Restoring local inbox and stopping daily flow."
-  run_log_event "Digest unchanged" "Path: \`${DIGEST_RELATIVE_PATH}\`."$'\n'"Card news will not run because today's digest was not freshly generated or updated."
+  run_log_event "Digest unchanged" "Path: \`${DIGEST_RELATIVE_PATH}\`."$'\n'"Digest was not freshly generated or updated."
   restore_local_inbox "${inbox_backup_path}"
   rm -f "${inbox_backup_path}"
   exit 1
@@ -131,21 +126,9 @@ fi
 
 rm -f "${inbox_backup_path}"
 
-print_header "Digest changed successfully. Running card news step."
-run_log_event "Running card news step" "Digest: \`${DIGEST_RELATIVE_PATH}\`."
-set +e
-"${cardnews_runner}" "${date_path}"
-cardnews_status="$?"
-set -e
-
-if [[ "${cardnews_status}" -ne 0 ]]; then
-  run_log_event "Card news step failed" "Exit status: \`${cardnews_status}\`."
-  exit "${cardnews_status}"
-fi
-
-print_header "Digest and card news complete. Running publish step."
-run_log_event "Running publish step" "Digest: \`${DIGEST_RELATIVE_PATH}\`"$'\n'"Card news: \`card-news/output/${date_path}/\`."
+print_header "Digest changed successfully. Running publish step."
+run_log_event "Running publish step" "Digest: \`${DIGEST_RELATIVE_PATH}\`."
 "${publish_runner}" "${date_path}"
 
 print_header "Daily flow complete."
-run_log_finish_success "Daily flow completed and publish step finished. Digest: \`${DIGEST_RELATIVE_PATH}\`; card news: \`card-news/output/${date_path}/\`."
+run_log_finish_success "Daily flow completed and publish step finished. Digest: \`${DIGEST_RELATIVE_PATH}\`."
