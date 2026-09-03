@@ -70,9 +70,13 @@ each other.
 
 - Korean uses the plain declarative `-다` form, matching the summaries printed
   below it in the same email. Do not use `-습니다`/`-ㅂ니다`.
-- Keep established English technical terms, product names, and model names in
-  English rather than forcing a translation; add the original in parentheses
-  where it helps.
+- Company, organisation, product, and model names stay in English, spelled the
+  way the summaries below spell them. The TL;DR sits directly above those
+  bullets in the same screen, so `앤트로픽` over `Anthropic`, or `엔비디아` over
+  `Nvidia`, reads as two people wrote the email. Do not transliterate a name the
+  body leaves in English.
+- Keep established English technical terms in English rather than forcing a
+  translation; add the original in parentheses where it helps.
 - Refer to people by name or public handle, not by gendered pronouns
   (`그`, `그녀`, `he`, `she`).
 
