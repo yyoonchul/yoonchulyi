@@ -44,9 +44,9 @@ read -r -d '' PROMPT <<EOF || true
 Use the repository skill at \`.claude/skills/card-news/SKILL.md\` and execute it now for datePath \`${DATE_PATH}\`.
 
 Constraints:
-- Today's digest already exists at \`content/${DATE_PATH}.md\`. Do not regenerate it.
-- Follow the skill end-to-end: parse digest KO section by article, generate \`card-news/article-headers/${DATE_PATH}.json\`, generate \`card-news/queries/${DATE_PATH}.json\`, and run the article renderer.
-- Renderer execution is hard-coded in this repository. Do not run \`node\`, \`npm\`, \`npx\`, or \`tsx\` directly for rendering. To render, execute exactly: \`scripts/automation/render-cardnews-article.sh ${DATE_PATH}\`.
+- Today's digest already exists at \`src/daily-insights/content/${DATE_PATH}.md\`. Do not regenerate it.
+- Follow the skill end-to-end: parse digest KO section by article, generate \`src/daily-insights/card-news/article-headers/${DATE_PATH}.json\`, generate \`src/daily-insights/card-news/queries/${DATE_PATH}.json\`, and run the article renderer.
+- Renderer execution is hard-coded in this repository. Do not run \`node\`, \`npm\`, \`npx\`, or \`tsx\` directly for rendering. To render, execute exactly: \`src/daily-insights/scripts/automation/render-cardnews-article.sh ${DATE_PATH}\`.
 - The renderer must leave public assets available under \`public/daily-insights/${DATE_PATH}/cardnews/\` for the publish step.
 - Do not run any git commands.
 EOF
@@ -57,12 +57,12 @@ while true; do
   run_log_event "Running card news skill" "Engine: \`claude\`"$'\n'"Attempt: \`${attempt}/${CLAUDE_RETRY_MAX_ATTEMPTS}\`"$'\n'"Date path: \`${DATE_PATH}\`."
 
   set +e
-  run_with_timeout "${CLAUDE_TIMEOUT_SECONDS}" \
+  (cd "${SITE_ROOT}" && run_with_timeout "${CLAUDE_TIMEOUT_SECONDS}" \
     claude \
       --print \
       --permission-mode dontAsk \
-      --add-dir "${REPO_ROOT}" \
-      -p "${PROMPT}"
+      --add-dir "${SITE_ROOT}" \
+      -p "${PROMPT}")
   run_status="$?"
   set -e
 

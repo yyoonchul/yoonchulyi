@@ -73,7 +73,7 @@ Formatting rules:
 
 ## YouTube / Video Content
 
-When the source is a YouTube video (transcript extracted via `scripts/fetch-yt-transcript.sh`):
+When the source is a YouTube video (transcript extracted via `src/daily-insights/scripts/fetch-yt-transcript.sh`):
 
 - **Source**: `YouTube`
 - **Metadata line**: `**Source:** YouTube · **Channel:** {Channel} · **Duration:** {Duration} · **Category:** {Category} · **Link:** [Original]({URL})`

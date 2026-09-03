@@ -68,9 +68,9 @@ read -r -d '' PROMPT <<'EOF' || true
 Use the `$digest` skill in this repository and execute the full workflow now.
 
 Constraints:
-- Read URLs from `content/inbox.md`.
-- Write/update `content/YYYY/MM/DD.md` and `content/index.json`.
-- Do not clear or modify `content/inbox.md`; the automation script owns inbox clearing.
+- Read URLs from `src/daily-insights/content/inbox.md`.
+- Write/update `src/daily-insights/content/YYYY/MM/DD.md` and `src/daily-insights/content/index.json`.
+- Do not clear or modify `src/daily-insights/content/inbox.md`; the automation script owns inbox clearing.
 - If inbox has no valid URLs, respond exactly: `📭 Inbox is empty.`
 - Do not run any git commands.
 - Korean section: translate the English version into natural Korean. Do not leave English words in Korean prose just because the source used English.
@@ -104,7 +104,7 @@ while true; do
     run_with_timeout "${CODEX_TIMEOUT_SECONDS}" \
       codex exec \
         -c 'model_reasoning_effort="high"' \
-        -C "${REPO_ROOT}" \
+        -C "${SITE_ROOT}" \
         --dangerously-bypass-approvals-and-sandbox \
         "${PROMPT}"
     run_status="$?"
@@ -114,7 +114,7 @@ while true; do
     run_with_timeout "${CODEX_TIMEOUT_SECONDS}" \
       codex exec \
         -c 'model_reasoning_effort="high"' \
-        -C "${REPO_ROOT}" \
+        -C "${SITE_ROOT}" \
         -s "${CODEX_SANDBOX_MODE}" \
         "${PROMPT}"
     run_status="$?"

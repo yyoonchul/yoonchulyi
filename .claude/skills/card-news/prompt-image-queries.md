@@ -4,7 +4,7 @@ Produce English image search queries for article-level card news decks.
 
 ## Output shape
 
-One JSON object written to `card-news/queries/YYYY/MM/DD.json`:
+One JSON object written to `src/daily-insights/card-news/queries/YYYY/MM/DD.json`:
 
 ```json
 {

@@ -12,6 +12,14 @@ map for agents; detailed operating knowledge belongs in `docs/`.
 - `src/about/` contains About page content and rendering.
 - `src/components/` and `src/layouts/` contain shared page structure.
 - `src/lib/seo.ts` and `src/lib/schema.ts` contain the SEO/GEO backbone.
+- `.claude/skills/` and `.codex/skills/` hold every agent skill in this
+  repository, for both engines. Paths inside a skill are relative to the
+  repository root, and the runners start the agent there.
+- `scripts/newsletter/` sends the essay and weekly Daily Insights mailings; see
+  [docs/NEWSLETTER.md](docs/NEWSLETTER.md). The weekly letter splits across the
+  `weekly-letter` skill (picks the lead story and writes the TL;DR) and
+  `weekly-letter-send` (runs the send script, no editorial decisions), both
+  registered under `.claude/skills/` and `.codex/skills/`.
 
 ## Commands
 

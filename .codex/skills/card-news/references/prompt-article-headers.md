@@ -1,10 +1,10 @@
-# Article Header Generation
+# Article Cover Header Generation
 
 Produce one Korean cover title, one source/original-title line, and one Korean content-page header per detailed section for the article-card renderer.
 
 ## Output shape
 
-Write one JSON object to `card-news/article-headers/YYYY/MM/DD.json`:
+Write one JSON object to `src/daily-insights/card-news/article-headers/YYYY/MM/DD.json`:
 
 ```json
 {

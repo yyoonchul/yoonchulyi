@@ -21,6 +21,15 @@
 - `setup-digest-schedule.sh`: 빠른 설정 래퍼
 - `disable-digest-schedule.sh`: 빠른 끄기 래퍼
 
+## 스킬 위치
+
+모든 스킬은 레포 루트의 `.claude/skills/`(Claude Code)와 `.codex/skills/`(Codex)에
+있습니다. `digest`, `card-news`, `daily-insights-publish`, `weekly-letter`,
+`weekly-letter-send` 다섯 개입니다.
+
+스킬 안의 경로는 **레포 루트 기준**입니다(`src/daily-insights/content/inbox.md`).
+러너도 에이전트를 레포 루트에서 시작합니다 — Codex는 `-C`, Claude Code는 `cd`로.
+
 ## 사전 준비
 
 1. Codex 로그인

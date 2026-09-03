@@ -9,21 +9,21 @@ Publish one completed Daily Insights run after `digest` and `card-news` have bot
 
 ## Inputs
 
-- `content/YYYY/MM/DD.md` — generated digest.
-- `content/index.json` and `content/inbox.md` — digest index and cleared inbox state.
-- `card-news/article-headers/YYYY/MM/DD.json` and `card-news/queries/YYYY/MM/DD.json` — card news sidecars.
-- `card-news/output/YYYY/MM/DD/` — rendered article deck JPEGs and credits, used for verification but not committed because this output directory is ignored.
+- `src/daily-insights/content/YYYY/MM/DD.md` — generated digest.
+- `src/daily-insights/content/index.json` and `src/daily-insights/content/inbox.md` — digest index and cleared inbox state.
+- `src/daily-insights/card-news/article-headers/YYYY/MM/DD.json` and `src/daily-insights/card-news/queries/YYYY/MM/DD.json` — card news sidecars.
+- `src/daily-insights/card-news/output/YYYY/MM/DD/` — rendered article deck JPEGs and credits, used for verification but not committed because this output directory is ignored.
 - `public/daily-insights/YYYY/MM/DD/cardnews/` — public JPEG files served by GitHub Pages at `/daily-insights/YYYY/MM/DD/cardnews/A-B`.
 
 ## Workflow
 
 1. Resolve `datePath` in `YYYY/MM/DD`; default to today in KST.
-2. Confirm `content/<datePath>.md` exists.
-3. Confirm card news render outputs exist in `card-news/output/<datePath>/`.
+2. Confirm `src/daily-insights/content/<datePath>.md` exists.
+3. Confirm card news render outputs exist in `src/daily-insights/card-news/output/<datePath>/`.
 4. Confirm public cardnews assets exist in `public/daily-insights/<datePath>/cardnews/`.
 5. Run the repository publish wrapper:
    ```bash
-   scripts/automation/run-daily-insights-publish.sh <datePath>
+   src/daily-insights/scripts/automation/run-daily-insights-publish.sh <datePath>
    ```
 6. Report the pushed branch and at least one public URL, for example:
    `https://yoonchulyi.com/daily-insights/2026/05/22/cardnews/1-1`

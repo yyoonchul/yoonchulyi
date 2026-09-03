@@ -46,9 +46,9 @@ read -r -d '' PROMPT <<EOF || true
 Use the \`\$card-news\` skill in this repository and execute the full workflow now for datePath \`${DATE_PATH}\`.
 
 Constraints:
-- Today's digest already exists at \`content/${DATE_PATH}.md\`. Do not regenerate it.
-- Follow the skill end-to-end: parse digest KO section by article, generate \`card-news/article-headers/${DATE_PATH}.json\`, generate \`card-news/queries/${DATE_PATH}.json\`, and run the article renderer.
-- Renderer execution is hard-coded in this repository. Do not run \`node\`, \`npm\`, \`npx\`, or \`tsx\` directly for rendering. To render, execute exactly: \`scripts/automation/render-cardnews-article.sh ${DATE_PATH}\`.
+- Today's digest already exists at \`src/daily-insights/content/${DATE_PATH}.md\`. Do not regenerate it.
+- Follow the skill end-to-end: parse digest KO section by article, generate \`src/daily-insights/card-news/article-headers/${DATE_PATH}.json\`, generate \`src/daily-insights/card-news/queries/${DATE_PATH}.json\`, and run the article renderer.
+- Renderer execution is hard-coded in this repository. Do not run \`node\`, \`npm\`, \`npx\`, or \`tsx\` directly for rendering. To render, execute exactly: \`src/daily-insights/scripts/automation/render-cardnews-article.sh ${DATE_PATH}\`.
 - The renderer must leave public assets available under \`public/daily-insights/${DATE_PATH}/cardnews/\` for the publish step.
 - Do not run any git commands.
 EOF
@@ -69,7 +69,7 @@ while true; do
     run_with_timeout "${CODEX_TIMEOUT_SECONDS}" \
       codex exec \
         -c 'model_reasoning_effort="high"' \
-        -C "${REPO_ROOT}" \
+        -C "${SITE_ROOT}" \
         --dangerously-bypass-approvals-and-sandbox \
         "${PROMPT}"
     run_status="$?"
@@ -79,7 +79,7 @@ while true; do
     run_with_timeout "${CODEX_TIMEOUT_SECONDS}" \
       codex exec \
         -c 'model_reasoning_effort="high"' \
-        -C "${REPO_ROOT}" \
+        -C "${SITE_ROOT}" \
         -s "${CODEX_SANDBOX_MODE}" \
         "${PROMPT}"
     run_status="$?"

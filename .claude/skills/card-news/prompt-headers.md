@@ -4,7 +4,7 @@ Produce the Korean headers used by the card-news renderer.
 
 ## Output shape
 
-One JSON object written to `card-news/headers/YYYY/MM/DD.json`:
+One JSON object written to `src/daily-insights/card-news/headers/YYYY/MM/DD.json`:
 
 ```json
 {
