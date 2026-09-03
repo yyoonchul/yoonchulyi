@@ -329,6 +329,16 @@
       "key": "https://yoonchulyi.com/daily-insights/2026/08/25/|ko",
       "title": "📰 데일리 다이제스트 — 2026-08-25",
       "sentAt": "2026-09-02T23:09:20.647Z"
+    },
+    {
+      "key": "weekly:2026-08-24|en",
+      "title": "Anthropic previews the Model Hardware Standard",
+      "sentAt": "2026-09-03T04:42:57.700466Z"
+    },
+    {
+      "key": "weekly:2026-08-24|ko",
+      "title": "앤트로픽, AI 장치 제어 위한 MHS 공개",
+      "sentAt": "2026-09-03T04:42:57.700466Z"
     }
   ]
 }
