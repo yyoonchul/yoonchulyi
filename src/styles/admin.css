@@ -377,17 +377,53 @@
 
 /* ── trend ─────────────────────────────────────────────────────────────── */
 
+/* The padding reserves the row that the peak label and the hover readout share,
+   so showing one in place of the other never shifts the chart underneath. */
 .chart-wrap {
   position: relative;
+  padding-top: 24px;
 }
 
 .chart-peak {
   position: absolute;
-  top: -2px;
+  top: 2px;
   left: 0;
   font-size: 11px;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
+}
+
+.chart-tip {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  pointer-events: none;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  padding: 2px 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-tip b {
+  font-weight: 500;
+}
+
+.chart-tip .tip-when {
+  color: var(--muted);
+}
+
+.chart-tip .tip-when::after,
+.chart-tip .tip-visits::before {
+  content: ' · ';
+  color: var(--faint);
+}
+
+.chart-tip .tip-visits {
+  color: var(--muted);
 }
 
 /* Quarter gridlines, so a bar reads as a value and not only as a silhouette. */
@@ -397,7 +433,7 @@
   align-items: flex-end;
   gap: 4px;
   height: 128px;
-  margin-top: 16px;
+  margin-top: 8px;
   background:
     linear-gradient(to top, transparent 0, transparent calc(25% - 1px), var(--rule) 25%, transparent calc(25% + 1px)),
     linear-gradient(to top, transparent 0, transparent calc(50% - 1px), var(--rule) 50%, transparent calc(50% + 1px)),

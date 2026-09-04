@@ -322,18 +322,48 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     const peak = Math.max(...points.map((point: any) => point.pageviews), 1);
 
     const wrap = el('div', 'chart-wrap');
-    wrap.append(el('div', 'chart-peak', `peak ${number(peak)} views`));
+
+    // The value used to live on a `title` attribute, which meant waiting a
+    // second or two for an OS tooltip that was easy to miss entirely. This is a
+    // readout that appears the moment the pointer crosses a column, in the band
+    // the peak label otherwise occupies — same row, so nothing shifts and the
+    // two never overlap.
+    const peakLabel = el('div', 'chart-peak', `peak ${number(peak)} views`);
+    const tip = el('div', 'chart-tip');
+    tip.hidden = true;
+    wrap.append(peakLabel, tip);
 
     const chart = el('div', 'chart');
     for (const point of points) {
       const column = el('div', point.pageviews === peak ? 'col peak' : 'col');
-      column.title =
-        `${axisLabel(point.label, hourly)} · ${point.pageviews} views · ${point.visits} visits`;
       const fill = el('span');
       fill.style.height = `${Math.max((point.pageviews / peak) * 100, 1)}%`;
       column.append(fill);
+
+      column.addEventListener('mouseenter', () => {
+        tip.replaceChildren(
+          el('span', 'tip-when', axisLabel(point.label, hourly)),
+          el('b', '', `${number(point.pageviews)} views`),
+          el('span', 'tip-visits', `${number(point.visits)} visits`),
+        );
+        tip.hidden = false;
+        peakLabel.hidden = true;
+
+        // Follow the column, but never hang off either end of the chart.
+        const centre = column.offsetLeft + column.offsetWidth / 2;
+        const half = tip.offsetWidth / 2;
+        const limit = Math.max(chart.clientWidth - half, half);
+        tip.style.left = `${Math.min(Math.max(centre, half), limit)}px`;
+      });
+
       chart.append(column);
     }
+
+    chart.addEventListener('mouseleave', () => {
+      tip.hidden = true;
+      peakLabel.hidden = false;
+    });
+
     wrap.append(chart);
     box.append(wrap);
 
