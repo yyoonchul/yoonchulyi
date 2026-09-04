@@ -1,5 +1,5 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import AdminLayout from '../../layouts/AdminLayout.astro';
 
 // Nothing here is secret in itself — this is a plain static page, and every
 // number arrives later from /api/admin/*. The password gate lives in the
@@ -9,86 +9,51 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 // Two tabs, two sources: page traffic comes from Cloudflare Web Analytics,
 // newsletter numbers from Resend. Each loads on first view, so opening the
 // page only pays for the tab you are looking at.
+//
+// Layout and styling live in AdminLayout and src/styles/admin.css. The short
+// version: panels group, mono tabular numbers line up, zebra rows carry the
+// eye down a long list, and every grey clears WCAG AA.
 ---
 
-<BaseLayout
-  title="Admin - Yoonchul Yi"
-  description="Private."
-  robots="noindex, nofollow"
->
-  <section class="py-8">
-    <div class="flex items-baseline justify-between gap-4 mb-6">
-      <h1 class="font-serif text-2xl">Admin</h1>
-      <div class="flex items-baseline gap-4 font-mono text-sm">
-        <button
-          type="button"
-          data-refresh
-          class="text-sub hover:text-accent transition-colors"
-        >
-          Refresh
-        </button>
-        <form method="post" action="/api/admin/logout">
-          <button type="submit" class="text-sub hover:text-accent transition-colors">
-            Sign out
-          </button>
-        </form>
-      </div>
-    </div>
-
-    <nav
-      role="tablist"
-      class="flex gap-6 font-mono text-sm border-b border-sub/20 mb-6"
-    >
-      <button
-        type="button"
-        role="tab"
-        data-tab="pages"
-        class="-mb-px border-b py-2 transition-colors"
-      >
+<AdminLayout title="Admin - Yoonchul Yi">
+  <Fragment slot="nav">
+    <div class="admin-tabs" role="tablist">
+      <button type="button" role="tab" class="admin-tab" data-tab="pages">
         Pages
       </button>
-      <button
-        type="button"
-        role="tab"
-        data-tab="mail"
-        class="-mb-px border-b py-2 transition-colors"
-      >
+      <button type="button" role="tab" class="admin-tab" data-tab="mail">
         Newsletter
       </button>
-    </nav>
-
-    <div data-panel="pages">
-      <div class="flex items-baseline justify-between gap-4 mb-6">
-        <p class="font-mono text-xs text-sub" data-status="pages">Loading…</p>
-        <div class="flex gap-3 font-mono text-xs shrink-0" data-ranges>
-          <button type="button" data-range="1d" class="transition-colors">24h</button>
-          <button type="button" data-range="7d" class="transition-colors">7d</button>
-          <button type="button" data-range="30d" class="transition-colors">30d</button>
-        </div>
-      </div>
-      <div data-body="pages" class="space-y-10"></div>
     </div>
-
-    <div data-panel="mail">
-      <p class="font-mono text-xs text-sub mb-6" data-status="mail">Loading…</p>
-      <div data-body="mail" class="space-y-10"></div>
+    <div class="admin-ranges" data-ranges>
+      <button type="button" data-range="1d">24h</button>
+      <button type="button" data-range="7d">7d</button>
+      <button type="button" data-range="30d">30d</button>
     </div>
-  </section>
-</BaseLayout>
+  </Fragment>
+
+  <div data-panel="pages">
+    <div data-body="pages" class="admin-stack"></div>
+    <p class="note" data-status="pages">Loading…</p>
+  </div>
+
+  <div data-panel="mail">
+    <div data-body="mail" class="admin-stack"></div>
+    <p class="note" data-status="mail">Loading…</p>
+  </div>
+</AdminLayout>
 
 <script>
   type TabName = 'pages' | 'mail';
 
   const refreshButton = document.querySelector('[data-refresh]') as HTMLButtonElement;
+  const asOf = document.querySelector('[data-asof]') as HTMLElement;
   const tabButtons = Array.from(
     document.querySelectorAll('[data-tab]'),
   ) as HTMLButtonElement[];
   const rangeButtons = Array.from(
     document.querySelectorAll('[data-range]'),
   ) as HTMLButtonElement[];
-
-  const ACTIVE_TAB = 'border-text text-text';
-  const IDLE_TAB = 'border-transparent text-sub hover:text-accent';
 
   let activeTab: TabName = location.hash === '#mail' ? 'mail' : 'pages';
   let activeRange = '7d';
@@ -106,91 +71,166 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     return node;
   }
 
-  function section(title: string, note = ''): HTMLElement {
-    const wrapper = el('section');
-    const heading = el(
-      'div',
-      'flex items-baseline justify-between gap-4 mb-4',
-    );
-    heading.append(
-      el('h2', 'font-mono text-xs uppercase tracking-wider text-sub', title),
-    );
-    if (note) heading.append(el('span', 'font-mono text-xs text-sub/70', note));
-    wrapper.append(heading);
+  /** A titled white panel. Pass no title for a bare band, like the stat strip. */
+  function panel(title = '', note = ''): HTMLElement {
+    const root = el('div', 'panel');
+    if (title) {
+      const head = el('div', 'panel-head');
+      head.append(el('h2', 'panel-title', title));
+      if (note) head.append(el('span', 'panel-note', note));
+      root.append(head);
+    }
+    return root;
+  }
+
+  function body(flush = false): HTMLElement {
+    return el('div', flush ? 'panel-body flush' : 'panel-body');
+  }
+
+  function grid(...panels: HTMLElement[]): HTMLElement {
+    const wrapper = el('div', 'admin-grid');
+    wrapper.append(...panels);
     return wrapper;
   }
 
   function failed(title: string, message: string): HTMLElement {
-    const wrapper = section(title);
-    wrapper.append(el('p', 'font-mono text-sm text-accent', message));
-    return wrapper;
+    const root = panel(title);
+    const box = body();
+    box.append(el('p', 'note bad', message));
+    root.append(box);
+    return root;
   }
 
-  function stat(label: string, value: string, note = ''): HTMLElement {
-    const item = el('div');
-    item.append(el('div', 'font-serif text-2xl leading-none', value));
-    item.append(el('div', 'font-mono text-xs text-sub mt-2', label));
-    if (note) item.append(el('div', 'font-mono text-xs text-sub/70 mt-1', note));
+  interface StatOptions {
+    note?: string;
+    /** Colours the note. */
+    noteTone?: 'pos' | 'bad';
+    /** Colours the value: red for a problem, grey for a harmless zero. */
+    valueTone?: 'bad' | 'zero';
+    /** Pairs like "248 / 143" need a step down to fit their cell. */
+    small?: boolean;
+  }
+
+  function stat(label: string, value: string, options: StatOptions = {}): HTMLElement {
+    const item = el('div', 'stat');
+    item.append(el('div', 'stat-label', label));
+
+    let valueClass = 'stat-value';
+    if (options.small) valueClass += ' sm';
+    if (options.valueTone) valueClass += ` ${options.valueTone}`;
+    item.append(el('div', valueClass, value));
+
+    if (options.note) {
+      const noteClass = options.noteTone ? `stat-note ${options.noteTone}` : 'stat-note';
+      item.append(el('div', noteClass, options.note));
+    }
     return item;
   }
 
-  function statGrid(...items: HTMLElement[]): HTMLElement {
-    const grid = el('div', 'grid grid-cols-2 sm:grid-cols-4 gap-6 mb-6');
-    grid.append(...items);
-    return grid;
-  }
-
-  function row(cells: string[], muted = false): HTMLElement {
-    const line = el(
-      'div',
-      `flex gap-4 py-2 border-t border-sub/20 font-mono text-xs ${
-        muted ? 'text-sub' : ''
-      }`,
-    );
-    line.append(el('span', 'w-28 shrink-0 text-sub', cells[0]));
-    line.append(el('span', 'flex-1 min-w-0 truncate', cells[1]));
-    if (cells[2] !== undefined) {
-      line.append(el('span', 'shrink-0 text-sub', cells[2]));
-    }
-    return line;
+  /** Four across, or two-by-two when the band shares a row with another panel. */
+  function statBand(items: HTMLElement[], two = false): HTMLElement {
+    const band = el('div', two ? 'stats two' : 'stats');
+    band.append(...items);
+    return band;
   }
 
   interface Bar {
     label: string;
     value: number;
-    note?: string;
   }
 
   /**
-   * A ranked list where each row carries its own share as a background. The
-   * bar is proportional to the largest row, not the total, because the useful
-   * comparison in a top-ten list is against the leader.
+   * A ranked list. Each bar sits in a track, so a short bar reads as short
+   * rather than as missing, and the leader carries the accent at full strength
+   * — the bar is proportional to the largest row, not the total, because the
+   * useful comparison in a top-ten list is against the leader. The share
+   * column is against the total, which is the other question.
    */
-  function barList(bars: Bar[], empty = 'Nothing yet.'): HTMLElement {
-    const wrapper = el('div');
-    if (!bars.length) {
-      wrapper.append(el('p', 'font-mono text-sm text-sub', empty));
-      return wrapper;
-    }
+  function rankList(
+    bars: Bar[],
+    share = false,
+    empty = 'Nothing yet.',
+    track = true,
+  ): HTMLElement {
+    if (!bars.length) return el('p', 'note', empty);
 
     const peak = Math.max(...bars.map((bar) => bar.value), 1);
-    for (const bar of bars) {
-      const line = el('div', 'relative border-t border-sub/20');
-      const fill = el('div', 'absolute inset-y-0 left-0 bg-accent/10');
-      fill.style.width = `${Math.max((bar.value / peak) * 100, 1)}%`;
-      const content = el('div', 'relative flex gap-3 py-2 font-mono text-xs');
-      content.append(el('span', 'flex-1 min-w-0 truncate', bar.label));
-      if (bar.note) content.append(el('span', 'shrink-0 text-sub/70', bar.note));
-      content.append(el('span', 'shrink-0 text-sub tabular-nums', String(bar.value)));
-      line.append(fill, content);
-      wrapper.append(line);
+    const total = bars.reduce((sum, bar) => sum + bar.value, 0);
+
+    const table = el('table', 'ranks');
+    const tbody = el('tbody');
+
+    for (const [index, bar] of bars.entries()) {
+      const line = el('tr');
+
+      const label = el('td', 'r-label', bar.label);
+      label.title = bar.label;
+      line.append(label);
+
+      if (track) {
+        const cell = el('td', 'r-track');
+        const rail = el('i');
+        const fill = el('b', index === 0 ? 'lead' : '');
+        fill.style.width = `${Math.max((bar.value / peak) * 100, 3)}%`;
+        rail.append(fill);
+        cell.append(rail);
+        line.append(cell);
+      }
+
+      line.append(el('td', 'r-value', number(bar.value)));
+      if (share) {
+        line.append(el('td', 'r-share', total ? `${Math.round((bar.value / total) * 100)}%` : '—'));
+      }
+
+      tbody.append(line);
     }
-    return wrapper;
+
+    table.append(tbody);
+    return table;
+  }
+
+  interface Column {
+    label: string;
+    width?: string;
+    right?: boolean;
+  }
+
+  function dataTable(columns: Column[], plain = false): { table: HTMLElement; rows: HTMLElement } {
+    const table = el('table', plain ? 'data plain' : 'data');
+    const head = el('thead');
+    const line = el('tr');
+
+    for (const column of columns) {
+      const cell = el('th', column.right ? 'r' : '', column.label);
+      if (column.width) cell.style.width = column.width;
+      line.append(cell);
+    }
+
+    head.append(line);
+    const rows = el('tbody');
+    table.append(head, rows);
+    return { table, rows };
+  }
+
+  function cell(row: HTMLElement, className: string, text: string): HTMLElement {
+    const node = el('td', className, text);
+    row.append(node);
+    return node;
+  }
+
+  function flag(text: string, tone: 'sent' | 'draft' | 'gone'): HTMLElement {
+    return el('span', `flag ${tone}`, text);
   }
 
   function percent(part: number, whole: number): string {
     if (!whole) return '—';
     return `${Math.round((part / whole) * 100)}%`;
+  }
+
+  /** One decimal, because 99.2% and 100% are a meaningful distance apart. */
+  function rate(part: number, whole: number): string {
+    if (!whole) return '—';
+    return `${((part / whole) * 100).toFixed(1)}%`;
   }
 
   function shortDate(value: string): string {
@@ -200,7 +240,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   }
 
   function number(value: number): string {
-    return value.toLocaleString();
+    return (value ?? 0).toLocaleString();
   }
 
   // ---------------------------------------------------------------------
@@ -208,9 +248,11 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   // ---------------------------------------------------------------------
 
   function setupNotice(reason: string): HTMLElement {
-    const wrapper = section('Not configured yet');
-    wrapper.append(el('p', 'font-mono text-xs text-sub mb-4', reason));
-    const steps = el('ol', 'font-mono text-xs text-sub space-y-2 list-decimal pl-4');
+    const root = panel('Not configured yet');
+    const box = body();
+    box.append(el('p', 'note', reason));
+
+    const steps = el('ol', 'steps');
     for (const step of [
       'Add yoonchulyi.com under Web Analytics in the Cloudflare dashboard.',
       'Put its beacon token in WEB_ANALYTICS_TOKEN in src/components/BaseHead.astro.',
@@ -219,40 +261,70 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     ]) {
       steps.append(el('li', '', step));
     }
-    wrapper.append(steps);
-    return wrapper;
+
+    box.append(steps);
+    root.append(box);
+    return root;
+  }
+
+  function axisLabel(label: string, hourly: boolean): string {
+    return hourly ? label.slice(11, 16) : label.slice(5);
   }
 
   /**
    * The trend. Bars are drawn against the busiest bucket in the window, so the
    * shape is a comparison within the range rather than an absolute scale — a
    * quiet week and a busy one look the same height, which is the point when
-   * the question is "which day".
+   * the question is "which day". The peak value is printed above the chart and
+   * quarter gridlines sit behind it, so the height can also be read as a number.
    */
   function trendPanel(series: any): HTMLElement {
     const points: any[] = series?.points ?? [];
     const hourly = series?.granularity === 'hour';
-    const wrapper = section(
+    const root = panel(
       hourly ? 'By hour' : 'By day',
-      points.length ? '' : 'no data in this window',
+      points.length ? 'hover a bar for the count' : 'no data in this window',
     );
-    if (!points.length) return wrapper;
+    const box = body();
+    if (!points.length) {
+      box.append(el('p', 'note', 'Nothing recorded in this window.'));
+      root.append(box);
+      return root;
+    }
 
     const peak = Math.max(...points.map((point: any) => point.pageviews), 1);
-    const chart = el('div', 'flex items-end gap-px h-20');
-    for (const point of points) {
-      const bar = el('div', 'flex-1 bg-accent/30 hover:bg-accent/60 transition-colors');
-      bar.style.height = `${Math.max((point.pageviews / peak) * 100, 2)}%`;
-      bar.title = `${point.label} · ${point.pageviews} views · ${point.visits} visits`;
-      chart.append(bar);
-    }
-    wrapper.append(chart);
 
-    const axis = el('div', 'flex justify-between font-mono text-xs text-sub/70 mt-2');
-    axis.append(el('span', '', points[0].label));
-    axis.append(el('span', '', points[points.length - 1].label));
-    wrapper.append(axis);
-    return wrapper;
+    const wrap = el('div', 'chart-wrap');
+    wrap.append(el('div', 'chart-peak', `peak ${number(peak)} views`));
+
+    const chart = el('div', 'chart');
+    for (const point of points) {
+      const column = el('div', point.pageviews === peak ? 'col peak' : 'col');
+      column.title =
+        `${axisLabel(point.label, hourly)} · ${point.pageviews} views · ${point.visits} visits`;
+      const fill = el('span');
+      fill.style.height = `${Math.max((point.pageviews / peak) * 100, 1)}%`;
+      column.append(fill);
+      chart.append(column);
+    }
+    wrap.append(chart);
+    box.append(wrap);
+
+    // Up to ten buckets get a label each, aligned to their bar. Beyond that the
+    // labels would collide, so only the ends are marked.
+    const axis = el('div', points.length <= 10 ? 'chart-axis' : 'chart-axis sparse');
+    if (points.length <= 10) {
+      for (const point of points) {
+        axis.append(el('span', '', axisLabel(point.label, hourly)));
+      }
+    } else {
+      axis.append(el('span', '', axisLabel(points[0].label, hourly)));
+      axis.append(el('span', '', axisLabel(points[points.length - 1].label, hourly)));
+    }
+    box.append(axis);
+
+    root.append(box);
+    return root;
   }
 
   /**
@@ -273,107 +345,135 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     };
   }
 
+  function listPanel(title: string, note: string, content: HTMLElement): HTMLElement {
+    const root = panel(title, note);
+    const isTable = content.tagName === 'TABLE';
+    const box = body(isTable);
+    box.append(content);
+    root.append(box);
+    return root;
+  }
+
   function trafficPanels(traffic: any): HTMLElement[] {
     const totals = traffic.totals ?? { pageviews: 0, visits: 0 };
     const peak = busiest(traffic.series);
-    const overview = section('Overview');
+
+    const overview = panel();
     overview.append(
-      statGrid(
+      statBand([
         stat('pageviews', number(totals.pageviews)),
-        stat('visits', number(totals.visits), 'sessions, not people'),
+        stat('visits', number(totals.visits), { note: 'sessions, not people' }),
         stat(
           'per visit',
           totals.visits ? (totals.pageviews / totals.visits).toFixed(1) : '—',
-          'pages read in a sitting',
+          { note: 'pages read in a sitting' },
         ),
-        stat('busiest', peak.label, peak.note),
-      ),
-    );
-
-    const pages = section('Top pages');
-    pages.append(
-      barList(
-        (traffic.pages ?? []).map((page: any) => ({
-          label: page.label || '/',
-          value: page.pageviews,
-          note: `${page.visits} visits`,
-        })),
-      ),
-    );
-
-    const referrers = section('Sources');
-    const external = traffic.referrers?.external ?? [];
-    referrers.append(
-      barList([
-        {
-          label: 'Direct / typed / own links',
-          value: traffic.referrers?.direct ?? 0,
-        },
-        ...external.map((source: any) => ({
-          label: source.label,
-          value: source.pageviews,
-        })),
+        stat('busiest', peak.label, { note: peak.note }),
       ]),
     );
 
-    const places = section('Countries');
-    places.append(
-      barList(
+    const pages = listPanel(
+      'Top pages',
+      `${(traffic.pages ?? []).length} listed`,
+      rankList(
+        (traffic.pages ?? []).map((page: any) => ({
+          label: page.label || '/',
+          value: page.pageviews,
+        })),
+        true,
+      ),
+    );
+
+    const external = traffic.referrers?.external ?? [];
+    const sources = listPanel(
+      'Sources',
+      'where the visit came from',
+      rankList(
+        [
+          { label: 'Direct / typed / own links', value: traffic.referrers?.direct ?? 0 },
+          ...external.map((source: any) => ({
+            label: source.label,
+            value: source.pageviews,
+          })),
+        ],
+        true,
+      ),
+    );
+
+    const places = listPanel(
+      'Countries',
+      '',
+      rankList(
         (traffic.countries ?? []).map((country: any) => ({
           label: country.label || 'unknown',
           value: country.pageviews,
         })),
+        true,
       ),
     );
 
-    const clients = section('Devices, browsers, systems');
-    const columns = el('div', 'grid sm:grid-cols-3 gap-6');
-    for (const key of ['devices', 'browsers', 'systems']) {
-      columns.append(
-        barList(
+    const clients = panel('Clients');
+    const clientBox = body(true);
+    const triple = el('div', 'triple');
+    for (const [key, heading] of [
+      ['devices', 'device'],
+      ['browsers', 'browser'],
+      ['systems', 'system'],
+    ] as [string, string][]) {
+      const column = el('div');
+      column.append(el('h4', '', heading));
+      // No bars here: three lists share one panel, and at roughly 160px each a
+      // bar would eat the label down to one letter. The counts carry the rank.
+      column.append(
+        rankList(
           (traffic[key] ?? []).map((item: any) => ({
             label: item.label || 'unknown',
             value: item.pageviews,
           })),
+          false,
           '—',
+          false,
         ),
       );
+      triple.append(column);
     }
-    clients.append(columns);
+    clientBox.append(triple);
+    clients.append(clientBox);
 
     return [
       overview,
       trendPanel(traffic.series),
-      pages,
-      referrers,
-      places,
-      clients,
+      grid(pages, sources),
+      grid(places, clients),
     ];
   }
 
   async function loadPages(): Promise<void> {
     const status = document.querySelector('[data-status="pages"]') as HTMLElement;
-    const body = document.querySelector('[data-body="pages"]') as HTMLElement;
+    const target = document.querySelector('[data-body="pages"]') as HTMLElement;
+    status.className = 'note';
     status.textContent = 'Loading…';
 
     const data = await request(`/api/admin/traffic?range=${activeRange}`);
     if (!data) return;
 
     if (!data.configured) {
-      body.replaceChildren(setupNotice(data.reason ?? 'No credentials.'));
+      target.replaceChildren(setupNotice(data.reason ?? 'No credentials.'));
+      status.className = 'note bad';
       status.textContent = 'Cloudflare Web Analytics is not wired up yet.';
       return;
     }
     if (data.traffic?.error) {
-      body.replaceChildren(failed('Traffic', data.traffic.error));
+      target.replaceChildren(failed('Traffic', data.traffic.error));
+      status.className = 'note bad';
       status.textContent = 'Could not read Cloudflare Web Analytics.';
       return;
     }
 
-    body.replaceChildren(...trafficPanels(data.traffic));
+    target.replaceChildren(...trafficPanels(data.traffic));
+    stamp(data.fetched_at);
     status.textContent =
-      `as of ${new Date(data.fetched_at).toLocaleString()} · ` +
-      'counts browsers that ran the beacon';
+      'Cloudflare Web Analytics · counts browsers that ran the beacon.';
   }
 
   // ---------------------------------------------------------------------
@@ -386,37 +486,255 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   };
 
   function subscriberPanel(data: any): HTMLElement {
-    if (data.error) return failed('Subscribers', data.error);
-
-    const wrapper = section('Subscribers');
+    const contacts: any[] = data.contacts ?? [];
+    const root = panel('Subscribers', `${number(contacts.length)} on file`);
     const languages = data.languages ?? { en: 0, ko: 0, unknown: 0 };
     const topics = data.topics ?? { essays: 0, daily: 0, note: 'skipped' };
+    const total = data.total ?? (data.active ?? 0) + (data.unsubscribed ?? 0);
 
-    wrapper.append(
-      statGrid(
-        stat('active', number(data.active)),
-        stat('unsubscribed', number(data.unsubscribed)),
-        stat(
-          'EN / KO',
-          `${languages.en} / ${languages.ko}`,
-          languages.unknown ? `${languages.unknown} in neither segment` : '',
-        ),
-        topics.note === 'ok'
-          ? stat('essays / daily', `${topics.essays} / ${topics.daily}`)
-          : stat('essays / daily', '—', TOPIC_NOTES[topics.note] ?? ''),
+    root.append(
+      statBand(
+        [
+          stat('active', number(data.active)),
+          stat('unsubscribed', number(data.unsubscribed), {
+            note: total ? `${rate(data.unsubscribed, total)} of all time` : '',
+          }),
+          stat('en / ko', `${languages.en} / ${languages.ko}`, {
+            small: true,
+            note: languages.unknown
+              ? `${languages.unknown} in neither segment`
+              : '0 in neither segment',
+          }),
+          topics.note === 'ok'
+            ? stat('essays / daily', `${topics.essays} / ${topics.daily}`, { small: true })
+            : stat('essays / daily', '—', {
+                small: true,
+                note: TOPIC_NOTES[topics.note] ?? '',
+              }),
+        ],
+        true,
       ),
     );
 
     if (data.truncated) {
-      wrapper.append(
+      const box = body();
+      box.append(el('p', 'note', 'Contact list was truncated at the page cap.'));
+      root.append(box);
+    }
+    return root;
+  }
+
+  function deliveryPanel(data: any): HTMLElement {
+    const root = panel('Delivery', 'last 30 days');
+    root.append(
+      statBand(
+        [
+          stat('sent', number(data.sent)),
+          stat('delivered', number(data.delivered), {
+            note: `${rate(data.delivered, data.sent)} of sent`,
+            noteTone: 'pos',
+          }),
+          stat('opened', number(data.opened), {
+            note: `${percent(data.opened, data.delivered)} of delivered`,
+          }),
+          stat('clicked', number(data.clicked), {
+            note: `${percent(data.clicked, data.delivered)} of delivered`,
+          }),
+        ],
+        true,
+      ),
+    );
+    return root;
+  }
+
+  /**
+   * Bounces and complaints used to live inside a grey run-on sentence next to
+   * "in flight", which made a spam report look exactly like a healthy queue.
+   * They get their own band, and anything above zero is red.
+   */
+  function problemsPanel(data: any): HTMLElement {
+    const root = panel('Problems', 'anything above zero wants a look');
+    const tone = (count: number) => (count > 0 ? ('bad' as const) : ('zero' as const));
+
+    root.append(
+      statBand([
+        stat('bounced', number(data.bounced), {
+          valueTone: tone(data.bounced),
+          note: data.bounced ? `${rate(data.bounced, data.sent)} of sent` : 'none',
+          noteTone: data.bounced ? 'bad' : undefined,
+        }),
+        stat('complained', number(data.complained), {
+          valueTone: tone(data.complained),
+          note: data.complained ? 'marked as spam' : 'none',
+          noteTone: data.complained ? 'bad' : undefined,
+        }),
+        stat('failed', number(data.failed), {
+          valueTone: tone(data.failed),
+          note: data.failed ? 'never left Resend' : 'none',
+          noteTone: data.failed ? 'bad' : undefined,
+        }),
+        stat('in flight', number(data.pending), {
+          valueTone: data.pending > 0 ? undefined : 'zero',
+          note: data.pending ? 'still sending' : 'nothing pending',
+        }),
+      ]),
+    );
+    return root;
+  }
+
+  function latestPanel(data: any): HTMLElement {
+    const recent: any[] = data.recent ?? [];
+    const root = panel('Latest', `${recent.length} most recent`);
+    const box = body(true);
+    const { table, rows } = dataTable([
+      { label: 'date', width: '118px' },
+      { label: 'to' },
+      { label: 'subject' },
+      { label: 'last event', width: '120px', right: true },
+    ]);
+
+    for (const email of recent) {
+      const line = el('tr');
+      cell(line, 'date', shortDate(email.created_at));
+      cell(line, 'trunc', email.to ?? '');
+      cell(line, 'trunc', email.subject ?? '');
+      cell(line, 'r seg', email.last_event ?? '');
+      rows.append(line);
+    }
+
+    box.append(table);
+    root.append(box);
+    return root;
+  }
+
+  function rawEventsPanel(data: any): HTMLElement {
+    const events = Object.entries((data.by_event ?? {}) as Record<string, number>).sort(
+      (a, b) => b[1] - a[1],
+    );
+    const root = panel('Raw last_event', 'diagnostics');
+    const content = rankList(
+      events.map(([event, count]) => ({ label: event, value: count })),
+      false,
+      'No events in the window.',
+    );
+    const box = body(content.tagName === 'TABLE');
+    box.append(content);
+    root.append(box);
+
+    if (data.truncated) {
+      const foot = body();
+      foot.append(
         el(
           'p',
-          'font-mono text-xs text-sub',
-          'Contact list was truncated at the page cap.',
+          'note',
+          'Email list was truncated at the page cap; counts are a floor, not a total.',
         ),
       );
+      root.append(foot);
     }
-    return wrapper;
+    return root;
+  }
+
+  /** One issue's detail, fetched the first time its row is opened and kept. */
+  const issueCache = new Map<string, any>();
+
+  function issueDetail(detail: any): HTMLElement {
+    const box = el('div', 'detail-box');
+    if (detail.error) {
+      box.append(el('p', 'note bad', detail.error));
+      return box;
+    }
+
+    const line = (label: string, value: string) => {
+      if (!value) return;
+      const item = el('div', 'detail-line');
+      item.append(el('span', '', label));
+      item.append(el('span', '', value));
+      box.append(item);
+    };
+
+    line('subject', detail.subject);
+    line('from', detail.from);
+    line('audience', [detail.segment, detail.topic].filter(Boolean).join(' · '));
+    line('preview', detail.preview_text);
+    line('created', shortDate(detail.created_at));
+    line('scheduled', detail.scheduled_at ? shortDate(detail.scheduled_at) : '');
+    line('sent', detail.sent_at ? shortDate(detail.sent_at) : 'not sent');
+
+    if (detail.excerpt) {
+      box.append(el('p', 'detail-excerpt', detail.excerpt));
+    }
+    return box;
+  }
+
+  function issuesPanel(data: any): HTMLElement {
+    const root = panel(
+      'Issues',
+      `${data.sent ?? 0} sent of ${data.total ?? 0} · click a row for detail`,
+    );
+    const issues: any[] = data.issues ?? [];
+
+    if (!issues.length) {
+      const box = body();
+      box.append(el('p', 'note', 'None yet.'));
+      root.append(box);
+      return root;
+    }
+
+    // The list endpoint carries no segment or topic — those only come back with
+    // one issue's detail — so the columns here are the four fields it does
+    // return. Audience shows up when a row is opened.
+    const box = body(true);
+    const { table, rows } = dataTable([
+      { label: 'created', width: '118px' },
+      { label: 'subject' },
+      { label: 'sent', width: '118px' },
+      { label: 'status', width: '96px', right: true },
+    ]);
+
+    for (const issue of issues) {
+      const line = el('tr', 'click');
+      cell(line, 'date', shortDate(issue.created_at));
+      cell(line, 'trunc', issue.subject || issue.name || '');
+      cell(line, 'date', issue.sent_at ? shortDate(issue.sent_at) : '—');
+      const status = cell(line, 'r', '');
+      status.append(flag(issue.status ?? '—', issue.status === 'sent' ? 'sent' : 'draft'));
+
+      const slot = el('tr', 'detail');
+      slot.hidden = true;
+      const holder = el('td', 'detail-cell');
+      holder.colSpan = 4;
+      slot.append(holder);
+
+      line.addEventListener('click', async () => {
+        if (!slot.hidden) {
+          slot.hidden = true;
+          return;
+        }
+        slot.hidden = false;
+        if (!issueCache.has(issue.id)) {
+          const box = el('div', 'detail-box');
+          box.append(el('p', 'note', 'Loading…'));
+          holder.replaceChildren(box);
+          const detail = await request(`/api/admin/broadcasts/${issue.id}`);
+          if (!detail) return;
+          issueCache.set(issue.id, detail);
+        }
+        holder.replaceChildren(issueDetail(issueCache.get(issue.id)));
+      });
+
+      rows.append(line, slot);
+    }
+
+    box.append(table);
+    root.append(box);
+
+    if (data.truncated) {
+      const foot = body();
+      foot.append(el('p', 'note', 'Broadcast list was truncated at the page cap.'));
+      root.append(foot);
+    }
+    return root;
   }
 
   /**
@@ -425,22 +743,32 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
    * round trip would be slower and would spend the Resend rate limit twice.
    */
   function subscriberList(data: any): HTMLElement {
-    if (data.error) return el('div');
-
     const contacts: any[] = data.contacts ?? [];
-    const wrapper = section('Subscriber list', `${contacts.length} on file`);
+    const root = panel('Subscriber list', `${number(contacts.length)} on file`);
 
+    const searchBox = body();
     const search = document.createElement('input');
     search.type = 'search';
     search.placeholder = 'Filter by address…';
-    search.className =
-      'w-full mb-4 px-3 py-2 font-mono text-xs bg-transparent border ' +
-      'border-sub/40 focus:border-accent focus:outline-none';
-    wrapper.append(search);
+    search.className = 'filter';
+    searchBox.append(search);
+    root.append(searchBox);
 
-    const list = el('div');
-    const footer = el('p', 'font-mono text-xs text-sub mt-3');
-    wrapper.append(list, footer);
+    const listBox = body(true);
+    const { table, rows } = dataTable(
+      [
+        { label: 'joined', width: '118px' },
+        { label: 'address' },
+        { label: 'language', width: '130px' },
+        { label: 'topics', width: '180px' },
+      ],
+      true,
+    );
+    listBox.append(table);
+    root.append(listBox);
+
+    const foot = el('p', 'list-foot');
+    root.append(foot);
 
     let limit = 25;
 
@@ -451,33 +779,39 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
         : contacts;
       const shown = matches.slice(0, limit);
 
-      list.replaceChildren();
+      rows.replaceChildren();
       for (const contact of shown) {
-        const marks = [contact.language === 'unknown' ? '—' : contact.language];
-        if (contact.topics?.length) marks.push(contact.topics.join('+'));
-        if (contact.unsubscribed) marks.push('unsubscribed');
+        const line = el('tr', contact.unsubscribed ? 'off' : '');
+        cell(line, 'date', shortDate(contact.created_at));
+        cell(line, 'trunc', contact.email);
 
-        list.append(
-          row(
-            [shortDate(contact.created_at), contact.email, marks.join(' · ')],
-            contact.unsubscribed,
-          ),
+        const language = cell(
+          line,
+          'seg',
+          contact.language === 'unknown' ? '—' : contact.language,
         );
+        if (contact.unsubscribed) {
+          language.append(document.createTextNode(' '));
+          language.append(flag('gone', 'gone'));
+        }
+
+        cell(line, 'seg', contact.topics?.length ? contact.topics.join(' + ') : '—');
+        rows.append(line);
       }
 
-      footer.replaceChildren();
+      foot.replaceChildren();
       if (!matches.length) {
-        footer.textContent = 'No match.';
+        foot.textContent = 'No match.';
         return;
       }
-      footer.textContent = `Showing ${shown.length} of ${matches.length}. `;
+      foot.textContent = `Showing ${shown.length} of ${number(matches.length)}. `;
       if (matches.length > shown.length) {
-        const more = el('button', 'text-accent hover:underline', 'Show more');
+        const more = el('button', '', 'Show more');
         more.addEventListener('click', () => {
           limit += 100;
           draw();
         });
-        footer.append(more);
+        foot.append(more);
       }
     };
 
@@ -486,187 +820,62 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       draw();
     });
     draw();
-    return wrapper;
+    return root;
   }
 
-  function emailPanel(data: any): HTMLElement {
-    if (data.error) return failed('Delivery · last 30 days', data.error);
+  function mailPanels(data: any): HTMLElement[] {
+    const subscribers = data.subscribers ?? {};
+    const emails = data.emails ?? {};
+    const broadcasts = data.broadcasts ?? {};
+    const out: HTMLElement[] = [];
 
-    const wrapper = section('Delivery · last 30 days');
-    wrapper.append(
-      statGrid(
-        stat('sent', number(data.sent)),
-        stat('delivered', number(data.delivered), percent(data.delivered, data.sent)),
-        stat('opened', number(data.opened), percent(data.opened, data.delivered)),
-        stat('clicked', number(data.clicked), percent(data.clicked, data.delivered)),
+    out.push(
+      grid(
+        subscribers.error
+          ? failed('Subscribers', subscribers.error)
+          : subscriberPanel(subscribers),
+        emails.error ? failed('Delivery', emails.error) : deliveryPanel(emails),
       ),
     );
 
-    wrapper.append(
-      el(
-        'p',
-        'font-mono text-xs text-sub mb-6',
-        `bounced ${data.bounced} · complained ${data.complained} · ` +
-          `failed ${data.failed} · in flight ${data.pending}`,
-      ),
+    if (!emails.error) out.push(problemsPanel(emails));
+
+    out.push(
+      broadcasts.error ? failed('Issues', broadcasts.error) : issuesPanel(broadcasts),
     );
 
-    const events = Object.entries(data.by_event as Record<string, number>).sort(
-      (a, b) => b[1] - a[1],
-    );
-    if (events.length) {
-      wrapper.append(el('h3', 'font-mono text-xs text-sub mt-8 mb-1', 'Raw last_event'));
-      for (const [event, count] of events) {
-        wrapper.append(row([event, '', String(count)], true));
-      }
+    if (!subscribers.error) out.push(subscriberList(subscribers));
+
+    if (!emails.error) {
+      if (emails.recent?.length) out.push(latestPanel(emails));
+      out.push(rawEventsPanel(emails));
     }
 
-    if (data.recent?.length) {
-      wrapper.append(el('h3', 'font-mono text-xs text-sub mt-8 mb-1', 'Latest'));
-      for (const email of data.recent) {
-        wrapper.append(
-          row([
-            shortDate(email.created_at),
-            `${email.to} — ${email.subject}`,
-            email.last_event,
-          ]),
-        );
-      }
-    }
-
-    if (data.truncated) {
-      wrapper.append(
-        el(
-          'p',
-          'font-mono text-xs text-sub mt-4',
-          'Email list was truncated at the page cap; counts are a floor, not a total.',
-        ),
-      );
-    }
-    return wrapper;
-  }
-
-  /** One issue's detail, fetched the first time its row is opened and kept. */
-  const issueCache = new Map<string, any>();
-
-  function issueDetail(detail: any): HTMLElement {
-    const box = el('div', 'py-3 pl-4 border-l border-accent/40 space-y-1');
-    if (detail.error) {
-      box.append(el('p', 'font-mono text-xs text-accent', detail.error));
-      return box;
-    }
-
-    const line = (label: string, value: string) => {
-      if (!value) return;
-      const item = el('div', 'flex gap-3 font-mono text-xs');
-      item.append(el('span', 'w-20 shrink-0 text-sub', label));
-      item.append(el('span', 'flex-1 min-w-0 break-words', value));
-      box.append(item);
-    };
-
-    line('subject', detail.subject);
-    line('from', detail.from);
-    line(
-      'audience',
-      [detail.segment, detail.topic].filter(Boolean).join(' · '),
-    );
-    line('preview', detail.preview_text);
-    line('created', shortDate(detail.created_at));
-    line('scheduled', detail.scheduled_at ? shortDate(detail.scheduled_at) : '');
-    line('sent', detail.sent_at ? shortDate(detail.sent_at) : 'not sent');
-    if (detail.excerpt) {
-      box.append(
-        el('p', 'font-mono text-xs text-sub leading-relaxed pt-2', detail.excerpt),
-      );
-    }
-    return box;
-  }
-
-  function issuesPanel(data: any): HTMLElement {
-    if (data.error) return failed('Issues', data.error);
-
-    const wrapper = section(
-      'Issues',
-      `${data.sent ?? 0} sent of ${data.total ?? 0}`,
-    );
-    const issues: any[] = data.issues ?? [];
-    if (!issues.length) {
-      wrapper.append(el('p', 'font-mono text-sm text-sub', 'None yet.'));
-      return wrapper;
-    }
-
-    for (const issue of issues) {
-      const block = el('div');
-      const button = el(
-        'button',
-        'w-full flex gap-4 py-2 border-t border-sub/20 font-mono text-xs text-left ' +
-          'hover:text-accent transition-colors',
-      );
-      button.append(
-        el('span', 'w-28 shrink-0 text-sub', shortDate(issue.sent_at ?? issue.created_at)),
-      );
-      button.append(
-        el('span', 'flex-1 min-w-0 truncate', issue.subject || issue.name),
-      );
-      button.append(el('span', 'shrink-0 text-sub', issue.status));
-
-      const slot = el('div');
-      slot.hidden = true;
-
-      button.addEventListener('click', async () => {
-        if (!slot.hidden) {
-          slot.hidden = true;
-          return;
-        }
-        slot.hidden = false;
-        if (!issueCache.has(issue.id)) {
-          slot.replaceChildren(el('p', 'font-mono text-xs text-sub py-2', 'Loading…'));
-          const detail = await request(`/api/admin/broadcasts/${issue.id}`);
-          if (!detail) return;
-          issueCache.set(issue.id, detail);
-        }
-        slot.replaceChildren(issueDetail(issueCache.get(issue.id)));
-      });
-
-      block.append(button, slot);
-      wrapper.append(block);
-    }
-
-    if (data.truncated) {
-      wrapper.append(
-        el(
-          'p',
-          'font-mono text-xs text-sub mt-4',
-          'Broadcast list was truncated at the page cap.',
-        ),
-      );
-    }
-    return wrapper;
+    return out;
   }
 
   async function loadMail(): Promise<void> {
     const status = document.querySelector('[data-status="mail"]') as HTMLElement;
-    const body = document.querySelector('[data-body="mail"]') as HTMLElement;
+    const target = document.querySelector('[data-body="mail"]') as HTMLElement;
+    status.className = 'note';
     status.textContent = 'Loading…';
 
     const data = await request('/api/admin/stats');
     if (!data) return;
 
     issueCache.clear();
-    body.replaceChildren(
-      subscriberPanel(data.subscribers),
-      subscriberList(data.subscribers),
-      issuesPanel(data.broadcasts),
-      emailPanel(data.emails),
-    );
-    status.textContent =
-      `as of ${new Date(data.fetched_at).toLocaleString()} · ` +
-      `Resend keeps ${data.retention_days} days`;
+    target.replaceChildren(...mailPanels(data));
+    stamp(data.fetched_at);
+    status.textContent = `Resend · keeps ${data.retention_days} days of delivery history.`;
   }
 
   // ---------------------------------------------------------------------
   // Plumbing
   // ---------------------------------------------------------------------
+
+  function stamp(fetchedAt: string): void {
+    asOf.textContent = fetchedAt ? new Date(fetchedAt).toLocaleString() : '—';
+  }
 
   /**
    * The session is 12 hours; when it lapses, reloading puts the login form
@@ -688,6 +897,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       const status = document.querySelector(
         `[data-status="${activeTab}"]`,
       ) as HTMLElement;
+      status.className = 'note bad';
       status.textContent =
         cause instanceof Error ? cause.message : 'Could not load.';
       return null;
@@ -711,23 +921,18 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
   function paint(): void {
     for (const button of tabButtons) {
-      const isActive = button.dataset.tab === activeTab;
-      button.className = `-mb-px border-b py-2 transition-colors ${
-        isActive ? ACTIVE_TAB : IDLE_TAB
-      }`;
-      button.setAttribute('aria-selected', String(isActive));
+      button.setAttribute('aria-selected', String(button.dataset.tab === activeTab));
     }
-    for (const panel of ['pages', 'mail'] as TabName[]) {
-      const node = document.querySelector(`[data-panel="${panel}"]`) as HTMLElement;
-      node.hidden = panel !== activeTab;
+    for (const name of ['pages', 'mail'] as TabName[]) {
+      const node = document.querySelector(`[data-panel="${name}"]`) as HTMLElement;
+      node.hidden = name !== activeTab;
     }
     for (const button of rangeButtons) {
-      button.className = `transition-colors ${
-        button.dataset.range === activeRange
-          ? 'text-text underline underline-offset-4'
-          : 'text-sub hover:text-accent'
-      }`;
+      button.setAttribute('aria-pressed', String(button.dataset.range === activeRange));
     }
+    // The range only means anything to the traffic tab.
+    const ranges = document.querySelector('[data-ranges]') as HTMLElement;
+    ranges.style.visibility = activeTab === 'pages' ? 'visible' : 'hidden';
   }
 
   function show(tab: TabName): void {

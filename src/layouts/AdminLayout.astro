@@ -1,0 +1,72 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import '../styles/global.css';
+import '../styles/admin.css';
+
+// The admin does not use BaseLayout. BaseLayout is built for prose: a 672px
+// column, the public nav, the essay rhythm. A dashboard put inside it reads as
+// a blog post that happens to contain numbers, which is exactly how the old
+// admin read. This layout keeps the site's ground, ink, accent, wordmark and
+// serif headings, and gives up the column and the nav.
+//
+// The chrome here is the part that is the same on any admin screen: the
+// wordmark, the as-of stamp, refresh, sign out. Tabs and range buttons are the
+// page's business and arrive through the `nav` slot.
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="admin">
+  <BaseHead title={title} description="Private." robots="noindex, nofollow" />
+  <body>
+    <header class="admin-bar" data-admin-bar>
+      <div class="admin-bar-inner">
+        <div class="admin-bar-top">
+          <div class="admin-brand">
+            <a class="admin-wordmark" href="/">Yoonchul Yi</a>
+            <span class="admin-brand-tag">Admin</span>
+          </div>
+          <div class="admin-tools">
+            <span class="admin-asof">as of <b data-asof>—</b></span>
+            <button type="button" class="admin-link" data-refresh>Refresh</button>
+            <form method="post" action="/api/admin/logout">
+              <button type="submit" class="admin-link">Sign out</button>
+            </form>
+          </div>
+        </div>
+        <div class="admin-bar-nav">
+          <slot name="nav" />
+        </div>
+      </div>
+    </header>
+
+    <main class="admin-main">
+      <slot />
+    </main>
+
+    <footer class="admin-footer">© {new Date().getFullYear()} Yoonchul Yi</footer>
+
+    <script>
+      // Table headers stick under the bar, so they need its real height rather
+      // than a guess that drifts the moment the wordmark wraps on a phone.
+      const bar = document.querySelector('[data-admin-bar]') as HTMLElement;
+
+      function measure(): void {
+        document.documentElement.style.setProperty(
+          '--bar-h',
+          `${bar.offsetHeight}px`,
+        );
+      }
+
+      measure();
+      window.addEventListener('resize', measure);
+      // Newsreader and Plex Mono land after first paint and change the height.
+      if (document.fonts) void document.fonts.ready.then(measure);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,865 @@
+/* Admin-only styling.
+ *
+ * The admin is the one screen on this site that is a table, not an essay, so it
+ * is the one screen that does not use BaseLayout. What it keeps from the public
+ * pages is everything that costs nothing to read: the paper ground #F4F4F0, the
+ * ink #191919, the accent #EA580C, Newsreader for headings, IBM Plex Mono for
+ * everything else, square corners, and the 400/500 weights BaseHead already
+ * loads. What it drops is the 672px reading column, the site nav and the essay
+ * rhythm, none of which survive contact with a six-panel dashboard.
+ *
+ * Where identity and legibility disagreed, legibility won:
+ *   · white panels, because grouping six blocks is a reading job, not decor
+ *   · numbers in mono 500, because Newsreader 400 digits go soft at a glance
+ *   · zebra rows instead of hairlines, because 418 rows need a rail for the eye
+ *   · every bar sits in a track, so a short bar reads as short rather than absent
+ *
+ * Contrast on the white panel: text 17.6:1, muted 6.9:1, faint 4.7:1,
+ * danger 6.4:1, positive 5.1:1. The old page ran on #8C8C8C (3.0:1) and
+ * #8C8C8C at 70% (1.9:1), which is most of why nothing on it registered.
+ */
+
+.admin {
+  --ground: #f4f4f0; /* site, unchanged */
+  --panel: #ffffff;
+  --zebra: #f6f6f2;
+  --hover: #efefe8;
+  --head: #f7f7f3;
+
+  --text: #191919; /* site, unchanged */
+  --muted: #5a5a56; /* the site's grey, darkened until it clears AA */
+  --faint: #74746d; /* de-emphasis that still clears AA */
+
+  --accent: #ea580c; /* site, unchanged */
+  --pos: #15803d;
+  --danger: #b4231d;
+
+  --edge: #d2d2c9; /* panel border, section rules */
+  --rule: #e4e4db; /* inside a panel */
+  --bar: #35352d;
+  --bar-bg: #e8e8e0;
+
+  --page: 1120px;
+  --bar-h: 86px; /* replaced with the measured height on load */
+
+  background: var(--ground);
+  color: var(--text);
+}
+
+/* Typography sits on the body, not on <html>, so that raising the base size to
+   14px does not quietly redefine rem for anything Tailwind's preflight sets. */
+.admin body {
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.admin h1,
+.admin h2,
+.admin h3 {
+  font-family: Newsreader, Georgia, serif;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* ── header ────────────────────────────────────────────────────────────── */
+
+.admin-bar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: rgba(244, 244, 240, 0.95);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--edge);
+}
+
+.admin-bar-inner {
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.admin-bar-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 16px 0 12px;
+}
+
+.admin-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 11px;
+}
+
+.admin-wordmark {
+  font-family: Newsreader, Georgia, serif;
+  font-style: italic;
+  font-size: 25px;
+  line-height: 1;
+  color: var(--text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.admin-wordmark:hover {
+  color: var(--accent);
+}
+
+.admin-brand-tag {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.admin-brand-tag::before {
+  content: '/ ';
+  color: var(--faint);
+}
+
+.admin-tools {
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+  font-size: 13px;
+}
+
+.admin-asof {
+  color: var(--muted);
+}
+
+.admin-asof b {
+  font-weight: 500;
+  color: var(--text);
+}
+
+.admin-link {
+  font: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.admin-link:hover {
+  color: var(--accent);
+}
+
+.admin-link:disabled {
+  color: var(--faint);
+  cursor: default;
+}
+
+.admin-bar-nav {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 26px;
+}
+
+.admin-tab {
+  font: inherit;
+  font-size: 15px;
+  background: none;
+  cursor: pointer;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 0 0 9px;
+  color: var(--muted);
+}
+
+.admin-tab:hover {
+  color: var(--accent);
+}
+
+.admin-tab[aria-selected='true'] {
+  color: var(--text);
+  font-weight: 500;
+  border-bottom-color: var(--accent);
+}
+
+.admin-ranges {
+  display: flex;
+  gap: 18px;
+  padding-bottom: 9px;
+}
+
+.admin-ranges button {
+  font: inherit;
+  font-size: 14px;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.admin-ranges button:hover {
+  color: var(--accent);
+}
+
+.admin-ranges button[aria-pressed='true'] {
+  color: var(--text);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+
+/* ── page ──────────────────────────────────────────────────────────────── */
+
+.admin-main {
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: 20px 24px 8px;
+}
+
+.admin-footer {
+  max-width: var(--page);
+  margin: 40px auto 0;
+  padding: 18px 24px 40px;
+  border-top: 1px solid var(--edge);
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.admin-stack > * + * {
+  margin-top: 18px;
+}
+
+.admin-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 900px) {
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── panel ─────────────────────────────────────────────────────────────── */
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  min-width: 0;
+}
+
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 11px 18px 10px;
+  border-bottom: 1px solid var(--edge);
+}
+
+.panel-title {
+  font-size: 20px;
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+}
+
+.panel-note {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.panel-body {
+  padding: 16px 18px 18px;
+}
+
+.panel-body.flush {
+  padding: 0;
+}
+
+/* ── stat band ─────────────────────────────────────────────────────────── */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.stats.two {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.stat {
+  padding: 15px 18px 17px;
+  border-left: 1px solid var(--rule);
+  min-width: 0;
+}
+
+.stat:first-child {
+  border-left: 0;
+}
+
+.stats.two .stat:nth-child(3) {
+  border-left: 0;
+}
+
+.stats.two .stat:nth-child(n + 3) {
+  border-top: 1px solid var(--rule);
+}
+
+@media (max-width: 720px) {
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stats:not(.two) .stat:nth-child(odd) {
+    border-left: 0;
+  }
+
+  .stats:not(.two) .stat:nth-child(n + 3) {
+    border-top: 1px solid var(--rule);
+  }
+}
+
+.stat-label {
+  font-size: 11px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 31px;
+  line-height: 1.05;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  margin-top: 9px;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  overflow-wrap: anywhere;
+}
+
+/* Paired values like "248 / 143" need the room a single count does not. */
+.stat-value.sm {
+  font-size: 25px;
+}
+
+.stat-value.bad {
+  color: var(--danger);
+}
+
+.stat-value.zero {
+  color: var(--faint);
+}
+
+.stat-note {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.stat-note.pos {
+  color: var(--pos);
+  font-weight: 500;
+}
+
+.stat-note.bad {
+  color: var(--danger);
+  font-weight: 500;
+}
+
+/* ── trend ─────────────────────────────────────────────────────────────── */
+
+.chart-wrap {
+  position: relative;
+}
+
+.chart-peak {
+  position: absolute;
+  top: -2px;
+  left: 0;
+  font-size: 11px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Quarter gridlines, so a bar reads as a value and not only as a silhouette. */
+.chart {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 128px;
+  margin-top: 16px;
+  background:
+    linear-gradient(to top, transparent 0, transparent calc(25% - 1px), var(--rule) 25%, transparent calc(25% + 1px)),
+    linear-gradient(to top, transparent 0, transparent calc(50% - 1px), var(--rule) 50%, transparent calc(50% + 1px)),
+    linear-gradient(to top, transparent 0, transparent calc(75% - 1px), var(--rule) 75%, transparent calc(75% + 1px));
+}
+
+.chart .col {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+  min-width: 0;
+}
+
+.chart .col span {
+  display: block;
+  width: 100%;
+  background: var(--bar);
+}
+
+.chart .col:hover span,
+.chart .col.peak span {
+  background: var(--accent);
+}
+
+/* Same gap as the chart, so every label sits under its own bar. */
+.chart-axis {
+  display: flex;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 8px;
+  border-top: 1px solid var(--edge);
+  padding-top: 7px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-axis span {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.chart-axis span:first-child {
+  text-align: left;
+}
+
+.chart-axis span:last-child {
+  text-align: right;
+}
+
+/* Past ten buckets the per-bar labels collide, so only the ends are marked. */
+.chart-axis.sparse {
+  gap: 0;
+  justify-content: space-between;
+}
+
+.chart-axis.sparse span {
+  flex: none;
+}
+
+/* ── ranked list ───────────────────────────────────────────────────────── */
+
+.admin table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ranks td {
+  padding: 9px 18px;
+  vertical-align: middle;
+  font-size: 13px;
+}
+
+.ranks tr:nth-child(even) {
+  background: var(--zebra);
+}
+
+.ranks tr:hover {
+  background: var(--hover);
+}
+
+.r-label {
+  max-width: 1px;
+  width: 99%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The width lives on the rail, not on the cell. In an auto-layout table a cell
+   whose content can shrink to nothing loses its declared width to the label
+   column next door, which collapsed every bar to a couple of pixels. Giving the
+   rail a real width makes the column at least that wide by construction. */
+.r-track {
+  width: 1%;
+  padding-left: 14px;
+  padding-right: 14px;
+}
+
+.r-track i {
+  display: block;
+  width: 88px;
+  height: 9px;
+  background: var(--bar-bg);
+}
+
+.r-track i b {
+  display: block;
+  height: 100%;
+  background: var(--bar);
+}
+
+.r-track i b.lead {
+  background: var(--accent);
+}
+
+.r-value {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+  font-weight: 500;
+  padding-left: 0;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+.r-share {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+  color: var(--muted);
+  font-size: 12px;
+  padding-left: 12px;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* ── device / browser / system, three lists in one panel ───────────────── */
+
+.triple {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.triple > div {
+  border-left: 1px solid var(--rule);
+  min-width: 0;
+}
+
+.triple > div:first-child {
+  border-left: 0;
+}
+
+.triple h4 {
+  margin: 0;
+  padding: 11px 14px 8px;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.triple .ranks td {
+  padding: 7px 14px;
+  font-size: 12px;
+}
+
+.triple .r-track {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.triple .r-track i {
+  width: 40px;
+}
+
+/* ── data table ────────────────────────────────────────────────────────── */
+
+table.data {
+  font-size: 13px;
+}
+
+table.data thead th {
+  text-align: left;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--head);
+  padding: 9px 18px;
+  border-bottom: 1px solid var(--edge);
+  position: sticky;
+  top: var(--bar-h);
+  z-index: 5;
+}
+
+table.data td {
+  padding: 9px 18px;
+}
+
+/* Issue rows come in pairs (the row, then its hidden detail), so the stripe
+   lands on every fourth child rather than every second. */
+table.data tbody tr:nth-child(4n + 3) {
+  background: var(--zebra);
+}
+
+table.data.plain tbody tr:nth-child(4n + 3) {
+  background: none;
+}
+
+table.data.plain tbody tr:nth-child(even) {
+  background: var(--zebra);
+}
+
+table.data.plain tbody tr:hover {
+  background: var(--hover);
+}
+
+table.data tbody tr.click {
+  cursor: pointer;
+}
+
+table.data tbody tr.click:hover {
+  background: var(--hover);
+}
+
+table.data tbody tr.detail:hover {
+  background: none;
+}
+
+.admin td.r,
+.admin th.r {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+.admin td.date {
+  color: var(--muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin td.trunc {
+  max-width: 1px;
+  width: 99%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin td.seg {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.admin tr.off td {
+  color: var(--faint);
+}
+
+.admin tr.off td.trunc {
+  text-decoration: line-through;
+  text-decoration-color: var(--faint);
+}
+
+/* ── issue detail ──────────────────────────────────────────────────────── */
+
+.detail-cell {
+  padding: 0;
+  background: var(--zebra);
+}
+
+.detail-box {
+  border-left: 3px solid var(--accent);
+  padding: 13px 18px;
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+.detail-line {
+  display: flex;
+  gap: 16px;
+}
+
+.detail-line span:first-child {
+  width: 80px;
+  flex: none;
+  color: var(--muted);
+}
+
+.detail-line span:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.detail-excerpt {
+  color: var(--muted);
+  margin: 11px 0 0;
+  max-width: 70ch;
+}
+
+/* ── flags, filter, notes ──────────────────────────────────────────────── */
+
+.flag {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 1px 6px;
+  font-weight: 500;
+  line-height: 1.5;
+  border: 1px solid currentColor;
+}
+
+.flag.sent {
+  color: var(--pos);
+}
+
+.flag.draft {
+  color: var(--faint);
+}
+
+.flag.gone {
+  color: var(--danger);
+}
+
+.filter {
+  width: 100%;
+  font: inherit;
+  font-size: 13px;
+  padding: 9px 12px;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--edge);
+}
+
+.filter:focus {
+  outline: 0;
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.filter::placeholder {
+  color: var(--faint);
+}
+
+.list-foot {
+  padding: 11px 18px;
+  border-top: 1px solid var(--rule);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.list-foot button {
+  font: inherit;
+  font-size: 12px;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--accent);
+  cursor: pointer;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.note {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 16px 0 0;
+}
+
+.panel-body > .note:first-child {
+  margin-top: 0;
+}
+
+/* An empty list drops a note where a table would have gone, and a flush body
+   has no padding of its own to give it. */
+.panel-body.flush > .note {
+  margin: 0;
+  padding: 16px 18px;
+}
+
+.note.bad {
+  color: var(--danger);
+}
+
+.steps {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 12px 0 0;
+  padding-left: 20px;
+  list-style: decimal;
+}
+
+.steps li + li {
+  margin-top: 7px;
+}
+
+/* ── phone ─────────────────────────────────────────────────────────────── */
+
+/* Four nav items no longer fit beside the wordmark on a phone — the same thing
+   that made the public Header stack below `sm`. Wide tables scroll inside their
+   own panel rather than pushing the page sideways, and the sticky header goes
+   with them: sticky inside a scroll container pins to the container, not the
+   viewport, which reads as a bug rather than a feature. */
+@media (max-width: 640px) {
+  .admin-bar-inner,
+  .admin-main,
+  .admin-footer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .admin-bar-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding-bottom: 10px;
+  }
+
+  .admin-tools {
+    flex-wrap: wrap;
+    gap: 8px 16px;
+  }
+
+  .admin-tabs {
+    gap: 18px;
+  }
+
+  .admin-ranges {
+    gap: 14px;
+  }
+
+  .panel-body.flush {
+    overflow-x: auto;
+  }
+
+  table.data {
+    min-width: 520px;
+  }
+
+  table.data thead th {
+    position: static;
+  }
+
+  .triple {
+    grid-template-columns: 1fr;
+  }
+
+  .triple > div {
+    border-left: 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .triple > div:first-child {
+    border-top: 0;
+  }
+}
