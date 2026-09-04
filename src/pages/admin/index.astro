@@ -247,22 +247,49 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   // Pages tab — Cloudflare Web Analytics
   // ---------------------------------------------------------------------
 
-  function setupNotice(reason: string): HTMLElement {
+  /**
+   * What is actually missing, and only that.
+   *
+   * The old version of this listed four steps for every failure, and the second
+   * one told you to paste a beacon token into BaseHead.astro. That is a trap:
+   * yoonchulyi.com runs Web Analytics on automatic injection, so Cloudflare
+   * already adds the beacon at the edge, and a second one would count every
+   * pageview twice. Collection and reading are separate problems; this panel is
+   * only ever about the reading half.
+   */
+  function setupNotice(reason: string, missing: string[]): HTMLElement {
     const root = panel('Not configured yet');
     const box = body();
     box.append(el('p', 'note', reason));
 
     const steps = el('ol', 'steps');
-    for (const step of [
-      'Add yoonchulyi.com under Web Analytics in the Cloudflare dashboard.',
-      'Put its beacon token in WEB_ANALYTICS_TOKEN in src/components/BaseHead.astro.',
-      'Create an API token with Account · Account Analytics · Read.',
-      'wrangler secret put CF_ANALYTICS_TOKEN',
-    ]) {
-      steps.append(el('li', '', step));
+    if (missing.includes('CF_ACCOUNT_ID')) {
+      steps.append(
+        el('li', '', 'Set CF_ACCOUNT_ID under [vars] in wrangler.toml, then deploy.'),
+      );
     }
-
+    if (missing.includes('CF_ANALYTICS_TOKEN')) {
+      for (const step of [
+        'Create a Cloudflare API token scoped to Account · Account Analytics · Read.',
+        'From the repo root, run: wrangler secret put CF_ANALYTICS_TOKEN',
+        'Reload this page. A secret takes effect immediately — no deploy needed.',
+      ]) {
+        steps.append(el('li', '', step));
+      }
+    }
     box.append(steps);
+
+    box.append(
+      el(
+        'p',
+        'note',
+        'Collection is a separate thing and is already running: Cloudflare injects the ' +
+          'beacon at the edge for yoonchulyi.com. WEB_ANALYTICS_TOKEN in BaseHead.astro ' +
+          'stays empty on purpose — filling it in puts a second beacon on every page and ' +
+          'counts every view twice.',
+      ),
+    );
+
     root.append(box);
     return root;
   }
@@ -458,7 +485,14 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     if (!data) return;
 
     if (!data.configured) {
-      target.replaceChildren(setupNotice(data.reason ?? 'No credentials.'));
+      // A Worker older than this page would not send `missing`; the token is the
+      // half that is normally absent, so that is the safer thing to assume.
+      const missing: string[] = data.missing?.length
+        ? data.missing
+        : ['CF_ANALYTICS_TOKEN'];
+      target.replaceChildren(
+        setupNotice(data.reason ?? 'No credentials.', missing),
+      );
       status.className = 'note bad';
       status.textContent = 'Cloudflare Web Analytics is not wired up yet.';
       return;

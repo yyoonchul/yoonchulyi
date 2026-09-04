@@ -30,10 +30,18 @@ const ogImageUrl = new URL(image, siteUrl);
 const jsonLdItems = Array.isArray(jsonLd) ? jsonLd : [jsonLd];
 
 // Cloudflare Web Analytics, which is where the /admin traffic tab gets its
-// numbers. The token is public by design — it ships in the HTML of every page
-// it measures — so it lives here rather than in a build secret, and while it
-// is empty no beacon is emitted at all. Annotated as a string so that filling
-// it in stays a one-line change.
+// numbers.
+//
+// This is empty on purpose, and empty is the finished state. yoonchulyi.com is
+// set to "Enable — the JS snippet will be automatically injected", so
+// Cloudflare adds beacon.min.js at the edge on every HTML response it serves a
+// browser; the page we build ships no beacon of its own and does not need to.
+// Putting a token here would add a second beacon and count every pageview
+// twice. It is only worth filling in if the site ever moves to "Enable with JS
+// Snippet installation", or off Cloudflare's proxy entirely.
+//
+// (Curl and other non-browser clients see no beacon — injection skips them.
+// That absence is not evidence the beacon is missing; check in a browser.)
 //
 // The admin pages are left out: they are the one corner of the site whose
 // traffic is me looking at the traffic.

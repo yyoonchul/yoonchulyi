@@ -335,12 +335,21 @@ async function handleAdminTraffic(request: Request, env: Env, url: URL): Promise
   const asked = url.searchParams.get('range') ?? '7d';
   const range: RumRange = asked in RUM_RANGES ? (asked as RumRange) : '7d';
 
-  if (!env.CF_ANALYTICS_TOKEN || !env.CF_ACCOUNT_ID) {
+  // Naming both when only one is missing sends you looking for the wrong thing:
+  // the account id is a var in wrangler.toml and the token is a secret, so the
+  // two are fixed in different places and only one of them needs a deploy.
+  const missing = [
+    env.CF_ACCOUNT_ID ? '' : 'CF_ACCOUNT_ID',
+    env.CF_ANALYTICS_TOKEN ? '' : 'CF_ANALYTICS_TOKEN',
+  ].filter(Boolean);
+
+  if (missing.length) {
     return withAdminHeaders(
       json({
         configured: false,
         range,
-        reason: 'The Worker has no CF_ANALYTICS_TOKEN or CF_ACCOUNT_ID.',
+        missing,
+        reason: `The Worker is missing ${missing.join(' and ')}.`,
       }),
     );
   }
