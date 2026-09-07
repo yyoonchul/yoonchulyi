@@ -1,0 +1,19 @@
+{
+  "lead": "Maybe We Shouldn't Be Reviewing All This Code",
+  "subject": {
+    "en": "Rachel Laycock calls for rethinking AI code review",
+    "ko": "Rachel Laycock, AI 코드 리뷰를 설계와 자동 검사부터 바꾸자"
+  },
+  "tldr": {
+    "en": [
+      "Thoughtworks CTO Rachel Laycock argues for moving feedback into design, pairing, and automated checks while reserving human review for high-consequence changes.",
+      "WikiSkill reports that compiling agent experience into a persistent wiki improves skill evolution and lets smaller models with evolved skills outperform larger models without them.",
+      "Lingxi Li reports using Grok Bot to manage more than 200 cloud agents, with a shared Notion database tracking PR status across context windows."
+    ],
+    "ko": [
+      "Thoughtworks CTO Rachel Laycock은 설계·페어링·자동 검사로 피드백을 앞당기고 사람의 코드 검토는 영향이 큰 변경에 집중하자고 제안한다.",
+      "WikiSkill 연구진은 에이전트 경험을 위키에 축적해 스킬을 개선하면 작은 모델도 스킬 없는 더 큰 모델을 앞설 수 있다고 보고한다.",
+      "Lingxi Li는 Grok Bot과 공유 Notion 데이터베이스로 PR 상태를 추적하며 클라우드 에이전트 관리 규모를 15개에서 200개 이상으로 늘렸다고 밝혔다."
+    ]
+  }
+}
