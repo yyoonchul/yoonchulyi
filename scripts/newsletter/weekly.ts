@@ -21,6 +21,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { XMLParser } from 'fast-xml-parser';
 import { htmlToText, renderWeeklyDigestHtml } from './email.ts';
+import { weeklySubject } from './subject.ts';
 import { collectWeek, resolveWeekWindow, type DigestDay, type WeekWindow } from './digest.ts';
 import {
   LANGUAGES,
@@ -219,10 +220,10 @@ function build(
   window: WeekWindow,
   headline: WeeklyHeadline,
 ): { html: string; subject: string } {
-  const subject = headline.subject[language];
+  const subject = weeklySubject(language, window, headline.subject[language]);
   const html = renderWeeklyDigestHtml({
     language,
-    subject,
+    subject: headline.subject[language],
     tldr: headline.tldr[language],
     days,
     window,

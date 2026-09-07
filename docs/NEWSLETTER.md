@@ -25,6 +25,11 @@ feeds as already sent without emailing — the way to skip a backlog.
 It runs in two deterministic phases with one agent step between them. The agent
 writes the subject line and three TL;DR lines. Nothing else.
 
+The sender prefixes the email subject with `[9월 1주차 아티클 모음]` or
+`[Sep Week 1 Article Roundup]`. The covered week's Thursday determines its
+month and week number (the first Thursday is week 1), so August 31–September 6
+is September week 1. The body heading keeps the original editorial headline.
+
 ```
 Mac      plan   collect the week's summaries → .newsletter-weekly/<monday>/
   ↓      agent  reads brief.md, writes headline.json (weekly-letter skill)
