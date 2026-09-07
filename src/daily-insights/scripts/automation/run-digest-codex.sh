@@ -103,7 +103,7 @@ while true; do
     set +e
     run_with_timeout "${CODEX_TIMEOUT_SECONDS}" \
       codex exec \
-        -c 'model_reasoning_effort="high"' \
+        "${DAILY_INSIGHTS_CODEX_ARGS[@]}" \
         -C "${SITE_ROOT}" \
         --dangerously-bypass-approvals-and-sandbox \
         "${PROMPT}"
@@ -113,7 +113,7 @@ while true; do
     set +e
     run_with_timeout "${CODEX_TIMEOUT_SECONDS}" \
       codex exec \
-        -c 'model_reasoning_effort="high"' \
+        "${DAILY_INSIGHTS_CODEX_ARGS[@]}" \
         -C "${SITE_ROOT}" \
         -s "${CODEX_SANDBOX_MODE}" \
         "${PROMPT}"

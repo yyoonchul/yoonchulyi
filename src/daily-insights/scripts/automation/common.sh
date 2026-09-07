@@ -7,6 +7,9 @@ REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../.." && pwd)"
 # live there, not under src/daily-insights.
 SITE_ROOT="$(cd -- "${REPO_ROOT}/../.." && pwd)"
 
+# Shared model settings for Daily Digest and Weekly Letter Codex runs.
+DAILY_INSIGHTS_CODEX_ARGS=(--model gpt-5.6-terra -c 'model_reasoning_effort="medium"')
+
 export TZ="${DIGEST_TIMEZONE:-Asia/Seoul}"
 
 LOG_ROOT="${DIGEST_LOG_ROOT:-${HOME}/Library/Logs/daily-insights}"
