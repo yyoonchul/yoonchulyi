@@ -11,6 +11,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=./common.sh
 source "${SCRIPT_DIR}/common.sh"
+# shellcheck source=./node-env.sh
+source "${SCRIPT_DIR}/node-env.sh"
 
 ENGINE="${1:-codex}"
 case "${ENGINE}" in
@@ -23,6 +25,7 @@ esac
 
 acquire_lock "weekly-letter-${ENGINE}"
 run_log_init "weekly-letter" "${ENGINE}"
+require_node_runtime
 require_command npx
 require_command "${ENGINE}"
 
