@@ -99,6 +99,7 @@ while true; do
   print_header "Running digest with Codex skill (attempt ${attempt}/${CODEX_RETRY_MAX_ATTEMPTS})"
   run_log_event "Running digest skill" "Engine: \`codex\`"$'\n'"Attempt: \`${attempt}/${CODEX_RETRY_MAX_ATTEMPTS}\`."
 
+  temp_out=$(mktemp)
   if [[ "${CODEX_BYPASS_APPROVALS_AND_SANDBOX}" == "true" ]]; then
     set +e
     run_with_timeout "${CODEX_TIMEOUT_SECONDS}" \
@@ -106,8 +107,8 @@ while true; do
         "${DAILY_INSIGHTS_CODEX_ARGS[@]}" \
         -C "${SITE_ROOT}" \
         --dangerously-bypass-approvals-and-sandbox \
-        "${PROMPT}"
-    run_status="$?"
+        "${PROMPT}" 2>&1 | tee "${temp_out}"
+    run_status="${PIPESTATUS[0]}"
     set -e
   else
     set +e
@@ -116,10 +117,35 @@ while true; do
         "${DAILY_INSIGHTS_CODEX_ARGS[@]}" \
         -C "${SITE_ROOT}" \
         -s "${CODEX_SANDBOX_MODE}" \
-        "${PROMPT}"
-    run_status="$?"
+        "${PROMPT}" 2>&1 | tee "${temp_out}"
+    run_status="${PIPESTATUS[0]}"
     set -e
   fi
+
+  if [[ "${run_status}" -ne 0 ]] && grep -qiE "usage limit|rate limit|quota|429 too many" "${temp_out}"; then
+    print_header "Codex usage limit reached. Falling back to Antigravity (agy)..."
+    run_log_event "Codex limit reached" "Falling back to Antigravity (agy)."
+    if [[ "${CODEX_BYPASS_APPROVALS_AND_SANDBOX}" == "true" ]]; then
+      set +e
+      run_with_timeout "${CODEX_TIMEOUT_SECONDS}" \
+        agy \
+            --add-dir "${SITE_ROOT}" \
+            --dangerously-skip-permissions \
+            --print="${PROMPT}"
+      run_status="$?"
+      set -e
+    else
+      set +e
+      run_with_timeout "${CODEX_TIMEOUT_SECONDS}" \
+        agy \
+            --add-dir "${SITE_ROOT}" \
+            --sandbox \
+            --print="${PROMPT}"
+      run_status="$?"
+      set -e
+    fi
+  fi
+  rm -f "${temp_out}"
 
   if [[ "${run_status}" -eq 0 ]]; then
     run_log_event "Digest skill completed" "Attempt: \`${attempt}\`."

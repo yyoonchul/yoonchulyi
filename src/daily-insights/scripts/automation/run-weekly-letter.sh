@@ -123,21 +123,44 @@ else
 
     set +e
     if [[ "${ENGINE}" == "codex" ]]; then
+      temp_out=$(mktemp)
       if [[ "${CODEX_BYPASS_APPROVALS_AND_SANDBOX}" == "true" ]]; then
         run_with_timeout "${AGENT_TIMEOUT_SECONDS}" \
           codex exec \
             "${DAILY_INSIGHTS_CODEX_ARGS[@]}" \
             -C "${SITE_ROOT}" \
             --dangerously-bypass-approvals-and-sandbox \
-            "${PROMPT}"
+            "${PROMPT}" 2>&1 | tee "${temp_out}"
+        run_status="${PIPESTATUS[0]}"
       else
         run_with_timeout "${AGENT_TIMEOUT_SECONDS}" \
           codex exec \
             "${DAILY_INSIGHTS_CODEX_ARGS[@]}" \
             -C "${SITE_ROOT}" \
             -s "${CODEX_SANDBOX_MODE}" \
-            "${PROMPT}"
+            "${PROMPT}" 2>&1 | tee "${temp_out}"
+        run_status="${PIPESTATUS[0]}"
       fi
+      if [[ "${run_status}" -ne 0 ]] && grep -qiE "usage limit|rate limit|quota|429 too many" "${temp_out}"; then
+        print_header "Codex usage limit reached. Falling back to Antigravity (agy)..."
+        run_log_event "Codex limit reached" "Falling back to Antigravity (agy)."
+        if [[ "${CODEX_BYPASS_APPROVALS_AND_SANDBOX}" == "true" ]]; then
+          run_with_timeout "${AGENT_TIMEOUT_SECONDS}" \
+            agy \
+                --add-dir "${SITE_ROOT}" \
+                --dangerously-skip-permissions \
+                --print="${PROMPT}"
+          run_status="$?"
+        else
+          run_with_timeout "${AGENT_TIMEOUT_SECONDS}" \
+            agy \
+                --add-dir "${SITE_ROOT}" \
+                --sandbox \
+                --print="${PROMPT}"
+          run_status="$?"
+        fi
+      fi
+      rm -f "${temp_out}"
     else
       (cd "${SITE_ROOT}" && run_with_timeout "${AGENT_TIMEOUT_SECONDS}" \
         claude \
@@ -145,8 +168,8 @@ else
           --permission-mode dontAsk \
           --add-dir "${SITE_ROOT}" \
           -p "${PROMPT}")
+      run_status="$?"
     fi
-    run_status="$?"
     set -e
 
     # The agent's exit code is not the contract — the file it wrote is. A

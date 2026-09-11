@@ -2,7 +2,6 @@
 
 이 폴더는 macOS `launchd` 기반으로 daily insights 작업을 매일 자동 실행하기 위한 스크립트를 제공합니다.
 
-권장 방식은 `daily-flow-launchd.sh`로 **하나의 스케줄**만 등록하는 것입니다. daily flow는 기본적으로 `Digest` shortcut을 먼저 실행해 iCloud inbox를 repo inbox로 옮긴 뒤, `digest -> card-news -> daily-insights-publish` 순서로 실행합니다.
 
 ## 포함된 스크립트
 
@@ -14,7 +13,6 @@
 - `run-digest-claude.sh`: Claude Code digest 스킬 버전 실행. 커밋/푸시는 하지 않습니다.
 - `run-daily-insights-publish.sh`: digest/card news 산출물을 한 번에 커밋/푸시해 GitHub Pages 배포를 트리거합니다.
 - `digest-launchd.sh`: 스케줄 설정/켜기/끄기/상태/즉시실행
-- `cardnews-launchd.sh`: card news 개별 스케줄 설정/켜기/끄기/상태/즉시실행
 - `run-weekly-letter-codex.sh` / `run-weekly-letter-claude.sh`: 주간 뉴스레터 발송. 지난 한 주 요약을 모으고, 에이전트가 `weekly-letter` 스킬로 제목·TL;DR만 쓰고, 스크립트가 Resend로 보냅니다.
 - `run-weekly-letter.sh`: 주간 뉴스레터 공통 구현. 직접 실행보다 위 엔진별 래퍼 사용을 권장합니다.
 - `weekly-letter-launchd.sh`: 주간(기본 월요일 08:30) 스케줄 설정/켜기/끄기/상태/즉시실행. 자세한 내용은 [docs/NEWSLETTER.md](../../../../docs/NEWSLETTER.md).
@@ -24,7 +22,6 @@
 ## 스킬 위치
 
 모든 스킬은 레포 루트의 `.claude/skills/`(Claude Code)와 `.codex/skills/`(Codex)에
-있습니다. `digest`, `card-news`, `daily-insights-publish`, `weekly-letter`,
 `weekly-letter-send` 다섯 개입니다.
 
 스킬 안의 경로는 **레포 루트 기준**입니다(`src/daily-insights/content/inbox.md`).
@@ -63,7 +60,6 @@ resilient 모드는 `StartCalendarInterval` 대신 `StartInterval`을 사용합�
 ./scripts/automation/daily-flow-launchd.sh setup claude 08:30
 ```
 
-주의: `daily-flow`, `digest`, `cardnews` 스케줄을 동시에 켜면 같은 인박스를 중복 처리하거나 stale digest로 card news를 만들 수 있습니다. 보통 `daily-flow` 하나만 활성화하세요.
 
 ## Daily Flow 실행 순서
 
@@ -74,7 +70,6 @@ resilient 모드는 `StartCalendarInterval` 대신 `StartInterval`을 사용합�
 5. digest 실패 시 local inbox를 백업 상태로 복원하고 card news를 실행하지 않습니다.
 6. digest 성공 시 local inbox를 명시적으로 비웁니다.
 7. 오늘 digest 파일이 새로 생성되었거나 변경된 것을 검증합니다.
-8. card news 스킬을 실행해 카드뉴스, sidecar JSON, public cardnews URL 자산을 생성합니다.
 9. `daily-insights-publish` 단계에서 digest와 card news 산출물을 한 번에 커밋/푸시합니다.
 
 ## Resilient Daily Flow 동작
@@ -158,9 +153,6 @@ DAILY_FLOW_LAUNCHD_RESILIENT_INTERVAL_SECONDS=600 \
   - `content/YYYY/MM/DD.md` (오늘 날짜)
   - `content/index.json`
   - `content/inbox.md`
-  - `card-news/article-headers/YYYY/MM/DD.json`
-  - `card-news/queries/YYYY/MM/DD.json`
-  - `public/daily-insights/YYYY/MM/DD/cardnews/`
 - 커밋 메시지: `Publish daily insight for YYYY-MM-DD`
 - 푸시: `origin`의 현재 브랜치(`HEAD:<current-branch>`)
 

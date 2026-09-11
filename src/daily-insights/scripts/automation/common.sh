@@ -410,10 +410,7 @@ run_daily_insights_publish_commit_and_push() {
   for path in \
     "${digest_relative_path}" \
     "content/index.json" \
-    "content/inbox.md" \
-    "card-news/article-headers/${date_path}.json" \
-    "card-news/queries/${date_path}.json" \
-    "../../public/daily-insights/${date_path}/cardnews"; do
+    "content/inbox.md"; do
     if [[ -e "${REPO_ROOT}/${path}" ]]; then
       git -C "${REPO_ROOT}" add "${path}"
       staged_any="1"
