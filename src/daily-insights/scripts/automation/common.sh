@@ -394,6 +394,9 @@ run_git_commit_and_push() {
   print_header "Committing digest changes"
   git -C "${REPO_ROOT}" commit -m "${commit_message}"
 
+  print_header "Pulling remote changes before push"
+  git -C "${REPO_ROOT}" pull --rebase "${DIGEST_PUSH_REMOTE}" "${DIGEST_PUSH_BRANCH}"
+
   print_header "Pushing to ${DIGEST_PUSH_REMOTE} ${DIGEST_PUSH_BRANCH}"
   git -C "${REPO_ROOT}" push "${DIGEST_PUSH_REMOTE}" "HEAD:${DIGEST_PUSH_BRANCH}"
 }
@@ -424,6 +427,9 @@ run_daily_insights_publish_commit_and_push() {
 
   print_header "Committing daily insight publish changes"
   git -C "${REPO_ROOT}" commit -m "${commit_message}"
+
+  print_header "Pulling remote changes before push"
+  git -C "${REPO_ROOT}" pull --rebase "${DIGEST_PUSH_REMOTE}" "${DIGEST_PUSH_BRANCH}"
 
   print_header "Pushing to ${DIGEST_PUSH_REMOTE} ${DIGEST_PUSH_BRANCH}"
   git -C "${REPO_ROOT}" push "${DIGEST_PUSH_REMOTE}" "HEAD:${DIGEST_PUSH_BRANCH}"
