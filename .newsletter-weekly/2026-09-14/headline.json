@@ -1,0 +1,19 @@
+{
+  "lead": "Apple's Siri AI Can Be Swapped Out for Claude, ChatGPT, Code Shows",
+  "subject": {
+    "en": "Apple Opens Siri to Claude and ChatGPT",
+    "ko": "Apple, Siri에 Claude와 ChatGPT 교체 경로를 열다"
+  },
+  "tldr": {
+    "en": [
+      "Apple’s unreleased frameworks point to Siri models that can be replaced by Claude or ChatGPT while Siri keeps the interface.",
+      "Google Labs launched CC, a shared AI agent for up to six family members that can work across explicitly shared Gmail, Google Chat, Google Drive, and calendars.",
+      "TypeSafe AI released Jev in early access, claiming 70–500 ms software-automation responses through parallel typed probabilistic decisions."
+    ],
+    "ko": [
+      "Apple의 미공개 프레임워크는 Siri가 인터페이스를 유지한 채 Claude 또는 ChatGPT로 모델을 교체할 수 있음을 시사한다.",
+      "Google Labs는 최대 6명의 가족 구성원이 명시적으로 공유한 Gmail, Google Chat, Google Drive, 캘린더를 함께 다룰 수 있는 AI 에이전트 CC를 공개했다.",
+      "TypeSafe AI는 병렬 타입 확률적 결정을 통해 소프트웨어 자동화 응답 시간을 70~500ms로 내세운 Jev를 얼리 액세스로 선보였다."
+    ]
+  }
+}
