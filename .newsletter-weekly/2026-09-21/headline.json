@@ -1,0 +1,19 @@
+{
+  "lead": "The current balance of power in open models",
+  "subject": {
+    "en": "Chinese open models now dominate usage",
+    "ko": "중국 개방형 모델이 이용량을 주도한다"
+  },
+  "tldr": {
+    "en": [
+      "Nathan Lambert says Chinese labs lead open-weight models in capability and adoption, with Chinese models exceeding 80% of OpenRouter usage.",
+      "AX introduced a declarative platform for running isolated, stateful agent tasks at large scale with suspend-and-resume execution.",
+      "IFR counted about 7,000 humanoid robots sold for industrial and professional use in 2025, far below forecasts for the years ahead."
+    ],
+    "ko": [
+      "Nathan Lambert는 중국 연구소가 개방형 가중치 모델의 성능과 도입률에서 앞서며 OpenRouter 이용량 중 중국 모델 비중이 80%를 넘는다고 분석한다.",
+      "AX는 일시 중지와 재개가 가능한 격리형 상태 유지 에이전트 작업을 대규모로 실행하는 선언형 플랫폼을 공개했다.",
+      "IFR은 2025년 산업·전문 서비스용 휴머노이드 로봇 판매량을 약 7,000대로 집계했으며, 이는 향후 전망치보다 훨씬 낮다."
+    ]
+  }
+}
