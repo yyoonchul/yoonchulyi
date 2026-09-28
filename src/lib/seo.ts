@@ -6,6 +6,9 @@ export const WEBSITE_ID = `${SITE_URL}/#website`;
 export const DEFAULT_DESCRIPTION =
   'Yoonchul Yi is an AI product builder writing about local-first productivity, AI-native notes, Claude Code workflows, startups, and daily AI/devtools insights.';
 
+export const HOME_DESCRIPTION =
+  'I study robotics at SNU (Seoul National University), build products, and write about life, my values, and the experiences that shape me.';
+
 export const AUTHOR = {
   name: 'Yoonchul Yi',
   alternateNames: ['이윤철', 'yoonchulyi', 'yiyoonchul', 'YC'],

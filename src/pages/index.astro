@@ -5,7 +5,7 @@ import {
   createPersonSchema,
   createWebsiteSchema,
 } from '../lib/schema';
-import { AUTHOR, DEFAULT_DESCRIPTION } from '../lib/seo';
+import { AUTHOR, HOME_DESCRIPTION } from '../lib/seo';
 
 const socialLinks = [
   { label: 'LinkedIn', href: AUTHOR.linkedin },
@@ -19,14 +19,14 @@ const socialLinks = [
 
 <BaseLayout
   title="Yoonchul Yi"
-  description={DEFAULT_DESCRIPTION}
+  description={HOME_DESCRIPTION}
   canonicalPath="/"
   jsonLd={[createWebsiteSchema(), createPersonSchema()]}
 >
   <!-- About Section -->
   <section class="py-8">
     <p class="font-serif text-lg leading-relaxed text-text">
-      Hi, I'm Yoonchul Yi.
+      Hi, I'm Yoonchul Yi. {HOME_DESCRIPTION}
     </p>
   </section>
 
