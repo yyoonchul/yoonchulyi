@@ -7,7 +7,7 @@ export const DEFAULT_DESCRIPTION =
   'Yoonchul Yi is an AI product builder writing about local-first productivity, AI-native notes, Claude Code workflows, startups, and daily AI/devtools insights.';
 
 export const HOME_DESCRIPTION =
-  'I study robotics at SNU (Seoul National University), build products, and write about life, my values, and the experiences that shape me.';
+  'I study robotics at SNU, build products, and write about life, my values, and the experiences that shape me.';
 
 export const AUTHOR = {
   name: 'Yoonchul Yi',
