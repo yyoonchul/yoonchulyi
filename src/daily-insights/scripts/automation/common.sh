@@ -418,7 +418,7 @@ publish_one_pending_daily_insight() {
   local digest_relative_path="src/daily-insights/content/${date_path}.md"
   local index_relative_path="src/daily-insights/content/index.json"
   local commit_message="${DAILY_INSIGHTS_PUBLISH_COMMIT_MESSAGE:-Publish daily insight for ${date_label}}"
-  local worktree_path status attempt local_branch published_commit
+  local worktree_path status attempt local_branch published_commit publish_base
 
   local_branch="$(git -C "${SITE_ROOT}" symbolic-ref --quiet --short HEAD || true)"
   if [[ "${local_branch}" != "${DIGEST_PUSH_BRANCH}" ]]; then
@@ -443,10 +443,11 @@ publish_one_pending_daily_insight() {
       echo "ERROR: local ${DIGEST_PUSH_BRANCH} cannot fast-forward; publish remains queued." >&2
       return 1
     fi
-    if [[ "$(git -C "${SITE_ROOT}" rev-parse HEAD)" != "$(git -C "${SITE_ROOT}" rev-parse FETCH_HEAD)" ]]; then
-      echo "ERROR: local ${DIGEST_PUSH_BRANCH} has unpublished commits; publish remains queued." >&2
+    if ! git -C "${SITE_ROOT}" merge-base --is-ancestor FETCH_HEAD HEAD; then
+      echo "ERROR: local and remote ${DIGEST_PUSH_BRANCH} have diverged; publish remains queued." >&2
       return 1
     fi
+    publish_base="$(git -C "${SITE_ROOT}" rev-parse HEAD)"
     if [[ -n "$(git -C "${SITE_ROOT}" status --porcelain -- "${digest_relative_path}" "${index_relative_path}")" ]]; then
       echo "ERROR: digest or index has local edits; publish remains queued to avoid overwriting them." >&2
       return 1
@@ -454,7 +455,7 @@ publish_one_pending_daily_insight() {
 
     worktree_path="$(mktemp -d "${STATE_ROOT}/publish-worktree.XXXXXX")"
     rmdir "${worktree_path}"
-    if ! git -C "${SITE_ROOT}" worktree add --detach "${worktree_path}" FETCH_HEAD; then
+    if ! git -C "${SITE_ROOT}" worktree add --detach "${worktree_path}" "${publish_base}"; then
       return 1
     fi
 
@@ -480,10 +481,10 @@ PY
     fi
     if [[ "${status}" -eq 0 ]] && ! git -C "${worktree_path}" diff --cached --quiet; then
       git -C "${worktree_path}" commit -m "${commit_message}" || status=$?
-      if [[ "${status}" -eq 0 ]]; then
-        published_commit="$(git -C "${worktree_path}" rev-parse HEAD)"
-        git -C "${worktree_path}" push "${DIGEST_PUSH_REMOTE}" "HEAD:${DIGEST_PUSH_BRANCH}" || status=$?
-      fi
+    fi
+    if [[ "${status}" -eq 0 ]]; then
+      published_commit="$(git -C "${worktree_path}" rev-parse HEAD)"
+      git -C "${worktree_path}" push "${DIGEST_PUSH_REMOTE}" "HEAD:${DIGEST_PUSH_BRANCH}" || status=$?
     fi
 
     git -C "${SITE_ROOT}" worktree remove --force "${worktree_path}" || return 1
