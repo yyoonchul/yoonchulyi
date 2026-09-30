@@ -5,14 +5,15 @@
 
 ## 포함된 스크립트
 
-- `run-daily-flow-codex.sh`: Codex로 iCloud inbox move + digest + card news + publish 순차 실행
-- `run-daily-flow-claude.sh`: Claude Code로 iCloud inbox move + digest + card news + publish 순차 실행
+- `run-daily-flow-codex.sh`: Codex로 Discord inbox 동기화 + digest 생성 + publish 순차 실행
+- `run-daily-flow-claude.sh`: Claude Code로 Discord inbox 동기화 + digest 생성 + publish 순차 실행
 - `run-daily-flow.sh`: daily flow 공통 구현. 직접 실행보다 위 엔진별 래퍼 사용을 권장합니다.
 - `daily-flow-launchd.sh`: daily flow 스케줄 설정/켜기/끄기/상태/즉시실행
 - `run-digest-codex.sh`: Codex digest 스킬 버전 실행. 커밋/푸시는 하지 않습니다.
 - `run-digest-claude.sh`: Claude Code digest 스킬 버전 실행. 커밋/푸시는 하지 않습니다.
 - `run-daily-insights-publish.sh`: 다이제스트를 게시 대기열에 저장하고, 별도 Git worktree에서 커밋/푸시해 GitHub Pages 배포를 트리거합니다.
 - `digest-launchd.sh`: 스케줄 설정/켜기/끄기/상태/즉시실행
+- 게시까지 필요한 정기 실행에는 `daily-flow-launchd.sh`만 사용합니다. `digest-launchd.sh`는 다이제스트만 생성하고 게시하지 않으므로 별도 정기 스케줄로 등록하지 않습니다.
 - `run-weekly-letter-codex.sh` / `run-weekly-letter-claude.sh`: 주간 뉴스레터 발송. 지난 한 주 요약을 모으고, 에이전트가 `weekly-letter` 스킬로 제목·TL;DR만 쓰고, 스크립트가 Resend로 보냅니다.
 - `run-weekly-letter.sh`: 주간 뉴스레터 공통 구현. 직접 실행보다 위 엔진별 래퍼 사용을 권장합니다.
 - `weekly-letter-launchd.sh`: 주간(기본 월요일 08:30) 스케줄 설정/켜기/끄기/상태/즉시실행. 자세한 내용은 [docs/NEWSLETTER.md](../../../../docs/NEWSLETTER.md).
@@ -63,7 +64,7 @@ resilient 모드는 `StartCalendarInterval` 대신 `StartInterval`을 사용합�
 
 ## Daily Flow 실행 순서
 
-1. `Digest` shortcut을 실행해 iCloud inbox를 `content/inbox.md`로 옮기고 iCloud inbox를 비웁니다.
+1. Discord inbox를 `content/inbox.md`로 동기화합니다.
 2. 이전 실행에서 푸시하지 못한 다이제스트를 먼저 재시도합니다. 그 뒤 local inbox에 처리할 URL이 있는지 확인합니다.
 3. 로컬 `HEAD`의 임시 worktree에 inbox를 복사한 뒤 그 안에서 digest 스킬을 실행합니다.
 4. digest 실패 시 원래 inbox를 그대로 두고 임시 worktree를 제거합니다.
@@ -92,11 +93,11 @@ DAILY_FLOW_LAUNCHD_RESILIENT_INTERVAL_SECONDS=600 \
   ./scripts/automation/daily-flow-launchd.sh setup-resilient codex
 ```
 
-## Shortcut 선행 동기화 모드 (Codex / Claude Code)
+## Digest 단독 실행 시 Shortcut 선행 동기화
 
-`run-daily-flow.sh`, `run-digest-codex.sh`, `run-digest-claude.sh`는 기본적으로 pre-sync shortcut 실행을 지원합니다. launchd로 등록한 daily flow는 이 모드가 기본으로 켜집니다.
+`run-digest-codex.sh`, `run-digest-claude.sh`를 단독 실행할 때는 pre-sync shortcut으로 iCloud inbox를 옮길 수 있습니다. daily flow는 Discord inbox를 동기화하고 digest runner의 선행 동기화를 건너뜁니다.
 
-- daily-flow launchd 기본 shortcut 이름: `Digest`
+- 기본 shortcut 이름: `Digest`
 - 기본 지연: `0`초
 - 기본 shortcut 타임아웃: `300`초
 
@@ -105,7 +106,7 @@ DAILY_FLOW_LAUNCHD_RESILIENT_INTERVAL_SECONDS=600 \
 1. `shortcuts run "Digest"`
 2. 로컬 inbox 상태 확인. 같은 날짜에 이미 실행된 적이 있어도 inbox에 새 URL이 있으면 계속 진행합니다.
 3. (선택) 지연 후 선택한 엔진의 digest 실행
-4. digest 생성 후 daily flow가 card news와 publish 단계를 이어서 실행
+4. digest 단독 실행은 게시하지 않습니다. 게시까지 필요하면 daily flow를 사용합니다.
 
 이 모드가 활성화되면 해당 실행에서는 스크립트의 직접 iCloud inbox sync/clear를 건너뜁니다.
 즉, iCloud 접근은 shortcut에 맡기고, digest 본 처리는 로컬 `content/inbox.md`를 사용합니다.
@@ -119,20 +120,17 @@ DAILY_FLOW_LAUNCHD_RESILIENT_INTERVAL_SECONDS=600 \
   - `DIGEST_PRE_SYNC_SHORTCUT_NAME`
   - `DIGEST_PRE_SYNC_DELAY_SECONDS`
   - `DIGEST_PRE_SYNC_SHORTCUT_TIMEOUT_SECONDS`
-  - daily-flow launchd plist 생성 시 기본값을 바꾸려면 각각 `DAILY_FLOW_LAUNCHD_PRE_SYNC_SHORTCUT_NAME`, `DAILY_FLOW_LAUNCHD_PRE_SYNC_DELAY_SECONDS`, `DAILY_FLOW_LAUNCHD_PRE_SYNC_SHORTCUT_TIMEOUT_SECONDS`를 사용하세요.
 
 ## 켜기 / 끄기
 
-### 끄기
+### Daily flow 끄기
 ```bash
-./scripts/automation/disable-digest-schedule.sh codex
-./scripts/automation/disable-digest-schedule.sh claude
+./scripts/automation/daily-flow-launchd.sh disable codex
 ```
 
-### 다시 켜기
+### Daily flow 다시 켜기
 ```bash
-./scripts/automation/digest-launchd.sh enable codex
-./scripts/automation/digest-launchd.sh enable claude
+./scripts/automation/daily-flow-launchd.sh enable codex
 ```
 
 ### 상태 확인

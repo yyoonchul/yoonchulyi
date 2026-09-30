@@ -190,18 +190,20 @@ enable_job() {
   plist="$(plist_for "${engine}")"
   [[ -f "${plist}" ]] || die "plist not found: ${plist}"
 
+  launchctl enable "gui/${UID}/${label}" >/dev/null 2>&1 || true
   launchctl bootout "gui/${UID}" "${plist}" >/dev/null 2>&1 || true
   launchctl bootstrap "gui/${UID}" "${plist}"
-  launchctl enable "gui/${UID}/${label}" >/dev/null 2>&1 || true
 }
 
 disable_job() {
   local engine="$1"
-  local plist
+  local label plist
 
+  label="$(label_for "${engine}")"
   plist="$(plist_for "${engine}")"
   [[ -f "${plist}" ]] || die "plist not found: ${plist}"
   launchctl bootout "gui/${UID}" "${plist}" >/dev/null 2>&1 || true
+  launchctl disable "gui/${UID}/${label}"
 }
 
 status_job() {
