@@ -418,11 +418,37 @@ publish_one_pending_daily_insight() {
   local digest_relative_path="src/daily-insights/content/${date_path}.md"
   local index_relative_path="src/daily-insights/content/index.json"
   local commit_message="${DAILY_INSIGHTS_PUBLISH_COMMIT_MESSAGE:-Publish daily insight for ${date_label}}"
-  local worktree_path status attempt
+  local worktree_path status attempt local_branch published_commit
+
+  local_branch="$(git -C "${SITE_ROOT}" symbolic-ref --quiet --short HEAD || true)"
+  if [[ "${local_branch}" != "${DIGEST_PUSH_BRANCH}" ]]; then
+    echo "ERROR: local branch '${local_branch}' does not match publish branch '${DIGEST_PUSH_BRANCH}'." >&2
+    return 1
+  fi
+  if ! git -C "${SITE_ROOT}" diff --cached --quiet; then
+    echo "ERROR: staged local changes must be handled before publishing; publish remains queued." >&2
+    return 1
+  fi
 
   for attempt in 1 2 3; do
+    published_commit=""
     print_header "Fetching ${DIGEST_PUSH_REMOTE}/${DIGEST_PUSH_BRANCH} for ${date_path} (attempt ${attempt}/3)"
     if ! git -C "${SITE_ROOT}" fetch "${DIGEST_PUSH_REMOTE}" "${DIGEST_PUSH_BRANCH}"; then
+      return 1
+    fi
+
+    # Fast-forward leaves unrelated working-tree edits alone. If a local edit
+    # overlaps remote changes, stop before publishing anything remotely.
+    if ! git -C "${SITE_ROOT}" merge --ff-only FETCH_HEAD; then
+      echo "ERROR: local ${DIGEST_PUSH_BRANCH} cannot fast-forward; publish remains queued." >&2
+      return 1
+    fi
+    if [[ "$(git -C "${SITE_ROOT}" rev-parse HEAD)" != "$(git -C "${SITE_ROOT}" rev-parse FETCH_HEAD)" ]]; then
+      echo "ERROR: local ${DIGEST_PUSH_BRANCH} has unpublished commits; publish remains queued." >&2
+      return 1
+    fi
+    if [[ -n "$(git -C "${SITE_ROOT}" status --porcelain -- "${digest_relative_path}" "${index_relative_path}")" ]]; then
+      echo "ERROR: digest or index has local edits; publish remains queued to avoid overwriting them." >&2
       return 1
     fi
 
@@ -455,12 +481,19 @@ PY
     if [[ "${status}" -eq 0 ]] && ! git -C "${worktree_path}" diff --cached --quiet; then
       git -C "${worktree_path}" commit -m "${commit_message}" || status=$?
       if [[ "${status}" -eq 0 ]]; then
+        published_commit="$(git -C "${worktree_path}" rev-parse HEAD)"
         git -C "${worktree_path}" push "${DIGEST_PUSH_REMOTE}" "HEAD:${DIGEST_PUSH_BRANCH}" || status=$?
       fi
     fi
 
     git -C "${SITE_ROOT}" worktree remove --force "${worktree_path}" || return 1
     if [[ "${status}" -eq 0 ]]; then
+      if [[ -n "${published_commit:-}" ]]; then
+        if ! git -C "${SITE_ROOT}" merge --ff-only "${published_commit}"; then
+          echo "ERROR: remote publish succeeded, but local fast-forward failed; publish remains queued." >&2
+          return 1
+        fi
+      fi
       rm -f "${pending_path}"
       run_log_event "Publish completed" "Digest: \`content/${date_path}.md\`."
       return 0

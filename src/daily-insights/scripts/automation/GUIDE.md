@@ -150,12 +150,14 @@ DAILY_FLOW_LAUNCHD_RESILIENT_INTERVAL_SECONDS=600 \
 
 - 게시 대기 파일: `${DIGEST_STATE_ROOT:-~/Library/Application Support/daily-insights}/pending-publish/YYYY/MM/DD.md`
 - 게시 대상: `content/YYYY/MM/DD.md`와 원격 최신 상태에 날짜를 추가한 `content/index.json`
-- 생성은 로컬 `HEAD`의 임시 worktree에서, 게시는 최신 원격 브랜치의 별도 임시 worktree에서 진행하므로 로컬 작업 트리의 수정 사항과 독립적입니다.
-- 푸시가 성공해야 대기 파일을 지웁니다. 실패하면 다음 daily flow 또는 resilient 실행이 먼저 재시도합니다.
+- 생성은 로컬 `HEAD`의 임시 worktree에서, 게시는 최신 원격 브랜치의 별도 임시 worktree에서 진행합니다.
+- 게시 전 로컬 브랜치를 원격으로 fast-forward합니다. 다른 파일의 로컬 수정은 유지하고, 다이제스트나 index의 로컬 수정이 겹치면 게시를 보류합니다.
+- 스테이징된 변경이나 로컬 전용 커밋이 있으면 사용자 작업을 섞어 푸시하지 않고 게시를 보류합니다.
+- 원격 푸시 후 로컬 브랜치도 같은 게시 커밋으로 fast-forward합니다. 두 단계가 끝나야 대기 파일을 지웁니다. 실패하면 다음 daily flow 또는 resilient 실행이 먼저 재시도합니다.
 - 수동 재시도: `./scripts/automation/run-daily-insights-publish.sh --retry-pending`
 - 커밋 메시지: `Publish daily insight for YYYY-MM-DD`
 - 푸시: 기본값 `origin`의 현재 브랜치 (환경변수 `DIGEST_PUSH_REMOTE`, `DIGEST_PUSH_BRANCH`로 변경 가능)
-- 로컬 `main`은 게시 중 자동으로 이동하지 않습니다. 생성된 결과는 원격 `main`과 게시 대기열에 저장됩니다.
+- 게시 성공 후 로컬 브랜치와 원격 브랜치에 같은 다이제스트 커밋이 있습니다. 다른 파일의 미커밋 수정은 그대로 남습니다.
 
 ## Codex 권한 기본값 (현재)
 
