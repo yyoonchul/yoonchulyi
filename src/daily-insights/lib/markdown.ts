@@ -1,4 +1,5 @@
 import { createMarkdownProcessor } from '@astrojs/markdown-remark';
+import remarkGfm from 'remark-gfm';
 
 let markdownProcessorPromise:
   | ReturnType<typeof createMarkdownProcessor>
@@ -6,7 +7,10 @@ let markdownProcessorPromise:
 
 export function getDailyInsightsMarkdownProcessor() {
   if (!markdownProcessorPromise) {
-    markdownProcessorPromise = createMarkdownProcessor();
+    markdownProcessorPromise = createMarkdownProcessor({
+      gfm: false,
+      remarkPlugins: [[remarkGfm, { singleTilde: false }]],
+    });
   }
 
   return markdownProcessorPromise;
