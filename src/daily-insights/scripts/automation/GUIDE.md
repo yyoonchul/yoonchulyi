@@ -11,7 +11,7 @@
 - `daily-flow-launchd.sh`: daily flow 스케줄 설정/켜기/끄기/상태/즉시실행
 - `run-digest-codex.sh`: Codex digest 스킬 버전 실행. 커밋/푸시는 하지 않습니다.
 - `run-digest-claude.sh`: Claude Code digest 스킬 버전 실행. 커밋/푸시는 하지 않습니다.
-- `run-daily-insights-publish.sh`: digest/card news 산출물을 한 번에 커밋/푸시해 GitHub Pages 배포를 트리거합니다.
+- `run-daily-insights-publish.sh`: 다이제스트를 게시 대기열에 저장하고, 별도 Git worktree에서 커밋/푸시해 GitHub Pages 배포를 트리거합니다.
 - `digest-launchd.sh`: 스케줄 설정/켜기/끄기/상태/즉시실행
 - `run-weekly-letter-codex.sh` / `run-weekly-letter-claude.sh`: 주간 뉴스레터 발송. 지난 한 주 요약을 모으고, 에이전트가 `weekly-letter` 스킬로 제목·TL;DR만 쓰고, 스크립트가 Resend로 보냅니다.
 - `run-weekly-letter.sh`: 주간 뉴스레터 공통 구현. 직접 실행보다 위 엔진별 래퍼 사용을 권장합니다.
@@ -64,13 +64,12 @@ resilient 모드는 `StartCalendarInterval` 대신 `StartInterval`을 사용합�
 ## Daily Flow 실행 순서
 
 1. `Digest` shortcut을 실행해 iCloud inbox를 `content/inbox.md`로 옮기고 iCloud inbox를 비웁니다.
-2. local inbox에 처리할 URL이 있는지 확인합니다. 비어 있으면 digest/card news/publish를 실행하지 않고 종료합니다.
-3. local inbox를 백업합니다.
-4. digest 스킬을 실행합니다.
-5. digest 실패 시 local inbox를 백업 상태로 복원하고 card news를 실행하지 않습니다.
-6. digest 성공 시 local inbox를 명시적으로 비웁니다.
-7. 오늘 digest 파일이 새로 생성되었거나 변경된 것을 검증합니다.
-9. `daily-insights-publish` 단계에서 digest와 card news 산출물을 한 번에 커밋/푸시합니다.
+2. 이전 실행에서 푸시하지 못한 다이제스트를 먼저 재시도합니다. 그 뒤 local inbox에 처리할 URL이 있는지 확인합니다.
+3. 로컬 `HEAD`의 임시 worktree에 inbox를 복사한 뒤 그 안에서 digest 스킬을 실행합니다.
+4. digest 실패 시 원래 inbox를 그대로 두고 임시 worktree를 제거합니다.
+5. 오늘 digest 파일이 새로 생성되었거나 변경된 것을 검증합니다.
+6. digest 성공 시 결과를 게시 대기열에 저장하고 처리한 inbox 항목만 원래 inbox에서 제거합니다.
+7. `daily-insights-publish` 단계에서 최신 원격 브랜치의 별도 임시 worktree로 다이제스트와 index를 커밋/푸시합니다.
 
 ## Resilient Daily Flow 동작
 
@@ -78,7 +77,7 @@ resilient 모드는 `StartCalendarInterval` 대신 `StartInterval`을 사용합�
 
 1. launchd가 기본 600초마다 runner를 실행합니다.
 2. runner는 22:00-02:00 창 밖이면 바로 종료합니다.
-3. 해당 22:00 창에서 이미 full daily flow가 성공했으면 바로 종료합니다.
+3. 게시 대기열을 먼저 재시도합니다. 해당 22:00 창에서 이미 full daily flow가 성공했으면 그 뒤 종료합니다.
 4. 아직 성공하지 않았으면 Discord inbox를 sync합니다.
 5. local inbox에 valid URL이 없으면 다음 interval에 다시 확인합니다.
 6. valid URL이 있으면 `caffeinate -dimsu`로 full daily flow를 실행합니다.
@@ -147,14 +146,16 @@ DAILY_FLOW_LAUNCHD_RESILIENT_INTERVAL_SECONDS=600 \
 ./scripts/automation/daily-flow-launchd.sh run-now claude
 ```
 
-## 기본 동작
+## 게시와 재시도
 
-- `daily-insights-publish` 실행 성공 후 아래 파일을 커밋 대상으로 추가합니다.
-  - `content/YYYY/MM/DD.md` (오늘 날짜)
-  - `content/index.json`
-  - `content/inbox.md`
+- 게시 대기 파일: `${DIGEST_STATE_ROOT:-~/Library/Application Support/daily-insights}/pending-publish/YYYY/MM/DD.md`
+- 게시 대상: `content/YYYY/MM/DD.md`와 원격 최신 상태에 날짜를 추가한 `content/index.json`
+- 생성은 로컬 `HEAD`의 임시 worktree에서, 게시는 최신 원격 브랜치의 별도 임시 worktree에서 진행하므로 로컬 작업 트리의 수정 사항과 독립적입니다.
+- 푸시가 성공해야 대기 파일을 지웁니다. 실패하면 다음 daily flow 또는 resilient 실행이 먼저 재시도합니다.
+- 수동 재시도: `./scripts/automation/run-daily-insights-publish.sh --retry-pending`
 - 커밋 메시지: `Publish daily insight for YYYY-MM-DD`
-- 푸시: `origin`의 현재 브랜치(`HEAD:<current-branch>`)
+- 푸시: 기본값 `origin`의 현재 브랜치 (환경변수 `DIGEST_PUSH_REMOTE`, `DIGEST_PUSH_BRANCH`로 변경 가능)
+- 로컬 `main`은 게시 중 자동으로 이동하지 않습니다. 생성된 결과는 원격 `main`과 게시 대기열에 저장됩니다.
 
 ## Codex 권한 기본값 (현재)
 

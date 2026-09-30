@@ -75,6 +75,8 @@ if ! within_window; then
   exit 0
 fi
 
+"${SCRIPT_DIR}/run-daily-insights-publish.sh" --retry-pending
+
 run_window_id="$(window_id)"
 success_marker="${state_dir}/${ENGINE}-${run_window_id}.success"
 

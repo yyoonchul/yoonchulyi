@@ -29,6 +29,7 @@ DIGEST_ICLOUD_AVAILABLE="1"
 RUN_LOG_PATH=""
 RUN_LOG_FINALIZED="0"
 ACTIVE_LOCK_PATH=""
+ACTIVE_WORKTREE_PATH=""
 ICLOUD_INBOX_PATH_DEFAULT="${HOME}/Library/Mobile Documents/com~apple~CloudDocs/Shortcuts/daily-insights/inbox.md"
 ICLOUD_INBOX_PATH_WORKFLOW="${HOME}/Library/Mobile Documents/iCloud~is~workflow~my~workflows/Documents/daily-insights/inbox.md"
 # Prefer explicit override, then the Shortcuts "My Workflows" container path
@@ -141,6 +142,10 @@ run_log_finish_success() {
 
 automation_on_exit() {
   local status="$1"
+
+  if [[ -n "${ACTIVE_WORKTREE_PATH:-}" ]]; then
+    git -C "${SITE_ROOT}" worktree remove --force "${ACTIVE_WORKTREE_PATH}" || true
+  fi
 
   if [[ -n "${RUN_LOG_PATH:-}" && "${RUN_LOG_FINALIZED:-0}" != "1" ]]; then
     if [[ "${status}" -eq 0 ]]; then
@@ -375,62 +380,100 @@ sync_inbox_from_icloud() {
   run_log_event "iCloud inbox cleared" "Path: \`${source_path}\`"
 }
 
-run_git_commit_and_push() {
-  local digest_file="${REPO_ROOT}/${DIGEST_RELATIVE_PATH}"
-  local commit_message="Add daily digest for ${DIGEST_DATE}"
+PENDING_PUBLISH_ROOT="${STATE_ROOT}/pending-publish"
 
-  print_header "Staging digest files"
-  if [[ -f "${digest_file}" ]]; then
-    git -C "${REPO_ROOT}" add "${DIGEST_RELATIVE_PATH}"
+queue_daily_insights_publish() {
+  local date_path="$1"
+  local source_path="${DAILY_INSIGHTS_PUBLISH_SOURCE_ROOT:-${REPO_ROOT}}/content/${date_path}.md"
+  local pending_path="${PENDING_PUBLISH_ROOT}/${date_path}.md"
+  local temporary_path
+
+  [[ -f "${source_path}" ]] || {
+    echo "ERROR: digest not found: ${source_path}" >&2
+    return 1
+  }
+  mkdir -p "$(dirname "${pending_path}")"
+  if [[ -f "${pending_path}" ]]; then
+    if cmp -s "${source_path}" "${pending_path}"; then
+      run_log_event "Publish already queued" "Digest: \`content/${date_path}.md\`."
+      return 0
+    fi
+    echo "ERROR: a different digest is already pending for ${date_path}; publish it before queueing another." >&2
+    return 1
   fi
-  git -C "${REPO_ROOT}" add content/index.json 2>/dev/null || true
-  git -C "${REPO_ROOT}" add content/inbox.md 2>/dev/null || true
-
-  if git -C "${REPO_ROOT}" diff --cached --quiet; then
-    print_header "No staged changes. Skip commit/push."
-    return 0
+  temporary_path="$(mktemp "${pending_path}.XXXXXX")"
+  if ! cp "${source_path}" "${temporary_path}"; then
+    rm -f "${temporary_path}"
+    return 1
   fi
-
-  print_header "Committing digest changes"
-  git -C "${REPO_ROOT}" commit -m "${commit_message}"
-
-  print_header "Pulling remote changes before push"
-  git -C "${REPO_ROOT}" pull --rebase "${DIGEST_PUSH_REMOTE}" "${DIGEST_PUSH_BRANCH}"
-
-  print_header "Pushing to ${DIGEST_PUSH_REMOTE} ${DIGEST_PUSH_BRANCH}"
-  git -C "${REPO_ROOT}" push "${DIGEST_PUSH_REMOTE}" "HEAD:${DIGEST_PUSH_BRANCH}"
+  mv "${temporary_path}" "${pending_path}"
+  run_log_event "Publish queued" "Digest: \`content/${date_path}.md\`."
 }
 
-run_daily_insights_publish_commit_and_push() {
-  local date_path="${1:-$(date +%Y/%m/%d)}"
+publish_one_pending_daily_insight() {
+  local pending_path="$1"
+  local date_path="${pending_path#${PENDING_PUBLISH_ROOT}/}"
+  date_path="${date_path%.md}"
   local date_label="${date_path//\//-}"
-  local digest_relative_path="content/${date_path}.md"
+  local digest_relative_path="src/daily-insights/content/${date_path}.md"
+  local index_relative_path="src/daily-insights/content/index.json"
   local commit_message="${DAILY_INSIGHTS_PUBLISH_COMMIT_MESSAGE:-Publish daily insight for ${date_label}}"
-  local staged_any="0"
+  local worktree_path status attempt
 
-  print_header "Staging daily insight publish files for ${date_path}"
-
-  for path in \
-    "${digest_relative_path}" \
-    "content/index.json" \
-    "content/inbox.md"; do
-    if [[ -e "${REPO_ROOT}/${path}" ]]; then
-      git -C "${REPO_ROOT}" add "${path}"
-      staged_any="1"
+  for attempt in 1 2 3; do
+    print_header "Fetching ${DIGEST_PUSH_REMOTE}/${DIGEST_PUSH_BRANCH} for ${date_path} (attempt ${attempt}/3)"
+    if ! git -C "${SITE_ROOT}" fetch "${DIGEST_PUSH_REMOTE}" "${DIGEST_PUSH_BRANCH}"; then
+      return 1
     fi
+
+    worktree_path="$(mktemp -d "${STATE_ROOT}/publish-worktree.XXXXXX")"
+    rmdir "${worktree_path}"
+    if ! git -C "${SITE_ROOT}" worktree add --detach "${worktree_path}" FETCH_HEAD; then
+      return 1
+    fi
+
+    mkdir -p "$(dirname "${worktree_path}/${digest_relative_path}")"
+    status=0
+    cp "${pending_path}" "${worktree_path}/${digest_relative_path}" || status=$?
+    if [[ "${status}" -eq 0 ]]; then
+      python3 - "${worktree_path}/${index_relative_path}" "${date_path}" <<'PY' || status=$?
+import json
+import sys
+
+index_path, date_path = sys.argv[1:]
+with open(index_path, encoding="utf-8") as index_file:
+    dates = json.load(index_file)
+dates = sorted(set(dates) | {date_path}, reverse=True)
+with open(index_path, "w", encoding="utf-8") as index_file:
+    json.dump(dates, index_file, ensure_ascii=False, indent=2)
+    index_file.write("\n")
+PY
+    fi
+    if [[ "${status}" -eq 0 ]]; then
+      git -C "${worktree_path}" add -- "${digest_relative_path}" "${index_relative_path}" || status=$?
+    fi
+    if [[ "${status}" -eq 0 ]] && ! git -C "${worktree_path}" diff --cached --quiet; then
+      git -C "${worktree_path}" commit -m "${commit_message}" || status=$?
+      if [[ "${status}" -eq 0 ]]; then
+        git -C "${worktree_path}" push "${DIGEST_PUSH_REMOTE}" "HEAD:${DIGEST_PUSH_BRANCH}" || status=$?
+      fi
+    fi
+
+    git -C "${SITE_ROOT}" worktree remove --force "${worktree_path}" || return 1
+    if [[ "${status}" -eq 0 ]]; then
+      rm -f "${pending_path}"
+      run_log_event "Publish completed" "Digest: \`content/${date_path}.md\`."
+      return 0
+    fi
+    run_log_event "Publish attempt failed" "Digest: \`content/${date_path}.md\`. Attempt: \`${attempt}/3\`."
   done
+  return 1
+}
 
-  if [[ "${staged_any}" != "1" ]] || git -C "${REPO_ROOT}" diff --cached --quiet; then
-    print_header "No staged publish changes. Skip commit/push."
-    return 0
-  fi
-
-  print_header "Committing daily insight publish changes"
-  git -C "${REPO_ROOT}" commit -m "${commit_message}"
-
-  print_header "Pulling remote changes before push"
-  git -C "${REPO_ROOT}" pull --rebase "${DIGEST_PUSH_REMOTE}" "${DIGEST_PUSH_BRANCH}"
-
-  print_header "Pushing to ${DIGEST_PUSH_REMOTE} ${DIGEST_PUSH_BRANCH}"
-  git -C "${REPO_ROOT}" push "${DIGEST_PUSH_REMOTE}" "HEAD:${DIGEST_PUSH_BRANCH}"
+publish_pending_daily_insights() {
+  local pending_path
+  [[ -d "${PENDING_PUBLISH_ROOT}" ]] || return 0
+  while IFS= read -r pending_path; do
+    publish_one_pending_daily_insight "${pending_path}" || return 1
+  done < <(find "${PENDING_PUBLISH_ROOT}" -type f -name '*.md' | sort)
 }
