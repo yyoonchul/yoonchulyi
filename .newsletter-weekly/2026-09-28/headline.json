@@ -1,0 +1,19 @@
+{
+  "lead": "AMD will acquire Fei-Fei Li’s World Labs for $8.2 billion",
+  "subject": {
+    "en": "AMD brings World Labs’ world models in-house",
+    "ko": "AMD, World Labs 인수로 월드 모델을 내재화한다"
+  },
+  "tldr": {
+    "en": [
+      "AMD agreed to acquire World Labs for $8.2 billion, adding Fei-Fei Li’s world-model research to its AI chip ecosystem.",
+      "Skild AI says it passed $100 million ARR ten months after its first commercial deployment, with more than 60 paying customers.",
+      "Apple is adding explicit consent controls to macOS Full Disk Access as AI agents gain broader access to personal files and messages."
+    ],
+    "ko": [
+      "AMD가 월드 랩스(World Labs)를 82억 달러에 인수하기로 합의해 페이페이 리의 월드 모델 연구를 AI 칩 생태계에 들인다.",
+      "Skild AI는 첫 상업 배치 10개월 만에 연간 반복 매출 1억 달러를 넘었고 유료 고객이 60곳을 넘었다고 밝혔다.",
+      "애플은 AI 에이전트가 개인 파일과 메시지에 폭넓게 접근하는 상황에 맞춰 macOS 전체 디스크 접근 권한에 명시적 동의 절차를 추가한다."
+    ]
+  }
+}
