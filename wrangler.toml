@@ -34,6 +34,13 @@ RESEND_TOPIC_DAILY = "52cde607-0aef-4096-b665-0b45519f0c96"
 CF_ACCOUNT_ID = "a35a145c184d1aea933c52815216b06d"
 CF_RUM_SITE_TAG = ""
 
+# Search queries, from Google Search Console. The property and the service
+# account's address are identifiers; the account's private key is the secret:
+# `wrangler secret put GSC_PRIVATE_KEY`. The account also has to be listed as a
+# user on the property (Search Console → Settings → Users and permissions).
+GSC_SITE_URL = "https://yoonchulyi.com/"
+GSC_CLIENT_EMAIL = "admin-search-console@yoonchulyi-site.iam.gserviceaccount.com"
+
 # /api/subscribe sends mail on an anonymous request, so it is capped per IP.
 [[ratelimits]]
 name = "SUBSCRIBE_LIMITER"

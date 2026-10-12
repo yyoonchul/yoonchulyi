@@ -28,6 +28,9 @@ interface Env {
   CF_ACCOUNT_ID: string;
   CF_RUM_SITE_TAG: string;
   CF_ANALYTICS_TOKEN: string;
+  GSC_SITE_URL: string;
+  GSC_CLIENT_EMAIL: string;
+  GSC_PRIVATE_KEY: string;
 }
 
 type Language = 'en' | 'ko';
@@ -204,6 +207,21 @@ const CHANNEL_DOMAINS: [Channel, string[]][] = [
   ],
 ];
 
+// Search queries come from Google Search Console, the only place they exist:
+// search engines stopped passing the query in the referrer long ago, so
+// Cloudflare can say a visit came from Google but never what was typed.
+//
+// The Worker reads it as a service account that the property lists as a
+// restricted user. Its numbers are Google's, not the beacon's — clicks here and
+// pageviews on the traffic tab are counted by different people in different
+// ways and will not agree.
+const GOOGLE_TOKEN = 'https://oauth2.googleapis.com/token';
+const GSC_SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly';
+const GSC_API = 'https://www.googleapis.com/webmasters/v3/sites';
+const GSC_ROWS = 25;
+// Search Console keeps its days in Pacific time, whatever the site's is.
+const GSC_TIME_ZONE = 'America/Los_Angeles';
+
 // Deliberately conservative: this endpoint sends mail on a stranger's
 // request, so abuse here costs sending reputation, not just CPU.
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -230,6 +248,9 @@ export default {
     }
     if (url.pathname === '/api/admin/traffic') {
       return handleAdminTraffic(request, env, url);
+    }
+    if (url.pathname === '/api/admin/search') {
+      return handleAdminSearch(request, env, url);
     }
     if (url.pathname.startsWith('/api/admin/broadcasts/')) {
       return handleAdminBroadcast(
@@ -492,6 +513,45 @@ async function handleAdminTraffic(request: Request, env: Env, url: URL): Promise
   );
 }
 
+/**
+ * The search tab. Same shape as the traffic tab, down to answering 200 with
+ * `configured: false` when the credentials are not there yet.
+ */
+async function handleAdminSearch(request: Request, env: Env, url: URL): Promise<Response> {
+  if (!(await hasAdminSession(request, env))) {
+    return json({ error: 'Unauthorized' }, 401);
+  }
+
+  const asked = url.searchParams.get('range') ?? '7d';
+  const range: RumRange = asked in RUM_RANGES ? (asked as RumRange) : '7d';
+
+  // The first two are vars in wrangler.toml and need a deploy; the key is a
+  // secret and does not.
+  const missing = [
+    env.GSC_SITE_URL ? '' : 'GSC_SITE_URL',
+    env.GSC_CLIENT_EMAIL ? '' : 'GSC_CLIENT_EMAIL',
+    env.GSC_PRIVATE_KEY ? '' : 'GSC_PRIVATE_KEY',
+  ].filter(Boolean);
+
+  if (missing.length) {
+    return withAdminHeaders(
+      json({
+        configured: false,
+        range,
+        missing,
+        reason: `The Worker is missing ${missing.join(' and ')}.`,
+      }),
+    );
+  }
+
+  const now = new Date();
+  const search = await settle(() => searchPerformance(range, now, env));
+
+  return withAdminHeaders(
+    json({ configured: true, fetched_at: now.toISOString(), range, search }),
+  );
+}
+
 /** One failing upstream call should cost you that panel, not the whole page. */
 async function settle<T>(load: () => Promise<T>): Promise<T | { error: string }> {
   try {
@@ -742,6 +802,178 @@ function sourceChannels(rows: TrafficRow[]): SourceChannel[] {
   }
 
   return [...channels.values()].sort((a, b) => b.pageviews - a.pageviews);
+}
+
+// ---------------------------------------------------------------------------
+// Google Search Console
+// ---------------------------------------------------------------------------
+
+interface SearchRow {
+  keys?: string[];
+  clicks?: number;
+  impressions?: number;
+  ctr?: number;
+  position?: number;
+}
+
+/**
+ * A fresh access token for the service account.
+ *
+ * Google's service-account flow is a JWT signed with the account's private key
+ * and traded for a bearer token. One is minted per request rather than cached:
+ * the Worker keeps no state, and this page is opened a few times a day.
+ */
+async function googleAccessToken(env: Env): Promise<string> {
+  // `wrangler secret put` keeps real newlines, but a key pasted from the JSON
+  // file arrives with them escaped; either way only the base64 body matters.
+  const pem = env.GSC_PRIVATE_KEY.replace(/\\n/g, '\n');
+  const der = Uint8Array.from(
+    atob(pem.replace(/-----[A-Z ]+-----/g, '').replace(/\s+/g, '')),
+    (char) => char.charCodeAt(0),
+  );
+  const key = await crypto.subtle.importKey(
+    'pkcs8',
+    der,
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+
+  const issued = Math.floor(Date.now() / 1000);
+  const unsigned = [
+    base64UrlEncode(JSON.stringify({ alg: 'RS256', typ: 'JWT' })),
+    base64UrlEncode(
+      JSON.stringify({
+        iss: env.GSC_CLIENT_EMAIL,
+        scope: GSC_SCOPE,
+        aud: GOOGLE_TOKEN,
+        iat: issued,
+        exp: issued + 300,
+      }),
+    ),
+  ].join('.');
+  const signature = await crypto.subtle.sign(
+    'RSASSA-PKCS1-v1_5',
+    key,
+    new TextEncoder().encode(unsigned),
+  );
+
+  const response = await fetch(GOOGLE_TOKEN, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion: `${unsigned}.${base64UrlEncodeBytes(new Uint8Array(signature))}`,
+    }),
+  });
+  const payload = (await response.json().catch(() => ({}))) as {
+    access_token?: string;
+    error_description?: string;
+  };
+  if (!response.ok || !payload.access_token) {
+    throw new Error(payload.error_description ?? `Google returned ${response.status} for a token`);
+  }
+  return payload.access_token;
+}
+
+/** A calendar day in Search Console's time zone, `offset` days from `now`. */
+function searchDay(now: Date, offset: number): string {
+  const day = new Date(now.getTime() + offset * 24 * 60 * 60 * 1000);
+  // en-CA is the locale that happens to write dates as 2026-10-12.
+  return day.toLocaleDateString('en-CA', { timeZone: GSC_TIME_ZONE });
+}
+
+/**
+ * Clicks, impressions and rank for the window, with the queries and pages
+ * behind them.
+ *
+ * Three requests: the trend, and the two breakdowns. The totals are added up
+ * from the trend rather than taken from the breakdowns, because Google leaves
+ * rare queries out of the query list for privacy — the list is a sample of the
+ * traffic, the trend is all of it.
+ *
+ * The last day is hourly, which Search Console only serves under its own data
+ * state, and only as partial numbers. Its breakdowns cover the two calendar
+ * days that the last 24 hours fall across, since a query list cannot be cut to
+ * the hour.
+ */
+async function searchPerformance(range: RumRange, now: Date, env: Env) {
+  const token = await googleAccessToken(env);
+  const hourly = range === '1d';
+  const window = {
+    startDate: searchDay(now, hourly ? -1 : -RUM_RANGES[range]),
+    endDate: searchDay(now, 0),
+  };
+
+  const query = async (body: Record<string, unknown>): Promise<SearchRow[]> => {
+    const response = await fetch(
+      `${GSC_API}/${encodeURIComponent(env.GSC_SITE_URL)}/searchAnalytics/query`,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...window, ...body }),
+      },
+    );
+    const payload = (await response.json().catch(() => ({}))) as {
+      rows?: SearchRow[];
+      error?: { message?: string };
+    };
+    if (!response.ok) {
+      // A 403 here is nearly always the property: the service account has to
+      // be listed under Settings → Users and permissions in Search Console.
+      throw new Error(payload.error?.message ?? `Search Console returned ${response.status}`);
+    }
+    return payload.rows ?? [];
+  };
+
+  const [trend, queries, pages] = await Promise.all([
+    hourly
+      ? query({ dimensions: ['HOUR'], dataState: 'HOURLY_ALL', rowLimit: 100 })
+      : query({ dimensions: ['date'], dataState: 'all', rowLimit: 100 }),
+    query({ dimensions: ['query'], dataState: 'all', rowLimit: GSC_ROWS }),
+    query({ dimensions: ['page'], dataState: 'all', rowLimit: GSC_ROWS }),
+  ]);
+
+  const dayAgo = now.getTime() - 24 * 60 * 60 * 1000;
+  const points = trend
+    .filter((row) => !hourly || Date.parse(row.keys?.[0] ?? '') >= dayAgo)
+    .sort((a, b) => (a.keys?.[0] ?? '').localeCompare(b.keys?.[0] ?? ''));
+
+  const clicks = points.reduce((sum, row) => sum + (row.clicks ?? 0), 0);
+  const impressions = points.reduce((sum, row) => sum + (row.impressions ?? 0), 0);
+  // Rank is an average over impressions, so that is what it is weighted by.
+  const ranked = points.reduce(
+    (sum, row) => sum + (row.position ?? 0) * (row.impressions ?? 0),
+    0,
+  );
+
+  const rows = (list: SearchRow[], label: (key: string) => string) =>
+    list.map((row) => ({
+      label: label(row.keys?.[0] ?? ''),
+      clicks: row.clicks ?? 0,
+      impressions: row.impressions ?? 0,
+      position: row.position ?? 0,
+    }));
+
+  return {
+    window,
+    totals: {
+      clicks,
+      impressions,
+      position: impressions ? ranked / impressions : 0,
+    },
+    series: {
+      granularity: hourly ? 'hour' : ('day' as const),
+      points: points.map((row) => ({
+        label: row.keys?.[0] ?? '',
+        clicks: row.clicks ?? 0,
+        impressions: row.impressions ?? 0,
+      })),
+    },
+    queries: rows(queries, (key) => key),
+    // Every page shares the property's origin; the path is the part that differs.
+    pages: rows(pages, (key) => key.replace(/^https?:\/\/[^/]+/, '') || '/'),
+  };
 }
 
 // ---------------------------------------------------------------------------

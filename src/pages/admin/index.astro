@@ -6,9 +6,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 // Worker (`handleAdmin`), which is the only thing standing between the CDN and
 // this file. See run_worker_first in wrangler.toml.
 //
-// Two tabs, two sources: page traffic comes from Cloudflare Web Analytics,
-// newsletter numbers from Resend. Each loads on first view, so opening the
-// page only pays for the tab you are looking at.
+// Three tabs, three sources: page traffic comes from Cloudflare Web Analytics,
+// search queries from Google Search Console, newsletter numbers from Resend.
+// Each loads on first view, so opening the page only pays for the tab you are
+// looking at.
 //
 // Layout and styling live in AdminLayout and src/styles/admin.css. The short
 // version: panels group, mono tabular numbers line up, zebra rows carry the
@@ -20,6 +21,9 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     <div class="admin-tabs" role="tablist">
       <button type="button" role="tab" class="admin-tab" data-tab="pages">
         Pages
+      </button>
+      <button type="button" role="tab" class="admin-tab" data-tab="search">
+        Search
       </button>
       <button type="button" role="tab" class="admin-tab" data-tab="mail">
         Newsletter
@@ -37,6 +41,11 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     <p class="note" data-status="pages">Loading…</p>
   </div>
 
+  <div data-panel="search">
+    <div data-body="search" class="admin-stack"></div>
+    <p class="note" data-status="search">Loading…</p>
+  </div>
+
   <div data-panel="mail">
     <div data-body="mail" class="admin-stack"></div>
     <p class="note" data-status="mail">Loading…</p>
@@ -44,7 +53,15 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 </AdminLayout>
 
 <script>
-  type TabName = 'pages' | 'mail';
+  type TabName = 'pages' | 'search' | 'mail';
+  const TABS: TabName[] = ['pages', 'search', 'mail'];
+  // The tabs whose numbers depend on the 24h / 7d / 30d switch.
+  const RANGED: TabName[] = ['pages', 'search'];
+
+  function tabFromHash(): TabName {
+    const name = location.hash.slice(1) as TabName;
+    return TABS.includes(name) ? name : 'pages';
+  }
 
   const refreshButton = document.querySelector('[data-refresh]') as HTMLButtonElement;
   const asOf = document.querySelector('[data-asof]') as HTMLElement;
@@ -55,7 +72,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     document.querySelectorAll('[data-range]'),
   ) as HTMLButtonElement[];
 
-  let activeTab: TabName = location.hash === '#mail' ? 'mail' : 'pages';
+  let activeTab: TabName = tabFromHash();
   let activeRange = '7d';
   const loaded = new Set<TabName>();
 
@@ -319,8 +336,11 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
    * quiet week and a busy one look the same height, which is the point when
    * the question is "which day". The peak value is printed above the chart and
    * quarter gridlines sit behind it, so the height can also be read as a number.
+   *
+   * `units` names the two counts on each point: the one the bars are drawn
+   * from, then the one that only appears in the readout.
    */
-  function trendPanel(series: any): HTMLElement {
+  function trendPanel(series: any, units = ['views', 'visits']): HTMLElement {
     const points: any[] = series?.points ?? [];
     const hourly = series?.granularity === 'hour';
     const root = panel(
@@ -343,7 +363,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     // readout that appears the moment the pointer crosses a column, in the band
     // the peak label otherwise occupies — same row, so nothing shifts and the
     // two never overlap.
-    const peakLabel = el('div', 'chart-peak', `peak ${number(peak)} views`);
+    const peakLabel = el('div', 'chart-peak', `peak ${number(peak)} ${units[0]}`);
     const tip = el('div', 'chart-tip');
     tip.hidden = true;
     wrap.append(peakLabel, tip);
@@ -358,8 +378,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       column.addEventListener('mouseenter', () => {
         tip.replaceChildren(
           el('span', 'tip-when', axisLabel(point.label, hourly)),
-          el('b', '', `${number(point.pageviews)} views`),
-          el('span', 'tip-visits', `${number(point.visits)} visits`),
+          el('b', '', `${number(point.pageviews)} ${units[0]}`),
+          el('span', 'tip-visits', `${number(point.visits)} ${units[1]}`),
         );
         tip.hidden = false;
         peakLabel.hidden = true;
@@ -605,6 +625,148 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     stamp(data.fetched_at);
     status.textContent =
       'Cloudflare Web Analytics · counts browsers that ran the beacon.';
+  }
+
+  // ---------------------------------------------------------------------
+  // Search tab — Google Search Console
+  // ---------------------------------------------------------------------
+
+  function searchSetupNotice(reason: string, missing: string[]): HTMLElement {
+    const root = panel('Not configured yet');
+    const box = body();
+    box.append(el('p', 'note', reason));
+
+    const steps = el('ol', 'steps');
+    if (missing.some((name) => name !== 'GSC_PRIVATE_KEY')) {
+      steps.append(
+        el(
+          'li',
+          '',
+          'Set GSC_SITE_URL and GSC_CLIENT_EMAIL under [vars] in wrangler.toml, then deploy.',
+        ),
+      );
+    }
+    if (missing.includes('GSC_PRIVATE_KEY')) {
+      for (const step of [
+        'Take private_key from the service account’s JSON key file.',
+        'From the repo root, run: wrangler secret put GSC_PRIVATE_KEY',
+        'Reload this page. A secret takes effect immediately — no deploy needed.',
+      ]) {
+        steps.append(el('li', '', step));
+      }
+    }
+    box.append(steps);
+
+    root.append(box);
+    return root;
+  }
+
+  /** Queries or pages: the same five columns either way. */
+  function searchTable(title: string, heading: string, list: any[]): HTMLElement {
+    const root = panel(title, `${list.length} listed`);
+    const box = body(true);
+    if (!list.length) {
+      box.append(el('p', 'note', 'Nothing yet.'));
+      root.append(box);
+      return root;
+    }
+
+    const { table, rows } = dataTable(
+      [
+        { label: heading },
+        { label: 'clicks', width: '72px', right: true },
+        { label: 'shown', width: '72px', right: true },
+        { label: 'ctr', width: '64px', right: true },
+        { label: 'rank', width: '60px', right: true },
+      ],
+      true,
+    );
+    for (const item of list) {
+      const line = el('tr');
+      cell(line, 'trunc', item.label).title = item.label;
+      cell(line, 'r', number(item.clicks));
+      cell(line, 'r', number(item.impressions));
+      cell(line, 'r', rate(item.clicks, item.impressions));
+      cell(line, 'r', item.position ? item.position.toFixed(1) : '—');
+      rows.append(line);
+    }
+    box.append(table);
+    root.append(box);
+    return root;
+  }
+
+  function searchPanels(search: any): HTMLElement[] {
+    const totals = search.totals ?? { clicks: 0, impressions: 0, position: 0 };
+
+    const overview = panel();
+    overview.append(
+      statBand([
+        stat('clicks', number(totals.clicks), { note: 'from Google results' }),
+        stat('impressions', number(totals.impressions), { note: 'times a result was shown' }),
+        stat('ctr', rate(totals.clicks, totals.impressions), { note: 'clicks per impression' }),
+        stat('avg rank', totals.position ? totals.position.toFixed(1) : '—', {
+          note: 'position in results, 1 is top',
+        }),
+      ]),
+    );
+
+    // The chart is drawn from impressions: on a small site clicks are mostly
+    // zero, and a row of empty columns says nothing about which day was seen.
+    const trend = trendPanel(
+      {
+        granularity: search.series?.granularity,
+        points: (search.series?.points ?? []).map((point: any) => ({
+          label: point.label,
+          pageviews: point.impressions,
+          visits: point.clicks,
+        })),
+      },
+      ['impressions', 'clicks'],
+    );
+
+    return [
+      overview,
+      trend,
+      searchTable('Queries', 'query', search.queries ?? []),
+      searchTable('Pages', 'page', search.pages ?? []),
+    ];
+  }
+
+  async function loadSearch(): Promise<void> {
+    const status = document.querySelector('[data-status="search"]') as HTMLElement;
+    const target = document.querySelector('[data-body="search"]') as HTMLElement;
+    status.className = 'note';
+    status.textContent = 'Loading…';
+
+    const data = await request(`/api/admin/search?range=${activeRange}`);
+    if (!data) return;
+
+    if (!data.configured) {
+      target.replaceChildren(
+        searchSetupNotice(data.reason ?? 'No credentials.', data.missing ?? []),
+      );
+      status.className = 'note bad';
+      status.textContent = 'Google Search Console is not wired up yet.';
+      return;
+    }
+    if (data.search?.error) {
+      target.replaceChildren(failed('Search', data.search.error));
+      status.className = 'note bad';
+      status.textContent = 'Could not read Google Search Console.';
+      return;
+    }
+
+    target.replaceChildren(...searchPanels(data.search));
+    stamp(data.fetched_at);
+    // Two things the numbers will not say for themselves: the newest days are
+    // still being counted, and the query list leaves rare queries out.
+    status.textContent =
+      `Google Search Console · ${data.search.window.startDate} to ${data.search.window.endDate}, ` +
+      'Pacific time · the last two or three days are provisional, and rare queries are ' +
+      'withheld by Google, so the query list adds up to less than the totals.' +
+      (activeRange === '1d'
+        ? ' Queries and pages cover both calendar days the last 24 hours fall across.'
+        : '');
   }
 
   // ---------------------------------------------------------------------
@@ -1037,6 +1199,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
   const loaders: Record<TabName, () => Promise<void>> = {
     pages: loadPages,
+    search: loadSearch,
     mail: loadMail,
   };
 
@@ -1054,16 +1217,16 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     for (const button of tabButtons) {
       button.setAttribute('aria-selected', String(button.dataset.tab === activeTab));
     }
-    for (const name of ['pages', 'mail'] as TabName[]) {
+    for (const name of TABS) {
       const node = document.querySelector(`[data-panel="${name}"]`) as HTMLElement;
       node.hidden = name !== activeTab;
     }
     for (const button of rangeButtons) {
       button.setAttribute('aria-pressed', String(button.dataset.range === activeRange));
     }
-    // The range only means anything to the traffic tab.
+    // The newsletter numbers are a fixed 30-day snapshot; the range is not theirs.
     const ranges = document.querySelector('[data-ranges]') as HTMLElement;
-    ranges.style.visibility = activeTab === 'pages' ? 'visible' : 'hidden';
+    ranges.style.visibility = RANGED.includes(activeTab) ? 'visible' : 'hidden';
   }
 
   function show(tab: TabName): void {
@@ -1080,12 +1243,15 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     button.addEventListener('click', () => {
       activeRange = button.dataset.range ?? '7d';
       paint();
-      void reload('pages');
+      // Both ranged tabs are now stale; only the one on screen is worth
+      // fetching, and the other reloads when it is next opened.
+      for (const tab of RANGED) loaded.delete(tab);
+      void reload(activeTab);
     });
   }
   refreshButton.addEventListener('click', () => void reload(activeTab));
   window.addEventListener('hashchange', () => {
-    const tab: TabName = location.hash === '#mail' ? 'mail' : 'pages';
+    const tab = tabFromHash();
     if (tab !== activeTab) show(tab);
   });
 
