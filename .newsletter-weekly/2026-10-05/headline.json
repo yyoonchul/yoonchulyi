@@ -1,0 +1,19 @@
+{
+  "lead": "The next hurdle for AI agents: getting websites to let them in",
+  "subject": {
+    "en": "AI agents need websites to let them in",
+    "ko": "AI 에이전트가 웹사이트에 들어갈 길을 연다"
+  },
+  "tldr": {
+    "en": [
+      "Meta, Walmart, Stripe and others are developing an open standard for agents to authenticate with businesses as websites block their tasks.",
+      "Pantheon Research says it collected more than 1 million unique robotics tasks in eight weeks for an average of $10 per recorded hour.",
+      "Satya Nadella says advanced models with access to sensitive systems should be treated as insider risks and kept under deterministic controls."
+    ],
+    "ko": [
+      "웹사이트가 에이전트의 작업을 막는 가운데 Meta, Walmart, Stripe 등은 기업 서비스에 에이전트가 인증하는 개방형 표준을 개발하고 있다.",
+      "Pantheon Research는 8주 동안 고유 로보틱스 작업 100만 건 이상을 기록 시간당 평균 10달러에 수집했다고 밝혔다.",
+      "Satya Nadella는 민감한 시스템에 접근하는 고성능 모델을 내부자 위험으로 보고 결정론적 통제 장치를 적용해야 한다고 주장했다."
+    ]
+  }
+}
