@@ -137,6 +137,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
   interface Bar {
     label: string;
     value: number;
+    /** Rows this one is the sum of, listed under it on the same scale. */
+    parts?: Bar[];
   }
 
   /**
@@ -145,6 +147,10 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
    * — the bar is proportional to the largest row, not the total, because the
    * useful comparison in a top-ten list is against the leader. The share
    * column is against the total, which is the other question.
+   *
+   * A row may carry parts. They are drawn against the same peak, so the bars
+   * under a row visibly add up to it, and they stay out of the peak, the total
+   * and the share column, all of which already counted them once.
    */
   function rankList(
     bars: Bar[],
@@ -156,12 +162,13 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
     const peak = Math.max(...bars.map((bar) => bar.value), 1);
     const total = bars.reduce((sum, bar) => sum + bar.value, 0);
+    const grouped = bars.some((bar) => bar.parts?.length);
 
-    const table = el('table', 'ranks');
+    const table = el('table', grouped ? 'ranks grouped' : 'ranks');
     const tbody = el('tbody');
 
-    for (const [index, bar] of bars.entries()) {
-      const line = el('tr');
+    const row = (bar: Bar, lead: boolean, part: boolean) => {
+      const line = el('tr', part ? 'part' : '');
 
       const label = el('td', 'r-label', bar.label);
       label.title = bar.label;
@@ -170,7 +177,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       if (track) {
         const cell = el('td', 'r-track');
         const rail = el('i');
-        const fill = el('b', index === 0 ? 'lead' : '');
+        const fill = el('b', lead ? 'lead' : '');
         fill.style.width = `${Math.max((bar.value / peak) * 100, 3)}%`;
         rail.append(fill);
         cell.append(rail);
@@ -179,10 +186,18 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
       line.append(el('td', 'r-value', number(bar.value)));
       if (share) {
-        line.append(el('td', 'r-share', total ? `${Math.round((bar.value / total) * 100)}%` : '—'));
+        const text = total ? `${Math.round((bar.value / total) * 100)}%` : '—';
+        line.append(el('td', 'r-share', part ? '' : text));
       }
 
       tbody.append(line);
+    };
+
+    for (const [index, bar] of bars.entries()) {
+      row(bar, index === 0, false);
+      for (const part of bar.parts ?? []) {
+        row(part, false, true);
+      }
     }
 
     table.append(tbody);
@@ -411,6 +426,72 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     return root;
   }
 
+  // The Worker sorts hosts into channels; what each one is called is the page's
+  // business. A channel it does not know yet shows under its own key.
+  const CHANNEL_LABELS: Record<string, string> = {
+    direct: 'Direct / no referrer',
+    internal: 'Own pages',
+    search: 'Search',
+    social: 'Social & community',
+    email: 'Email',
+    ai: 'AI assistants',
+    other: 'Other sites',
+  };
+
+  /**
+   * Channels, each with the sites that make it up underneath.
+   *
+   * The two channels that are not a site get a sentence instead, because their
+   * names promise more than they can deliver: "direct" is whatever arrived
+   * without a referrer, which is far more than typed addresses, and "own
+   * pages" is not a source at all.
+   */
+  function sourcePanel(channels: any[]): HTMLElement {
+    const root = panel('Sources', 'channel, then site');
+    const box = body(true);
+
+    box.append(
+      rankList(
+        channels.map((channel: any) => {
+          const sites: Bar[] = (channel.sites ?? []).map((site: any) => ({
+            label: site.label,
+            value: site.pageviews,
+          }));
+          if (channel.unlisted) {
+            // Whatever the named sites do not account for, so the rows under a
+            // channel still add up to it.
+            const named = sites.reduce((sum, site) => sum + site.value, 0);
+            sites.push({
+              label: `+ ${number(channel.unlisted)} more`,
+              value: channel.pageviews - named,
+            });
+          }
+          return {
+            label: CHANNEL_LABELS[channel.channel] ?? channel.channel,
+            value: channel.pageviews,
+            parts: sites,
+          };
+        }),
+        true,
+      ),
+    );
+
+    if (channels.length) {
+      box.append(
+        el(
+          'p',
+          'note',
+          'Direct is every view that arrived without a referrer: typed, bookmarked, or ' +
+            'opened from a messenger or a mail app. Own pages are clicks from one page ' +
+            'of this site to another — views, but not where a visit began.',
+        ),
+      );
+    }
+
+    root.append(box);
+    return root;
+  }
+
   function trafficPanels(traffic: any): HTMLElement[] {
     const totals = traffic.totals ?? { pageviews: 0, visits: 0 };
     const peak = busiest(traffic.series);
@@ -441,21 +522,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       ),
     );
 
-    const external = traffic.referrers?.external ?? [];
-    const sources = listPanel(
-      'Sources',
-      'where the visit came from',
-      rankList(
-        [
-          { label: 'Direct / typed / own links', value: traffic.referrers?.direct ?? 0 },
-          ...external.map((source: any) => ({
-            label: source.label,
-            value: source.pageviews,
-          })),
-        ],
-        true,
-      ),
-    );
+    const sources = sourcePanel(traffic.sources ?? []);
 
     const places = listPanel(
       'Countries',

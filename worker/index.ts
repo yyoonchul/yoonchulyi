@@ -81,6 +81,128 @@ const RUM_ROWS = 12;
 const RUM_HOUR_LIMIT = 800;
 // A referral from our own pages is a real pageview but not a source of one.
 const OWN_HOSTS = new Set(['yoonchulyi.com', 'www.yoonchulyi.com']);
+// Every referring host in the window, not the top of the list: a channel's
+// total is a sum over these rows, so a short list would under-count whichever
+// channel has the long tail.
+const RUM_REFERRER_LIMIT = 200;
+// Sites named under a channel; the rest are counted but not listed.
+const CHANNEL_SITES = 5;
+
+type Channel = 'direct' | 'internal' | 'search' | 'social' | 'email' | 'ai' | 'other';
+
+// Hosts that only a pattern can describe. Google search is google.<any tld>
+// with nothing in front but www — mail., news. and gemini.google.com are other
+// things entirely, which is why this is not a plain domain match. Webmail is
+// the reverse: the product is in the subdomain and the domain could be anyone.
+const CHANNEL_PATTERNS: [Channel, RegExp][] = [
+  ['search', /^(www\.)?google\.[a-z]{2,3}(\.[a-z]{2})?$/],
+  ['email', /(^|\.)(mail|webmail|email)\./],
+];
+
+// A domain here matches itself and its subdomains, so `facebook.com` covers
+// l.facebook.com and `search.naver.com` covers m.search.naver.com. The dotted
+// names without a tld are Android apps, which announce themselves by package
+// id (android-app://com.google.android.gm).
+//
+// Anything not listed lands in `other` and is still shown by name, so a miss
+// here costs a label, never a number.
+const CHANNEL_DOMAINS: [Channel, string[]][] = [
+  [
+    'search',
+    [
+      'bing.com',
+      'duckduckgo.com',
+      'search.naver.com',
+      'search.daum.net',
+      'search.zum.com',
+      'search.yahoo.com',
+      'search.yahoo.co.jp',
+      'search.brave.com',
+      'yandex.com',
+      'yandex.ru',
+      'baidu.com',
+      'ecosia.org',
+      'kagi.com',
+      'startpage.com',
+      'qwant.com',
+      'com.google.android.googlequicksearchbox',
+    ],
+  ],
+  [
+    'ai',
+    [
+      'chatgpt.com',
+      'chat.openai.com',
+      'perplexity.ai',
+      'claude.ai',
+      'gemini.google.com',
+      'notebooklm.google.com',
+      'copilot.microsoft.com',
+      'grok.com',
+      'deepseek.com',
+      'mistral.ai',
+      'meta.ai',
+      'duck.ai',
+      'you.com',
+      'phind.com',
+      'poe.com',
+      'genspark.ai',
+      'felo.ai',
+      'wrtn.ai',
+      'clova-x.naver.com',
+      'com.openai.chatgpt',
+    ],
+  ],
+  [
+    'social',
+    [
+      'x.com',
+      'twitter.com',
+      't.co',
+      'facebook.com',
+      'instagram.com',
+      'threads.net',
+      'threads.com',
+      'linkedin.com',
+      'lnkd.in',
+      'reddit.com',
+      'news.ycombinator.com',
+      'lobste.rs',
+      'bsky.app',
+      'mastodon.social',
+      'youtube.com',
+      'youtu.be',
+      'tiktok.com',
+      'pinterest.com',
+      'discord.com',
+      'slack.com',
+      't.me',
+      'telegram.org',
+      'cafe.naver.com',
+      'band.us',
+      'news.hada.io',
+      'disquiet.io',
+      'com.twitter.android',
+      'com.facebook.katana',
+      'com.instagram.android',
+      'com.linkedin.android',
+      'com.reddit.frontpage',
+      'org.telegram.messenger',
+      'com.slack',
+    ],
+  ],
+  [
+    'email',
+    [
+      'outlook.live.com',
+      'outlook.office.com',
+      'outlook.office365.com',
+      'fastmail.com',
+      'hey.com',
+      'com.google.android.gm',
+    ],
+  ],
+];
 
 // Deliberately conservative: this endpoint sends mail on a stranger's
 // request, so abuse here costs sending reputation, not just CPU.
@@ -446,7 +568,7 @@ async function rumTraffic(range: RumRange, since: Date, until: Date, env: Env) {
       }${breakdown('pages', 'requestPath', RUM_ROWS)}${breakdown(
         'referrers',
         'refererHost',
-        RUM_ROWS * 2,
+        RUM_REFERRER_LIMIT,
       )}${breakdown('countries', 'countryName', RUM_ROWS)}${breakdown(
         'devices',
         'deviceType',
@@ -509,7 +631,7 @@ async function rumTraffic(range: RumRange, since: Date, until: Date, env: Env) {
       points: rollUp(hours, range === '1d' ? 13 : 10),
     },
     pages: rumRows(account.pages, 'requestPath'),
-    referrers: splitReferrers(rumRows(account.referrers, 'refererHost')),
+    sources: sourceChannels(rumRows(account.referrers, 'refererHost')),
     countries: rumRows(account.countries, 'countryName'),
     devices: rumRows(account.devices, 'deviceType'),
     browsers: rumRows(account.browsers, 'userAgentBrowser'),
@@ -548,25 +670,78 @@ function rollUp(groups: RumGroup[], width: number): TrafficRow[] {
   return [...buckets.values()].sort((a, b) => a.label.localeCompare(b.label));
 }
 
-/**
- * Our own pages fold into the direct bucket rather than being dropped: an
- * internal link is a real pageview, it just is not somewhere a visitor came
- * from, and discarding it would make the sources add up to less than the
- * traffic they are meant to explain.
- */
-function splitReferrers(rows: TrafficRow[]) {
-  let direct = 0;
-  const external: TrafficRow[] = [];
+interface SourceChannel {
+  channel: Channel;
+  pageviews: number;
+  visits: number;
+  /** The busiest sites in the channel; empty where there is no site to name. */
+  sites: TrafficRow[];
+  /** How many more sites the totals include beyond the ones named. */
+  unlisted: number;
+}
 
-  for (const row of rows) {
-    if (!row.label || OWN_HOSTS.has(row.label)) {
-      direct += row.pageviews;
-    } else {
-      external.push(row);
+function channelOf(host: string): Channel {
+  if (!host) {
+    return 'direct';
+  }
+  if (OWN_HOSTS.has(host)) {
+    return 'internal';
+  }
+  for (const [channel, pattern] of CHANNEL_PATTERNS) {
+    if (pattern.test(host)) {
+      return channel;
     }
   }
+  for (const [channel, domains] of CHANNEL_DOMAINS) {
+    if (domains.some((domain) => host === domain || host.endsWith(`.${domain}`))) {
+      return channel;
+    }
+  }
+  return 'other';
+}
 
-  return { direct, external: external.slice(0, RUM_ROWS) };
+/**
+ * Referring hosts rolled up into channels, busiest first.
+ *
+ * Our own pages get a channel of their own rather than being dropped or folded
+ * into direct: an internal link is a real pageview, it just is not somewhere a
+ * visitor came from. Dropping it would make the sources add up to less than
+ * the traffic they are meant to explain, and folding it in hid how much of
+ * "direct" was really people reading a second page.
+ *
+ * What is left in direct is every view with no referrer at all. Typed
+ * addresses, bookmarks, messengers and most mail apps are indistinguishable
+ * from here — the browser sends nothing, so there is nothing to split on.
+ */
+function sourceChannels(rows: TrafficRow[]): SourceChannel[] {
+  const channels = new Map<Channel, SourceChannel>();
+
+  // Rows arrive busiest first, so the first few in a channel are its top sites.
+  for (const row of rows) {
+    const key = channelOf(row.label.toLowerCase());
+    const channel = channels.get(key) ?? {
+      channel: key,
+      pageviews: 0,
+      visits: 0,
+      sites: [],
+      unlisted: 0,
+    };
+    channel.pageviews += row.pageviews;
+    channel.visits += row.visits;
+
+    if (key !== 'direct' && key !== 'internal') {
+      // In a named channel the site is detail; in `other` it is the only thing
+      // that says what the traffic was, so that list runs longer.
+      if (channel.sites.length < (key === 'other' ? RUM_ROWS : CHANNEL_SITES)) {
+        channel.sites.push(row);
+      } else {
+        channel.unlisted += 1;
+      }
+    }
+    channels.set(key, channel);
+  }
+
+  return [...channels.values()].sort((a, b) => b.pageviews - a.pageviews);
 }
 
 // ---------------------------------------------------------------------------

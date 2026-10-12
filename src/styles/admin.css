@@ -574,6 +574,62 @@
   font-feature-settings: 'tnum' 1;
 }
 
+/* A list whose rows have parts under them. Zebra would stripe a row and its own
+   parts in different colours, which reads as two unrelated things, so here the
+   groups are ruled off instead and the parts sit indented under their row. */
+.ranks.grouped tr:nth-child(even) {
+  background: none;
+}
+
+.ranks.grouped tr:hover {
+  background: var(--hover);
+}
+
+.ranks.grouped tr:not(.part) td {
+  border-top: 1px solid var(--rule);
+}
+
+.ranks.grouped tr:first-child td {
+  border-top: 0;
+}
+
+.ranks.grouped tr:not(.part) .r-label {
+  font-weight: 500;
+}
+
+.ranks tr.part td {
+  padding-top: 3px;
+  padding-bottom: 3px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.ranks tr.part .r-label {
+  padding-left: 34px;
+}
+
+.ranks tr.part .r-value {
+  font-weight: 400;
+}
+
+.ranks tr.part .r-track i {
+  height: 5px;
+}
+
+.ranks tr.part .r-track i b {
+  background: var(--faint);
+}
+
+/* The last part needs air before the rule that opens the next group. */
+.ranks.grouped tr.part:has(+ tr:not(.part)) td,
+.ranks.grouped tr.part:last-child td {
+  padding-bottom: 10px;
+}
+
+.panel-body.flush > .ranks + .note {
+  border-top: 1px solid var(--rule);
+}
+
 /* ── device / browser / system, three lists in one panel ───────────────── */
 
 .triple {
