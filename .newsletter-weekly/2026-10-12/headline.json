@@ -1,0 +1,19 @@
+{
+  "lead": "Meta’s new commercial terms will allow the scraping of news sites, legal experts say",
+  "subject": {
+    "en": "Meta’s terms may let it scrape your site",
+    "ko": "Meta 새 약관, 비즈니스 사이트 수집 허용하나"
+  },
+  "tldr": {
+    "en": [
+      "Meta’s October 30 commercial terms let it crawl business account websites and use the content to develop and train its products, according to legal experts.",
+      "Character Technologies filed for Chapter 11 and plans a court-supervised asset sale, with Disney offering $20 million for rights to some intellectual property.",
+      "Anthropic researchers found that GLM-5.2 completed a tested replication chain across eight IoT nodes in four of five runs, though no model yet combines that capability with a small footprint."
+    ],
+    "ko": [
+      "10월 30일부터 적용되는 Meta 상업 약관은 비즈니스 계정 웹사이트를 수집해 제품 개발과 학습에 쓸 수 있도록 하며, 법률 전문가들은 광범위한 권한이 될 수 있다고 봤다.",
+      "Character Technologies가 챕터 11 파산을 신청하고 법원 감독 아래 자산 매각을 추진하며, Disney는 일부 지식재산권에 2천만 달러를 제안했다.",
+      "앤스로픽 연구진의 실험에서 GLM-5.2는 다섯 번 중 네 번 8개 IoT 노드에 걸친 복제 절차를 완료했지만, 현재 실제 확산 능력과 작은 크기를 모두 갖춘 모델은 없다."
+    ]
+  }
+}
