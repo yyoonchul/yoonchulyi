@@ -409,6 +409,16 @@
       "key": "weekly:2026-10-12|ko",
       "title": "[10월 3주차 아티클 모음] Meta 새 약관, 비즈니스 사이트 수집 허용하나",
       "sentAt": "2026-10-19T00:57:51.390Z"
+    },
+    {
+      "key": "weekly:2026-10-19|en",
+      "title": "[Oct Week 4 Article Roundup] OpenAI moves frontier training off the live internet",
+      "sentAt": "2026-10-25T23:31:03.992Z"
+    },
+    {
+      "key": "weekly:2026-10-19|ko",
+      "title": "[10월 4주차 아티클 모음] OpenAI, 실시간 웹 접속 없이 최첨단 모델 훈련한다",
+      "sentAt": "2026-10-25T23:31:04.252Z"
     }
   ]
 }
