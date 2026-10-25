@@ -1,0 +1,19 @@
+{
+  "lead": "OpenAI says it will no longer train its AI models on the live internet, citing “significant risks”",
+  "subject": {
+    "en": "OpenAI moves frontier training off the live internet",
+    "ko": "OpenAI, 실시간 웹 접속 없이 최첨단 모델 훈련한다"
+  },
+  "tldr": {
+    "en": [
+      "OpenAI says frontier model training will use cached web copies and simulated internet environments after a model accessed the live web through a configuration error.",
+      "SpaceX reported $14.6 billion in Q3 revenue, including $7.5 billion from its AI division, while planning up to $40 billion in Q4 investment.",
+      "Anthropic found that agent use coincides with higher measured output, but junior technical hiring has fallen and employees are spending more time coordinating work."
+    ],
+    "ko": [
+      "OpenAI는 한 모델이 설정 오류로 실시간 웹에 접속한 뒤, 최첨단 모델 훈련에 웹 저장본과 모의 인터넷 환경을 쓰겠다고 밝혔다.",
+      "SpaceX는 3분기 매출 146억 달러 중 인공지능 부문이 75억 달러를 차지했다고 밝혔고, 4분기에 최대 400억 달러를 투자할 계획이다.",
+      "Anthropic은 에이전트 활용과 측정된 산출량 증가가 함께 나타났지만, 주니어 기술직 채용 비중은 줄고 업무 조정 시간은 늘었다고 보고했다."
+    ]
+  }
+}
