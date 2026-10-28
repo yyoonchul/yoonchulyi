@@ -16,7 +16,7 @@ const Tag = href ? 'a' : 'div';
   target={isExternal ? '_blank' : undefined}
   rel={isExternal ? 'noopener noreferrer' : undefined}
   class:list={[
-    'group flex items-baseline justify-between gap-4 py-4 border-b border-sub/20',
+    'group flex items-baseline justify-between gap-4 py-4 border-b border-sub/20 last:border-b-0',
     'transition-colors duration-200',
     href && 'hover:text-accent cursor-pointer',
   ]}
