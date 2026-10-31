@@ -63,6 +63,7 @@ For new posts, prefer the expanded SEO frontmatter:
 
 ```yaml
 title: "Human-readable title"
+type: essay
 seoTitle: "Search-friendly title with the main topic"
 description: "A concise 140-160 character description of the post."
 slug: "stable-lowercase-slug"
@@ -81,8 +82,20 @@ index: true
 
 Rules:
 
+- `type` is `essay` (long, polished) or `note` (short) and defaults to
+  `essay`. It picks the section and the URL: `/essays/<slug>/` or
+  `/notes/<slug>/`. Changing the type of a published post moves its URL, so
+  add a 301 from the old path in `worker/index.ts` when you do.
+- `/blog/` is retired. The Worker 301s `/blog/` to `/essays/` and each
+  pre-split post to its new URL; that map is closed, since no post published
+  after the split ever had a `/blog/` URL.
 - `seoTitle` should be clear to a searcher, not only poetic or personal.
 - `description` should summarize the specific argument or experience in the post.
+  It is **required for essays** (the build fails without it): a 140-160
+  character English summary of what the essay is about, not its opening line.
+  It feeds the meta description, the share card, the English feed, the
+  `/essays/` ItemList, and the hover preview on `/essays/`. Notes may omit it.
+  The Korean feed ignores it and excerpts the Korean body instead.
 - `slug` should be stable, lowercase, and hyphenated for all new posts.
 - `tags` are display/search concepts; `topics` are future internal topic hubs.
 - Set `index: false` only for drafts, thin pages, or private/utility posts.
@@ -118,8 +131,9 @@ The site should expose:
 
 Sitemap rules:
 
-- Include home, experiences, projects, blog index, Daily Insights index, all
-  indexable blog posts, and Daily Insight detail pages.
+- Include home, experiences, projects, the essays and notes indexes, Daily
+  Insights index, all indexable essays and notes, and Daily Insight detail
+  pages.
 - `/about/` is retired. The Worker 301s it to `/experiences/`; keep it out of
   the sitemap so the redirect stays the only signal.
 - Use `dateModified` for blog `lastmod` when present.

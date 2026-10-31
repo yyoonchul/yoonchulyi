@@ -1,6 +1,7 @@
 ---
 title: Mutant
 date: 2024-03-15
+type: note
 ---
 
 <!-- LANG:EN:START -->

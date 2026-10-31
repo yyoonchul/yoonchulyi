@@ -71,7 +71,12 @@ export async function getBlogFeedEntries(language: FeedLanguage): Promise<FeedEn
     entries.push({
       title: language === 'ko' ? (post.data.titleKo ?? post.data.title) : post.data.title,
       link: getAbsoluteUrl(getBlogHref(post)),
-      description: post.data.description ?? getExcerptFromMarkdown(markdown),
+      // `description` is written in English, so the Korean feed (and the
+      // Korean email's oversized fallback) keeps an excerpt of the Korean body.
+      description:
+        language === 'en' && post.data.description
+          ? post.data.description
+          : getExcerptFromMarkdown(markdown),
       pubDate: getBlogPublishedDate(post),
       content: (await processor.render(markdown)).code,
     });

@@ -1,0 +1,60 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import {
+  formatBlogDate,
+  getBlogFirstSentence,
+  getBlogHref,
+  parseBlogBilingualContent,
+} from '../lib/blog';
+
+interface Props {
+  essays: CollectionEntry<'blog'>[];
+}
+
+const { essays } = Astro.props as Props;
+
+const items = essays.map((essay) => ({
+  title: essay.data.title,
+  date: formatBlogDate(essay.data.date),
+  href: getBlogHref(essay),
+  // The written summary says what the essay is about; the opening sentence
+  // only stands in when a post has none.
+  opening:
+    essay.data.description ?? getBlogFirstSentence(parseBlogBilingualContent(essay)),
+}));
+---
+
+{/*
+  Same shape as the home index: each row is one link, and hovering or
+  focusing it unfolds the essay's summary as a glance at what it is about
+  before committing to a long read.
+*/}
+<ul>
+  {items.map(({ title, date, href, opening }) => (
+    <li>
+      <a href={href} class="group block py-3 outline-none">
+        <div class="flex items-baseline justify-between gap-4">
+          <span class="font-serif text-base transition-colors group-hover:text-accent group-focus-visible:text-accent">
+            {title}
+          </span>
+          <span class="shrink-0 font-mono text-xs text-sub transition-colors group-hover:text-accent group-focus-visible:text-accent">
+            {date}
+          </span>
+        </div>
+
+        {opening && (
+          <div
+            aria-hidden="true"
+            class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none group-hover:grid-rows-[1fr] group-focus-visible:grid-rows-[1fr]"
+          >
+            <p class="overflow-hidden">
+              <span class="block pt-2 font-serif text-sm leading-relaxed text-sub">
+                {opening}
+              </span>
+            </p>
+          </div>
+        )}
+      </a>
+    </li>
+  ))}
+</ul>

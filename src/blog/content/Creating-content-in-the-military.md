@@ -1,6 +1,7 @@
 ---
 title: Creating content in the military
 date: 2024-07-01
+description: "What I learned making Instagram content and a newsletter during Korean military service: writing to finish my thoughts, seeing as a maker, and just starting."
 ---
 
 <!-- LANG:EN:START -->

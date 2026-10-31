@@ -1,0 +1,334 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import {
+  formatBlogDate,
+  getBlogSlug,
+  parseBlogBilingualContent,
+} from '../lib/blog';
+import { getBlogMarkdownProcessor } from '../lib/markdown';
+import '../content.css';
+
+interface Props {
+  notes: CollectionEntry<'blog'>[];
+}
+
+const { notes } = Astro.props as Props;
+const processor = await getBlogMarkdownProcessor();
+
+const rendered = await Promise.all(
+  notes.map(async (note) => {
+    const content = parseBlogBilingualContent(note);
+    const render = async (markdown: string) =>
+      markdown.trim() ? (await processor.render(markdown)).code : null;
+    const en = await render(content.enMarkdown);
+    const ko = await render(content.koMarkdown);
+
+    return {
+      id: getBlogSlug(note),
+      title: note.data.title,
+      date: formatBlogDate(note.data.date),
+      // A note missing one language shows the other rather than nothing.
+      en: en ?? ko,
+      ko: ko ?? en,
+    };
+  }),
+);
+---
+
+{/*
+  Notes read as one stream on a timeline, borrowed from the Experiences page.
+  Each starts as just its title and date; hovering shows a two-line glance
+  and clicking pins the whole note open, folding whichever note was open
+  before. The pinned note owns the URL fragment,
+  so the address bar (or "Copy link") is a link straight to that note, open.
+*/}
+<div class="note-timeline">
+  {rendered.map(({ id, title, date, en, ko }) => (
+    <article id={id} class="note">
+      <div class="flex items-baseline justify-between gap-4">
+        <h2 class="font-serif text-lg text-text">
+          <button
+            type="button"
+            class="note-toggle text-left transition-colors hover:text-accent"
+            aria-expanded="false"
+            aria-controls={`${id}-body`}
+          >
+            {title}
+          </button>
+        </h2>
+        <span class="shrink-0 font-mono text-xs text-sub">{date}</span>
+      </div>
+      <div class="note-controls">
+        <div class="overflow-hidden">
+          <div class="flex items-center justify-end gap-4 pt-1 font-mono text-xs text-sub">
+            <div role="group" aria-label="Language toggle" class="flex items-center gap-2">
+              <button type="button" class="blog-lang-button text-accent" data-note-lang="en" aria-pressed="true">
+                En
+              </button>
+              <span>/</span>
+              <button type="button" class="blog-lang-button" data-note-lang="ko" aria-pressed="false">
+                Ko
+              </button>
+            </div>
+            <button type="button" class="note-copy transition-colors hover:text-accent">
+              Copy link
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id={`${id}-body`} class="note-body mt-2">
+        <div
+          lang="en"
+          class="blog-content font-serif text-sm leading-relaxed text-text/90"
+          data-note-panel="en"
+          set:html={en}
+        />
+        <div
+          lang="ko"
+          class="blog-content hidden font-serif text-sm leading-relaxed text-text/90"
+          data-note-panel="ko"
+          set:html={ko}
+        />
+      </div>
+    </article>
+  ))}
+</div>
+
+<style>
+  .note-timeline {
+    /* Hover glance height: two clear lines plus the top of a third, which
+       fades. Read by the script too, in rem. */
+    --note-preview: 4.25rem;
+    position: relative;
+    display: grid;
+    gap: 1.5rem;
+    padding-left: 1.5rem;
+  }
+
+  .note-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.25rem;
+    top: 0.35rem;
+    bottom: 0.35rem;
+    width: 1px;
+    background: rgba(140, 140, 140, 0.35);
+  }
+
+  .note {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .note::before {
+    content: '';
+    position: absolute;
+    left: -1.45rem;
+    top: 0.45rem;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 999px;
+    border: 1px solid rgba(140, 140, 140, 0.5);
+    background: #f4f4f0;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+
+  .note.is-open::before {
+    border-color: #ea580c;
+    background: #ea580c;
+    box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.12);
+  }
+
+  .note.is-open .note-toggle {
+    color: #ea580c;
+  }
+
+  /* Three states. Folded: title and date only. Hovered: a two-line glance
+     that fades out, small enough that the rows below barely move under the
+     cursor. Pinned (clicked): the whole note. --note-full is the measured
+     height of the open body, so pinning animates to its real size. */
+  .note-body {
+    max-height: 0;
+    margin-top: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, margin-top 0.3s ease-out;
+    -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent);
+    mask-image: linear-gradient(to bottom, #000 62%, transparent);
+  }
+
+  /* Hover only where hovering exists; a short delay keeps a cursor passing
+     over the list from opening every note on the way. */
+  @media (hover: hover) {
+    .note:hover .note-body {
+      max-height: var(--note-preview);
+      margin-top: 0.5rem;
+      transition-delay: 0.12s;
+    }
+
+    /* A note that fits in the glance has nothing to fade. */
+    .note.is-short:hover .note-body {
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+  }
+
+  /* After the hover rules, so a pinned note under the cursor stays whole. */
+  .note.is-open .note-body,
+  .note:has(.note-toggle:focus-visible) .note-body {
+    max-height: var(--note-full, none);
+    margin-top: 0.5rem;
+    -webkit-mask-image: none;
+    mask-image: none;
+    transition-delay: 0s;
+  }
+
+  /* The language toggle and Copy link belong to a pinned note: their row
+     opens with it, and otherwise takes no space and stays out of the tab
+     order. */
+  .note-controls {
+    display: grid;
+    grid-template-rows: 0fr;
+    visibility: hidden;
+    transition: grid-template-rows 0.25s ease-out, visibility 0.25s;
+  }
+
+  .note.is-open .note-controls,
+  .note:focus-within .note-controls {
+    grid-template-rows: 1fr;
+    visibility: visible;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .note-body,
+    .note-controls {
+      transition: none;
+    }
+  }
+
+  .note-body :global(.blog-content p:last-child) {
+    margin-bottom: 0;
+  }
+
+  /* In the glance, paragraphs run together as one flow of text, so both
+     lines are words rather than a line and a paragraph gap. Pinning restores
+     the breaks. */
+  .note-body :global(.blog-content p) {
+    display: inline;
+  }
+
+  .note-body :global(.blog-content p)::after {
+    content: ' ';
+  }
+
+  .note.is-open .note-body :global(.blog-content p),
+  .note.is-measuring .note-body :global(.blog-content p),
+  .note:has(.note-toggle:focus-visible) .note-body :global(.blog-content p) {
+    display: block;
+  }
+</style>
+
+<script>
+  const notes = Array.from(document.querySelectorAll<HTMLElement>('.note'));
+
+  const timeline = document.querySelector<HTMLElement>('.note-timeline');
+
+  // Compared against the glance height itself, never the body's current
+  // height, which depends on whether the note is folded, hovered, or pinned.
+  const previewHeight = () => {
+    if (!timeline) return 0;
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    return parseFloat(getComputedStyle(timeline).getPropertyValue('--note-preview')) * rem;
+  };
+
+  const measure = () => {
+    const preview = previewHeight();
+    notes.forEach((note) => {
+      const body = note.querySelector<HTMLElement>('.note-body');
+      if (!body) return;
+      // Measure the open layout (separate paragraphs), whatever state the
+      // note is showing right now.
+      note.classList.add('is-measuring');
+      const full = Array.from(body.children)
+        .filter((child) => !child.classList.contains('hidden'))
+        .reduce((height, child) => height + (child as HTMLElement).offsetHeight, 0);
+      note.classList.remove('is-measuring');
+      note.style.setProperty('--note-full', `${full}px`);
+      // The glance already shows all of it: no fade.
+      note.classList.toggle('is-short', full <= preview + 1);
+    });
+  };
+
+  const setOpen = (note: HTMLElement, open: boolean) => {
+    note.classList.toggle('is-open', open);
+    note.querySelector('.note-toggle')?.setAttribute('aria-expanded', String(open));
+  };
+
+  // One note open at a time, and the URL points at it; unpinning it clears
+  // the fragment.
+  const pin = (note: HTMLElement) => {
+    const open = !note.classList.contains('is-open');
+    if (open) {
+      notes.filter((other) => other !== note).forEach((other) => setOpen(other, false));
+    }
+    setOpen(note, open);
+    const url = open ? `#${encodeURIComponent(note.id)}` : location.pathname;
+    if (open || location.hash === `#${encodeURIComponent(note.id)}`) {
+      history.replaceState(null, '', url);
+    }
+  };
+
+  notes.forEach((note) => {
+    note.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement;
+      // Links and the note's own controls do their own thing; a text
+      // selection is someone reading, not toggling.
+      if (target.closest('a, .note-controls') || getSelection()?.toString()) {
+        return;
+      }
+      pin(note);
+    });
+
+    // Each note switches language on its own.
+    const langButtons = Array.from(
+      note.querySelectorAll<HTMLButtonElement>('[data-note-lang]'),
+    );
+    langButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const lang = button.dataset.noteLang;
+        note.querySelectorAll<HTMLElement>('[data-note-panel]').forEach((panel) => {
+          panel.classList.toggle('hidden', panel.dataset.notePanel !== lang);
+        });
+        langButtons.forEach((other) => {
+          const active = other === button;
+          other.setAttribute('aria-pressed', String(active));
+          other.classList.toggle('text-accent', active);
+        });
+        measure();
+      });
+    });
+
+    const copy = note.querySelector<HTMLButtonElement>('.note-copy');
+    copy?.addEventListener('click', async () => {
+      const url = `${location.origin}${location.pathname}#${encodeURIComponent(note.id)}`;
+      const copied = await navigator.clipboard?.writeText(url).then(
+        () => true,
+        () => false,
+      );
+      copy.textContent = copied ? 'Link copied' : 'Copy failed';
+      setTimeout(() => (copy.textContent = 'Copy link'), 1600);
+    });
+  });
+
+  measure();
+  addEventListener('resize', measure);
+  document.fonts?.ready.then(measure);
+
+  // /notes/#Mutant arrives with that note open and in view.
+  const linked = location.hash
+    ? document.getElementById(decodeURIComponent(location.hash.slice(1)))
+    : null;
+  if (linked && notes.includes(linked)) {
+    setOpen(linked, true);
+    linked.scrollIntoView({ block: 'start' });
+  }
+</script>

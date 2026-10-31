@@ -1,6 +1,10 @@
 import type { CollectionEntry } from 'astro:content';
 import { getCollection } from 'astro:content';
-import { getExcerptFromMarkdown, uniqueStrings } from '../../lib/seo';
+import {
+  getExcerptFromMarkdown,
+  stripMarkdownHeading,
+  uniqueStrings,
+} from '../../lib/seo';
 
 const WHITESPACE_PATTERN = /\s+/g;
 
@@ -17,16 +21,38 @@ export function getBlogSlug(post: CollectionEntry<'blog'>): string {
   return post.data.slug ?? getBlogSlugFromTitle(post.data.title);
 }
 
-export function getBlogHrefFromSlug(slug: string): string {
-  return `/blog/${encodeURIComponent(slug)}/`;
+export type BlogPostType = CollectionEntry<'blog'>['data']['type'];
+
+export interface BlogSection {
+  type: BlogPostType;
+  label: string;
+  path: string;
 }
 
-export function getBlogHrefFromTitle(title: string): string {
-  return getBlogHrefFromSlug(getBlogSlugFromTitle(title));
+// Each post type is its own top-level section, so the type decides the URL.
+export const BLOG_SECTIONS: Record<BlogPostType, BlogSection> = {
+  essay: { type: 'essay', label: 'Essays', path: '/essays/' },
+  note: { type: 'note', label: 'Notes', path: '/notes/' },
+};
+
+export function getBlogSection(post: CollectionEntry<'blog'>): BlogSection {
+  return BLOG_SECTIONS[post.data.type];
+}
+
+export function getBlogHrefFromSlug(type: BlogPostType, slug: string): string {
+  return `${BLOG_SECTIONS[type].path}${encodeURIComponent(slug)}/`;
 }
 
 export function getBlogHref(post: CollectionEntry<'blog'>): string {
-  return getBlogHrefFromSlug(getBlogSlug(post));
+  return getBlogHrefFromSlug(post.data.type, getBlogSlug(post));
+}
+
+export async function getBlogPostsByType(
+  type: BlogPostType,
+): Promise<CollectionEntry<'blog'>[]> {
+  return (await getCollection('blog', (post) => post.data.type === type)).sort(
+    (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+  );
 }
 
 export function formatBlogDate(date: Date): string {
@@ -54,7 +80,10 @@ export function formatDateForSchema(date: Date): string {
 }
 
 export function getBlogSeoTitle(post: CollectionEntry<'blog'>): string {
-  return post.data.seoTitle ?? `${post.data.title} - Blog - Yoonchul Yi`;
+  return (
+    post.data.seoTitle ??
+    `${post.data.title} - ${getBlogSection(post).label} - Yoonchul Yi`
+  );
 }
 
 export function getBlogDescription(
@@ -70,6 +99,28 @@ export function getBlogDescription(
     .replace(/^#{1,3}\s+.+$/m, '')
     .trim();
   return getExcerptFromMarkdown(markdown);
+}
+
+// Blocks that open a post without being prose: headings, rules, quotes,
+// lists, and raw HTML.
+const NON_PROSE_BLOCK = /^(#{1,6}\s|-{3,}|\*{3,}|>|[-*+]\s|\d+\.\s|<)/;
+
+/**
+ * The first sentence of the post's first prose paragraph, English first. The
+ * essay list shows it as the hover preview.
+ */
+export function getBlogFirstSentence(content: BlogBilingualContent): string {
+  const markdown = content.enMarkdown || content.koMarkdown;
+  const paragraph = markdown
+    .split(/\n\s*\n/)
+    .map((block) => block.trim())
+    .find((block) => block && !NON_PROSE_BLOCK.test(block));
+  if (!paragraph) {
+    return '';
+  }
+
+  const text = stripMarkdownHeading(paragraph.replace(/\[\^[^\]]+\]/g, ''));
+  return /^.+?[.!?](?=\s|$)/.exec(text)?.[0] ?? text;
 }
 
 export function getBlogKeywords(post: CollectionEntry<'blog'>): string[] {
@@ -91,8 +142,8 @@ export interface BlogPostPageProps {
   content: BlogBilingualContent;
 }
 
-export async function getBlogPostStaticPaths() {
-  const posts = await getCollection('blog');
+export async function getBlogPostStaticPaths(type: BlogPostType) {
+  const posts = await getBlogPostsByType(type);
 
   return posts.map((post) => {
     const title = post.data.title;

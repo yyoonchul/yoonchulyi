@@ -5,7 +5,9 @@ import {
   type BlogPostPageProps,
 } from '../../blog/lib/blog';
 
-export const getStaticPaths = getBlogPostStaticPaths;
+export function getStaticPaths() {
+  return getBlogPostStaticPaths('essay');
+}
 
 const { post, slug, title, content } = Astro.props as BlogPostPageProps;
 ---

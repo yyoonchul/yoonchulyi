@@ -1,0 +1,15 @@
+---
+import BlogPostPage from '../../blog/pages/BlogPostPage.astro';
+import {
+  getBlogPostStaticPaths,
+  type BlogPostPageProps,
+} from '../../blog/lib/blog';
+
+export function getStaticPaths() {
+  return getBlogPostStaticPaths('note');
+}
+
+const { post, slug, title, content } = Astro.props as BlogPostPageProps;
+---
+
+<BlogPostPage post={post} slug={slug} title={title} content={content} />

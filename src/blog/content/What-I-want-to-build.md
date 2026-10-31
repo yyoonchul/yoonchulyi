@@ -1,6 +1,7 @@
 ---
 title: What I want to build
 date: 2025-07-25
+type: note
 ---
 
 <!-- LANG:EN:START -->

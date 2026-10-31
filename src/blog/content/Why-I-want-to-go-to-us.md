@@ -1,6 +1,7 @@
 ---
 title: Why I want to go to US
 date: 2025-09-21
+description: "Why I want to build a startup aimed at the US: the American media and Silicon Valley stories that shaped me, and wanting to play on the biggest stage."
 ---
 
 <!-- LANG:EN:START -->

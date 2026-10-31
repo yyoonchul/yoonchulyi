@@ -1,6 +1,7 @@
 ---
 title: 2025 Recap
 date: 2025-12-29
+description: "A 2025 reflection: going all in on startups, taking leave for a first internship, and what I learned about risk, cofounders, and acting over overthinking."
 ---
 
 <!-- LANG:EN:START -->

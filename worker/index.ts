@@ -273,9 +273,34 @@ export default {
       return Response.redirect(`${SITE}/experiences/`, 301);
     }
 
+    // /blog/ split into /essays/ and /notes/. Only posts published before the
+    // split ever had a /blog/ URL, so the map is closed: new posts never need
+    // an entry here.
+    const blogTarget = getLegacyBlogRedirect(url.pathname);
+    if (blogTarget) {
+      return Response.redirect(`${SITE}${blogTarget}`, 301);
+    }
+
     return env.ASSETS.fetch(request);
   },
 };
+
+const LEGACY_BLOG_POSTS: Record<string, string> = {
+  'MaekNote-Manifesto': '/essays/MaekNote-Manifesto/',
+  '2025-Recap': '/essays/2025-Recap/',
+  'Why-I-want-to-go-to-US': '/essays/Why-I-want-to-go-to-US/',
+  'What-I-want-to-build': '/notes/What-I-want-to-build/',
+  'Creating-content-in-the-military': '/essays/Creating-content-in-the-military/',
+  Mutant: '/notes/Mutant/',
+};
+
+function getLegacyBlogRedirect(pathname: string): string | null {
+  if (pathname === '/blog' || pathname === '/blog/') {
+    return '/essays/';
+  }
+  const match = /^\/blog\/([^/]+)\/?$/.exec(pathname);
+  return match ? (LEGACY_BLOG_POSTS[match[1]] ?? null) : null;
+}
 
 async function handleSubscribe(request: Request, env: Env): Promise<Response> {
   if (request.method !== 'POST') {

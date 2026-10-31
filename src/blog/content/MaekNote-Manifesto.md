@@ -1,6 +1,7 @@
 ---
 title: MaekNote Manifesto
 date: 2026-05-18
+description: "Why I left Notion after five years, moved all my notes to local Markdown, and built MaekNote so AI agents like Claude Code and Codex can work with my context."
 ---
 
 <!-- LANG:EN:START -->

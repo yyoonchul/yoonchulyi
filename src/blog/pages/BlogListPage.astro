@@ -1,37 +1,48 @@
 ---
-import { getCollection } from 'astro:content';
-import ListItem from '../../components/ListItem.astro';
 import SubscribeForm from '../../components/SubscribeForm.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import EssayList from '../components/EssayList.astro';
+import NoteList from '../components/NoteList.astro';
 import {
-  formatBlogDate,
+  BLOG_SECTIONS,
   getBlogDescription,
   getBlogHref,
+  getBlogPostsByType,
+  type BlogPostType,
 } from '../lib/blog';
 import {
   createBreadcrumbSchema,
   createItemListSchema,
 } from '../../lib/schema';
 
-const posts = (await getCollection('blog')).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
-);
+interface Props {
+  type: BlogPostType;
+}
+
+const { type } = Astro.props as Props;
+const section = BLOG_SECTIONS[type];
+const posts = await getBlogPostsByType(type);
+
+const pageTitle = `${section.label} by Yoonchul Yi`;
 const description =
-  'Long-form essays by Yoonchul Yi on AI-native productivity, local-first notes, Claude Code workflows, startups, and personal operating systems.';
+  type === 'essay'
+    ? 'Long-form essays by Yoonchul Yi on AI-native productivity, local-first notes, Claude Code workflows, startups, and personal operating systems.'
+    : 'Short notes by Yoonchul Yi: passing thoughts on AI, products, startups, and the things he is building.';
 ---
 
 <BaseLayout
-  title="Essays by Yoonchul Yi"
+  title={pageTitle}
   description={description}
-  canonicalPath="/blog/"
+  canonicalPath={section.path}
+  section={section}
   jsonLd={[
     createBreadcrumbSchema([
       { name: 'Home', path: '/' },
-      { name: 'Blog', path: '/blog/' },
+      { name: section.label, path: section.path },
     ]),
     createItemListSchema(
-      'Essays by Yoonchul Yi',
-      '/blog/',
+      pageTitle,
+      section.path,
       posts.map((post) => ({
         name: post.data.seoTitle ?? post.data.title,
         path: getBlogHref(post),
@@ -41,25 +52,15 @@ const description =
   ]}
 >
   <section class="py-8">
-    <h1 class="font-serif text-2xl mb-2">Blog</h1>
-
-    <div class="mt-6">
-      {posts.map((post) => {
-        const title = post.data.title;
-        return (
-          <ListItem
-            title={title}
-            date={formatBlogDate(post.data.date)}
-            href={getBlogHref(post)}
-          />
-        );
-      })}
-    </div>
+    {type === 'note' ? <NoteList notes={posts} /> : <EssayList essays={posts} />}
   </section>
 
-  <SubscribeForm
-    topics={['essays']}
-    heading="Essays by email"
-    blurb=""
-  />
+  {/* Notes are not mailed, so only the essays page offers the subscription. */}
+  {type === 'essay' && (
+    <SubscribeForm
+      topics={['essays']}
+      heading="Essays by email"
+      blurb=""
+    />
+  )}
 </BaseLayout>

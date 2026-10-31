@@ -15,7 +15,7 @@ routes = [
 [assets]
 directory = "./dist/"
 binding = "ASSETS"
-run_worker_first = ["/api/*", "/about", "/about/", "/admin", "/admin/*"]
+run_worker_first = ["/api/*", "/about", "/about/", "/blog", "/blog/*", "/admin", "/admin/*"]
 
 # Not credentials — the Resend API key is the thing that must stay secret.
 # Language picks the segment, topic picks what they opted into; a broadcast
