@@ -28,6 +28,14 @@
             }
           ]
         },
+        "type": {
+          "type": "string",
+          "enum": [
+            "essay",
+            "note"
+          ],
+          "default": "essay"
+        },
         "seoTitle": {
           "type": "string",
           "minLength": 1
@@ -102,9 +110,6 @@
         "index": {
           "type": "boolean",
           "default": true
-        },
-        "$schema": {
-          "type": "string"
         }
       },
       "required": [
