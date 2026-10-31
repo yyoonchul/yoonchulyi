@@ -1,44 +1,59 @@
 ---
-import { isPathActive } from '../lib/navigation';
+export interface HeaderSection {
+  label: string;
+  path: string;
+}
 
-const pathname = Astro.url.pathname;
+interface Props {
+  section?: HeaderSection;
+}
 
-const navItems = [
-  { label: 'Experiences', href: '/experiences' },
-  { label: 'Projects', href: '/projects' },
-  { label: 'Blog', href: '/blog' },
-  { label: 'Daily Insights', href: '/daily-insights' },
-];
+const { section } = Astro.props as Props;
+
+const trimSlash = (path: string) => path.replace(/\/+$/, '') || '/';
+const current = trimSlash(Astro.url.pathname);
+const isSectionIndex = section !== undefined && current === trimSlash(section.path);
+
+// The header line is the page title on the home page ("Yoonchul Yi") and on a
+// section index ("Yoonchul Yi / Essays"), so it carries the h1 there. On a
+// post the title below does, and this line is a breadcrumb back up the path.
+const Wrapper = current === '/' || isSectionIndex ? 'h1' : section ? 'nav' : 'div';
 ---
 
 {/*
-  Four nav items no longer fit beside the wordmark on a phone: both the name
-  and the menu broke across lines. Below `sm` the two stack instead, so each
-  stays on one line; from `sm` up this is the original single row.
+  The header is the way home, plus where you are. The home page lists every
+  section, so there is no nav row; the section name sits beside the wordmark
+  instead. Same serif as the wordmark, so the line reads as one title, but
+  upright, smaller, and muted so the name stays the lead and the page title
+  below is never outweighed.
 */}
-<header
-  class="flex flex-col gap-2 py-5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-0 sm:py-8"
->
-  <a
-    href="/"
-    class="self-start font-serif italic text-2xl whitespace-nowrap hover:text-accent transition-colors sm:self-auto sm:text-3xl"
+<header class="py-5 sm:py-8">
+  <Wrapper
+    aria-label={Wrapper === 'nav' ? 'Breadcrumb' : undefined}
+    class="flex min-w-0 items-baseline gap-2"
   >
-    Yoonchul Yi
-  </a>
-  <nav class="flex flex-wrap gap-x-4 gap-y-1 font-mono text-sm sm:gap-x-6">
-    {navItems.map(({ label, href }) => {
-      const isActive = isPathActive(pathname, href, { exact: false });
-      return (
-        <a
-          href={href}
-          class:list={[
-            'transition-colors hover:text-accent pb-1',
-            isActive ? 'text-accent border-b border-accent' : 'text-sub',
-          ]}
-        >
-          {label}
-        </a>
-      );
-    })}
-  </nav>
+    <a
+      href="/"
+      class="font-serif italic text-2xl whitespace-nowrap hover:text-accent transition-colors sm:text-3xl"
+    >
+      Yoonchul Yi
+    </a>
+    {section && (
+      <>
+        <span aria-hidden="true" class="font-serif text-lg text-sub/50 sm:text-xl">/</span>
+        {isSectionIndex ? (
+          <span aria-current="page" class="whitespace-nowrap font-serif text-lg text-sub sm:text-xl">
+            {section.label}
+          </span>
+        ) : (
+          <a
+            href={section.path}
+            class="whitespace-nowrap font-serif text-lg text-sub hover:text-accent transition-colors sm:text-xl"
+          >
+            {section.label}
+          </a>
+        )}
+      </>
+    )}
+  </Wrapper>
 </header>

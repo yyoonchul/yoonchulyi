@@ -1,5 +1,4 @@
 ---
-import AboutSection from '../components/AboutSection.astro';
 import ExperienceList from '../components/ExperienceList.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import {
@@ -16,6 +15,7 @@ const description =
   title="Experiences - Yoonchul Yi"
   description={description}
   canonicalPath="/experiences/"
+  section={{ label: 'Experiences', path: '/experiences/' }}
   ogType="profile"
   jsonLd={[
     createPersonSchema(),
@@ -27,8 +27,8 @@ const description =
   ]}
 >
   <main class="py-8">
-    <AboutSection title="Experiences">
+    <div class="space-y-8">
       <ExperienceList />
-    </AboutSection>
+    </div>
   </main>
 </BaseLayout>

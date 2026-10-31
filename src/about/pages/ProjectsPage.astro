@@ -1,5 +1,4 @@
 ---
-import AboutSection from '../components/AboutSection.astro';
 import ProjectList from '../components/ProjectList.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import {
@@ -15,6 +14,7 @@ const description =
   title="Projects - Yoonchul Yi"
   description={description}
   canonicalPath="/projects/"
+  section={{ label: 'Projects', path: '/projects/' }}
   jsonLd={[
     createPersonSchema(),
     createBreadcrumbSchema([
@@ -24,8 +24,8 @@ const description =
   ]}
 >
   <main class="py-8">
-    <AboutSection title="Projects">
+    <div class="space-y-8">
       <ProjectList />
-    </AboutSection>
+    </div>
   </main>
 </BaseLayout>

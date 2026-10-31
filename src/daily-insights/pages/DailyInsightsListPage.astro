@@ -83,6 +83,7 @@ const groupedDailyInsights = dailyInsights.reduce(
   title="AI, Tech, and Insightful Articles - Yoonchul Yi"
   description={description}
   canonicalPath="/daily-insights/"
+  section={{ label: 'Daily Insights', path: '/daily-insights/' }}
   jsonLd={[
     createBreadcrumbSchema([
       { name: 'Home', path: '/' },
@@ -96,8 +97,6 @@ const groupedDailyInsights = dailyInsights.reduce(
   ]}
 >
   <section class="py-8">
-    <h1 class="font-serif text-2xl mb-8">Daily Insights</h1>
-
     <div class="space-y-4">
       {groupedDailyInsights.map(({ year, months }) => (
         <details class="daily-insights-toggle" open={year === currentYear}>
