@@ -59,6 +59,18 @@ export function getDailyInsightDescription(
   );
 }
 
+/**
+ * The title of the day's first article: the first `###` heading, which the
+ * digest template uses for each item under the quick summary. Null when the
+ * digest has no item headings.
+ */
+export function getDailyInsightLeadTitle(
+  content: DailyInsightBilingualContent,
+): string | null {
+  const heading = /^###\s+(.+)$/m.exec(content.enMarkdown)?.[1];
+  return heading ? stripMarkdownHeading(heading) : null;
+}
+
 export function getDailyInsightHref(meta: Pick<DailyInsightMeta, 'year' | 'month' | 'day'>): string {
   return `/daily-insights/${meta.year}/${meta.month}/${meta.day}/`;
 }

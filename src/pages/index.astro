@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import HomeIndex from '../components/HomeIndex.astro';
 import SubscribeForm from '../components/SubscribeForm.astro';
 import {
   createPersonSchema,
@@ -26,10 +27,11 @@ const socialLinks = [
   <!-- About Section -->
   <section class="py-8">
     <p class="font-serif text-lg leading-relaxed text-text">
-      Hi, I'm Yoonchul Yi.<br />
       {HOME_DESCRIPTION}
     </p>
   </section>
+
+  <HomeIndex />
 
   <SubscribeForm heading="Get my essays and the articles I read." />
 

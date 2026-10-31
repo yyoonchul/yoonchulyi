@@ -1,0 +1,155 @@
+---
+import { getCollection } from 'astro:content';
+import {
+  BLOG_SECTIONS,
+  formatBlogDate,
+  getBlogPostsByType,
+} from '../blog/lib/blog';
+import {
+  getDailyInsightEntriesSorted,
+  getDailyInsightLeadTitle,
+  getDailyInsightTitle,
+  parseDailyInsightBilingualContent,
+} from '../daily-insights/lib/dailyInsights';
+
+interface PreviewItem {
+  title: string;
+  meta: string;
+}
+
+interface IndexSection {
+  label: string;
+  href: string;
+  blurb: string;
+  preview: PreviewItem[];
+}
+
+const PREVIEW_LIMIT = 3;
+
+const [essays, notes, dailyInsights, projects, experiences] = await Promise.all([
+  getBlogPostsByType('essay'),
+  getBlogPostsByType('note'),
+  getDailyInsightEntriesSorted(),
+  getCollection('aboutProjects'),
+  getCollection('aboutExperiences'),
+]);
+
+const byOrderDesc = <T extends { data: { order: number } }>(a: T, b: T) =>
+  b.data.order - a.data.order;
+
+const shortDateFormatter = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  timeZone: 'UTC',
+});
+
+const blogPreview = (posts: typeof essays): PreviewItem[] =>
+  posts.slice(0, PREVIEW_LIMIT).map((post) => ({
+    title: post.data.title,
+    meta: formatBlogDate(post.data.date),
+  }));
+
+const sections: IndexSection[] = [
+  {
+    label: 'Experiences',
+    href: '/experiences/',
+    blurb: 'Where I have worked and studied.',
+    preview: experiences
+      .sort(byOrderDesc)
+      .slice(0, PREVIEW_LIMIT)
+      .map((experience) => ({
+        title: experience.data.organization
+          ? `${experience.data.role}, ${experience.data.organization}`
+          : experience.data.role,
+        meta: experience.data.period,
+      })),
+  },
+  {
+    label: 'Projects',
+    href: '/projects/',
+    blurb: 'Things I have built and shipped.',
+    preview: projects
+      .sort(byOrderDesc)
+      .slice(0, PREVIEW_LIMIT)
+      .map((project) => ({ title: project.data.title, meta: '' })),
+  },
+  {
+    label: BLOG_SECTIONS.essay.label,
+    href: BLOG_SECTIONS.essay.path,
+    blurb: 'Long-form writing on products, AI, and how I work.',
+    preview: blogPreview(essays),
+  },
+  {
+    label: BLOG_SECTIONS.note.label,
+    href: BLOG_SECTIONS.note.path,
+    blurb: 'Short, unpolished thoughts.',
+    preview: blogPreview(notes),
+  },
+  {
+    label: 'Daily Insights',
+    href: '/daily-insights/',
+    blurb: 'What I read each day, summarized.',
+    // "Oct 30 — <first article>", so each day reads as what it covered rather
+    // than a run of identical "Daily Digest" headlines.
+    preview: dailyInsights.slice(0, PREVIEW_LIMIT).map(({ entry, meta }) => {
+      const content = parseDailyInsightBilingualContent(entry);
+      const lead =
+        getDailyInsightLeadTitle(content) ??
+        getDailyInsightTitle(meta, content).replace(/ - Yoonchul Yi$/, '');
+      return {
+        title: `${shortDateFormatter.format(new Date(meta.sortValue))} — ${lead}`,
+        meta: '',
+      };
+    }),
+  },
+];
+---
+
+{/*
+  The home page is the site's table of contents. Each row is one link to a
+  section; hovering or focusing it unfolds a preview of what is inside, so the
+  preview is a glance, not a second set of links. Touch devices skip the
+  preview and go straight to the section on tap.
+*/}
+<nav aria-label="Site sections" class="py-6 border-t border-sub/20">
+  <ul>
+    {sections.map(({ label, href, blurb, preview }) => (
+      <li>
+        <a href={href} class="group block py-3 outline-none">
+          <div class="flex items-baseline justify-between gap-4">
+            <div class="flex min-w-0 items-baseline gap-3">
+              <span class="font-serif text-lg transition-colors group-hover:text-accent group-focus-visible:text-accent">
+                {label}
+              </span>
+              <span class="hidden truncate text-sm text-sub sm:inline">{blurb}</span>
+            </div>
+            <span class="shrink-0 font-mono text-xs text-sub transition-colors group-hover:text-accent group-focus-visible:text-accent">
+              →
+            </span>
+          </div>
+
+          <div
+            aria-hidden="true"
+            class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none group-hover:grid-rows-[1fr] group-focus-visible:grid-rows-[1fr]"
+          >
+            <ul class="overflow-hidden">
+              {preview.map((item, index) => (
+                <li
+                  class:list={[
+                    'flex items-baseline justify-between gap-4 text-sm text-sub',
+                    index === 0 ? 'pt-3' : 'pt-1.5',
+                  ]}
+                >
+                  <span class="truncate font-serif">{item.title}</span>
+                  {item.meta && (
+                    <span class="shrink-0 font-mono text-xs">{item.meta}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
