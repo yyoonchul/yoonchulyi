@@ -1,0 +1,19 @@
+{
+  "lead": "The Ability of Frontier Models to Control Robots is Rapidly Improving",
+  "subject": {
+    "en": "Frontier models are learning to control robots faster",
+    "ko": "최전선 모델의 로봇 조작 능력이 빠르게 높아진다"
+  },
+  "tldr": {
+    "en": [
+      "Frontier multimodal models doubled their real-world robot manipulation performance every 53.9 days from July to October 2026, though full task completion remains uncommon.",
+      "Anthropic’s S-1 reports 11,900+ customers spending at least $100,000 a year, with more than half using both Claude Platform and a first-party app.",
+      "Amazon says token use, AI adoption, and code activity alone are poor measures of engineering productivity, favoring successful production changes and customer outcomes."
+    ],
+    "ko": [
+      "실제 양팔 로봇 실험에서 최전선 멀티모달 모델의 조작 성능은 2026년 7~10월 사이 53.9일마다 두 배가 됐지만, 전체 과업 완수는 여전히 드물었다.",
+      "Anthropic의 S-1에 따르면 연간 10만 달러 이상 지출하는 고객은 11,900곳을 넘었고, 절반 이상이 Claude Platform과 자체 앱을 함께 쓴다.",
+      "Amazon은 토큰 소비량, AI 도입률, 코드 작업량만으로 개발 생산성을 재기 어렵다며 운영 환경에 성공적으로 반영한 변경과 고객 성과를 중시한다."
+    ]
+  }
+}
