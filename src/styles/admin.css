@@ -49,7 +49,7 @@
 /* Typography sits on the body, not on <html>, so that raising the base size to
    14px does not quietly redefine rem for anything Tailwind's preflight sets. */
 .admin body {
-  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+  font-family: 'IBM Plex Mono', 'Noto Sans KR', ui-monospace, SFMono-Regular, monospace;
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
@@ -58,7 +58,7 @@
 .admin h1,
 .admin h2,
 .admin h3 {
-  font-family: Newsreader, Georgia, serif;
+  font-family: Newsreader, 'Noto Serif KR', Georgia, serif;
   font-weight: 500;
   margin: 0;
 }
@@ -95,7 +95,7 @@
 }
 
 .admin-wordmark {
-  font-family: Newsreader, Georgia, serif;
+  font-family: Newsreader, 'Noto Serif KR', Georgia, serif;
   font-style: italic;
   font-size: 25px;
   line-height: 1;
@@ -649,7 +649,7 @@
 .triple h4 {
   margin: 0;
   padding: 11px 14px 8px;
-  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-family: 'IBM Plex Mono', 'Noto Sans KR', ui-monospace, monospace;
   font-size: 11px;
   letter-spacing: 0.11em;
   text-transform: uppercase;

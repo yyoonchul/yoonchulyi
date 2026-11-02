@@ -4,7 +4,7 @@
 
 @layer base {
   html {
-    @apply bg-bg text-text antialiased;
+    @apply bg-bg font-serif text-text antialiased;
   }
 
   body {

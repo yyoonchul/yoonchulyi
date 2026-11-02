@@ -10,8 +10,8 @@ export default {
         accent: '#EA580C',
       },
       fontFamily: {
-        serif: ['Newsreader', 'serif'],
-        mono: ['IBM Plex Mono', 'monospace'],
+        serif: ['Newsreader', 'Noto Serif KR', 'serif'],
+        mono: ['IBM Plex Mono', 'Noto Sans KR', 'monospace'],
       },
     },
   },

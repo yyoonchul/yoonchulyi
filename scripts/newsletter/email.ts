@@ -87,7 +87,7 @@ export function renderEmailHtml({
 
   return `<!doctype html>
 <html lang="${language}">
-  <body style="margin:0;padding:32px 16px;background:#F4F4F0;font-family:Georgia,'Times New Roman',serif;color:#191919;line-height:1.7;">
+  <body style="margin:0;padding:32px 16px;background:#F4F4F0;font-family:Georgia,'Times New Roman','Noto Serif KR','Apple SD Gothic Neo','Malgun Gothic',serif;color:#191919;line-height:1.7;">
     <div style="max-width:600px;margin:0 auto;">
       <p style="margin:0 0 32px;font-size:13px;color:#8C8C8C;">yoonchulyi.com</p>
 
@@ -202,7 +202,7 @@ export function renderWeeklyDigestHtml({
 
   return `<!doctype html>
 <html lang="${language}">
-  <body style="margin:0;padding:32px 16px;background:#F4F4F0;font-family:Georgia,'Times New Roman',serif;color:#191919;line-height:1.7;">
+  <body style="margin:0;padding:32px 16px;background:#F4F4F0;font-family:Georgia,'Times New Roman','Noto Serif KR','Apple SD Gothic Neo','Malgun Gothic',serif;color:#191919;line-height:1.7;">
     <div style="max-width:600px;margin:0 auto;">
       <p style="margin:0 0 32px;font-size:13px;color:#8C8C8C;">yoonchulyi.com</p>
 

@@ -2,7 +2,7 @@
 .blog-content h2 {
   margin-top: 2rem;
   margin-bottom: 0.75rem;
-  font-family: 'Newsreader', serif;
+  font-family: 'Newsreader', 'Noto Serif KR', serif;
   font-size: 1.5rem;
   line-height: 1.25;
 }
@@ -10,7 +10,7 @@
 .blog-content h3 {
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
-  font-family: 'Newsreader', serif;
+  font-family: 'Newsreader', 'Noto Serif KR', serif;
   font-size: 1.25rem;
   line-height: 1.35;
 }
@@ -89,7 +89,7 @@
 }
 
 .blog-content code {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'IBM Plex Mono', 'Noto Sans KR', monospace;
   font-size: 0.9em;
   background: rgba(140, 140, 140, 0.12);
   border-radius: 0.25rem;
