@@ -2,7 +2,8 @@
  * Emails subscribers about essays that have not been sent yet.
  *
  * Two feeds are checked — English and Korean — and each maps to one segment
- * (language) and the essays topic. Feeds are read over HTTP rather than from
+ * (language) and the newsletter topic. Only `/essays/` posts are mailed; notes
+ * share the feed but are never sent. Feeds are read over HTTP rather than from
  * `dist/`, so a post is only ever announced once it is actually live: an email
  * whose link 404s cannot be unsent.
  *
@@ -77,7 +78,8 @@ async function main() {
   const plan: { feed: FeedSource; items: FeedItem[] }[] = [];
 
   for (const feed of FEEDS) {
-    const items = await fetchFeed(`${SITE}${feed.path}`);
+    // The blog feed carries notes too, but only essays are mailed.
+    const items = (await fetchFeed(`${SITE}${feed.path}`)).filter(isEssay);
     const pending = items.filter((item) => !seen.has(stateKey(item, feed)));
     console.log(`essays/${feed.language}: ${items.length} in feed, ${pending.length} unsent`);
     for (const item of pending) {
@@ -130,7 +132,7 @@ async function main() {
   }
 
   const apiKey = requireEnv('RESEND_API_KEY');
-  const topicId = requireEnv('RESEND_TOPIC_ESSAYS');
+  const topicId = requireEnv('RESEND_TOPIC_NEWSLETTER');
 
   for (const { feed, items } of plan) {
     // Oldest first, so a backlog arrives in reading order.
@@ -160,6 +162,10 @@ async function main() {
       console.log(`${outcome} essays/${feed.language}: ${item.title}`);
     }
   }
+}
+
+function isEssay(item: FeedItem): boolean {
+  return new URL(item.link, SITE).pathname.startsWith('/essays/');
 }
 
 function stateKey(item: FeedItem, feed: FeedSource): string {

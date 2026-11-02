@@ -1,35 +1,16 @@
 ---
-type Topic = 'essays' | 'daily';
-
 interface Props {
   heading?: string;
   /** Pass an empty string to let the heading stand on its own. */
   blurb?: string;
-  /**
-   * Fixes what the reader subscribes to. On a section page the choice is
-   * already implied by where they are standing, so the picker only appears
-   * where both streams are on offer.
-   */
-  topics?: Topic[];
 }
 
-const {
-  heading = 'Subscribe',
-  blurb = '',
-  topics: fixedTopics,
-} = Astro.props;
-
-const TOPIC_OPTIONS: { value: Topic; label: string; hint: string }[] = [
-  { value: 'essays', label: 'Essays', hint: 'now and then' },
-  { value: 'daily', label: 'Daily Insights', hint: 'weekly' },
-];
+const { heading = 'Subscribe', blurb = '' } = Astro.props;
 
 const languages = [
   { value: 'en', label: 'English' },
   { value: 'ko', label: '한국어' },
 ];
-
-const showTopicPicker = !fixedTopics || fixedTopics.length === 0;
 
 // Ids have to stay unique if a page ever renders more than one of these.
 const uid = Math.random().toString(36).slice(2, 8);
@@ -42,21 +23,6 @@ const websiteId = `subscribe-website-${uid}`;
   {blurb && <p class="text-sub text-sm mb-5">{blurb}</p>}
 
   <form data-subscribe-form action="/api/subscribe" method="post" class="flex flex-col gap-5">
-    {showTopicPicker ? (
-      <fieldset class="flex flex-col gap-2">
-        <legend class="font-mono text-xs text-sub mb-2">What to receive</legend>
-        {TOPIC_OPTIONS.map((topic) => (
-          <label class="flex items-baseline gap-2 cursor-pointer">
-            <input type="checkbox" name="topics" value={topic.value} checked class="accent-accent" />
-            <span class="font-serif text-base">{topic.label}</span>
-            <span class="text-sub text-xs">{topic.hint}</span>
-          </label>
-        ))}
-      </fieldset>
-    ) : (
-      fixedTopics.map((topic) => <input type="hidden" name="topics" value={topic} />)
-    )}
-
     <fieldset class="flex flex-col gap-2">
       <legend class="font-mono text-xs text-sub mb-2">Language</legend>
       <div class="flex gap-5">
@@ -114,13 +80,6 @@ const websiteId = `subscribe-website-${uid}`;
 
       const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
       const data = new FormData(form);
-      const topics = data.getAll('topics').map(String);
-
-      if (topics.length === 0) {
-        if (status) status.textContent = 'Choose at least one thing to receive.';
-        return;
-      }
-
       if (button) button.disabled = true;
       if (status) status.textContent = 'Sending…';
 
@@ -132,7 +91,6 @@ const websiteId = `subscribe-website-${uid}`;
             email: data.get('email'),
             website: data.get('website'),
             language: data.get('language'),
-            topics,
           }),
         });
         const body = (await response.json().catch(() => ({}))) as { error?: string };

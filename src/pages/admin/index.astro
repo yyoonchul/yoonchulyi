@@ -782,7 +782,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     const contacts: any[] = data.contacts ?? [];
     const root = panel('Subscribers', `${number(contacts.length)} on file`);
     const languages = data.languages ?? { en: 0, ko: 0, unknown: 0 };
-    const topics = data.topics ?? { essays: 0, daily: 0, note: 'skipped' };
+    const topics = data.topics ?? { newsletter: 0, note: 'skipped' };
     const total = data.total ?? (data.active ?? 0) + (data.unsubscribed ?? 0);
 
     root.append(
@@ -799,8 +799,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
               : '0 in neither segment',
           }),
           topics.note === 'ok'
-            ? stat('essays / daily', `${topics.essays} / ${topics.daily}`, { small: true })
-            : stat('essays / daily', '—', {
+            ? stat('newsletter', number(topics.newsletter), { small: true })
+            : stat('newsletter', '—', {
                 small: true,
                 note: TOPIC_NOTES[topics.note] ?? '',
               }),
@@ -1088,7 +1088,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           language.append(flag('gone', 'gone'));
         }
 
-        cell(line, 'seg', contact.topics?.length ? contact.topics.join(' + ') : '—');
+        cell(line, 'seg', contact.subscribed ? 'subscribed' : '—');
         rows.append(line);
       }
 

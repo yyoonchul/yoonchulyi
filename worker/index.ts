@@ -7,7 +7,7 @@
  * code; the rest of the site is served straight from the CDN.
  *
  * Confirmation state lives entirely in a signed token rather than storage:
- * the token carries the address, the chosen language and topics, and an
+ * the token carries the address, the chosen language, and an
  * expiry, and the HMAC makes it unforgeable. Signing the preferences (not just
  * the address) is what stops someone editing the confirm link to subscribe
  * another person to something they never asked for.
@@ -18,8 +18,7 @@ interface Env {
   RESEND_API_KEY: string;
   RESEND_SEGMENT_EN: string;
   RESEND_SEGMENT_KO: string;
-  RESEND_TOPIC_ESSAYS: string;
-  RESEND_TOPIC_DAILY: string;
+  RESEND_TOPIC_NEWSLETTER: string;
   SUBSCRIBE_SECRET: string;
   SUBSCRIBE_LIMITER: RateLimit;
   ADMIN_PASSWORD: string;
@@ -34,12 +33,10 @@ interface Env {
 }
 
 type Language = 'en' | 'ko';
-type Topic = 'essays' | 'daily';
 
 interface Subscription {
   email: string;
   language: Language;
-  topics: Topic[];
 }
 
 // Sending lives on the mail subdomain so bulk reputation never touches the
@@ -320,20 +317,13 @@ async function handleSubscribe(request: Request, env: Env): Promise<Response> {
   }
 
   const language: Language = submission.language === 'ko' ? 'ko' : 'en';
-  const topics = submission.topics.filter(
-    (topic): topic is Topic => topic === 'essays' || topic === 'daily',
-  );
-  if (topics.length === 0) {
-    return json({ error: 'Choose at least one thing to receive.' }, 400);
-  }
-
   const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
   const { success } = await env.SUBSCRIBE_LIMITER.limit({ key: ip });
   if (!success) {
     return json({ error: 'Too many requests. Try again in a minute.' }, 429);
   }
 
-  const token = await createToken({ email, language, topics }, env.SUBSCRIBE_SECRET);
+  const token = await createToken({ email, language }, env.SUBSCRIBE_SECRET);
   const confirmUrl = `${SITE}/api/confirm?token=${encodeURIComponent(token)}`;
   await sendConfirmationEmail(email, language, confirmUrl, env);
 
@@ -350,10 +340,6 @@ async function handleConfirm(url: URL, env: Env): Promise<Response> {
 
   const segmentId =
     subscription.language === 'ko' ? env.RESEND_SEGMENT_KO : env.RESEND_SEGMENT_EN;
-  const topicIds: Record<Topic, string> = {
-    essays: env.RESEND_TOPIC_ESSAYS,
-    daily: env.RESEND_TOPIC_DAILY,
-  };
 
   const response = await fetch('https://api.resend.com/contacts', {
     method: 'POST',
@@ -365,10 +351,7 @@ async function handleConfirm(url: URL, env: Env): Promise<Response> {
       email: subscription.email,
       unsubscribed: false,
       segments: [{ id: segmentId }],
-      topics: subscription.topics.map((topic) => ({
-        id: topicIds[topic],
-        subscription: 'opt_in',
-      })),
+      topics: [{ id: env.RESEND_TOPIC_NEWSLETTER, subscription: 'opt_in' }],
     }),
   });
 
@@ -1065,7 +1048,8 @@ interface RosterContact {
   created_at: string;
   unsubscribed: boolean;
   language: Language | 'unknown';
-  topics: Topic[] | null;
+  /** null when topics were not looked up (too many contacts, or the lookup failed). */
+  subscribed: boolean | null;
 }
 
 type TopicNote = 'ok' | 'skipped' | 'failed';
@@ -1092,13 +1076,13 @@ async function loadRoster(env: Env) {
   ]);
 
   const active = contacts.items.filter((contact) => !contact.unsubscribed);
-  let topics: Map<string, Topic[]> | null = null;
+  let subscribed: Map<string, boolean> | null = null;
   let note: TopicNote = 'skipped';
 
   if (active.length <= TOPIC_LOOKUP_LIMIT) {
-    const looked = await settle(() => topicsByContact(active, env));
+    const looked = await settle(() => subscribedByContact(active, env));
     if (looked instanceof Map) {
-      topics = looked;
+      subscribed = looked;
       note = 'ok';
     } else {
       note = 'failed';
@@ -1111,7 +1095,7 @@ async function loadRoster(env: Env) {
     created_at: contact.created_at ?? '',
     unsubscribed: Boolean(contact.unsubscribed),
     language: en.ids.has(contact.id) ? 'en' : ko.ids.has(contact.id) ? 'ko' : 'unknown',
-    topics: topics?.get(contact.id) ?? null,
+    subscribed: subscribed?.get(contact.id) ?? null,
   }));
 
   // Newest first: the useful question of a subscriber list is who just joined.
@@ -1144,20 +1128,12 @@ interface ResendTopic {
   subscription?: string;
 }
 
-/** essays vs daily, a few contacts at a time so the rate limit holds. */
-async function topicsByContact(
+/** Who is opted in to the newsletter topic, a few contacts at a time so the rate limit holds. */
+async function subscribedByContact(
   contacts: ResendContact[],
   env: Env,
-): Promise<Map<string, Topic[]>> {
-  const labels = new Map<string, Topic>();
-  if (env.RESEND_TOPIC_ESSAYS) {
-    labels.set(env.RESEND_TOPIC_ESSAYS, 'essays');
-  }
-  if (env.RESEND_TOPIC_DAILY) {
-    labels.set(env.RESEND_TOPIC_DAILY, 'daily');
-  }
-
-  const byContact = new Map<string, Topic[]>();
+): Promise<Map<string, boolean>> {
+  const byContact = new Map<string, boolean>();
   const queue = [...contacts];
 
   const worker = async () => {
@@ -1166,14 +1142,13 @@ async function topicsByContact(
         `/contacts/${contact.id}/topics`,
         env,
       );
-      const opted: Topic[] = [];
-      for (const topic of body.data ?? []) {
-        const label = labels.get(topic.id);
-        if (label && topic.subscription === 'opt_in') {
-          opted.push(label);
-        }
-      }
-      byContact.set(contact.id, opted);
+      byContact.set(
+        contact.id,
+        (body.data ?? []).some(
+          (topic) =>
+            topic.id === env.RESEND_TOPIC_NEWSLETTER && topic.subscription === 'opt_in',
+        ),
+      );
     }
   };
 
@@ -1189,11 +1164,11 @@ async function subscriberStats(env: Env) {
   const active = roster.rows.filter((row) => !row.unsubscribed);
 
   const languages = { en: 0, ko: 0, unknown: 0 };
-  const topics = { essays: 0, daily: 0 };
+  let subscribed = 0;
   for (const row of active) {
     languages[row.language] += 1;
-    for (const topic of row.topics ?? []) {
-      topics[topic] += 1;
+    if (row.subscribed) {
+      subscribed += 1;
     }
   }
 
@@ -1203,7 +1178,7 @@ async function subscriberStats(env: Env) {
     unsubscribed: roster.rows.length - active.length,
     truncated: roster.truncated,
     languages,
-    topics: { ...topics, note: roster.note },
+    topics: { newsletter: subscribed, note: roster.note },
     contacts: roster.rows,
   };
 }
@@ -1323,8 +1298,7 @@ async function broadcastDetail(id: string, env: Env) {
     [env.RESEND_SEGMENT_KO]: 'KO',
   };
   const topics: Record<string, string> = {
-    [env.RESEND_TOPIC_ESSAYS]: 'essays',
-    [env.RESEND_TOPIC_DAILY]: 'daily',
+    [env.RESEND_TOPIC_NEWSLETTER]: 'newsletter',
   };
 
   return {
@@ -1537,7 +1511,6 @@ interface Submission {
   email: string;
   honeypot: string;
   language: string;
-  topics: string[];
 }
 
 async function readSubmission(request: Request): Promise<Submission> {
@@ -1549,7 +1522,6 @@ async function readSubmission(request: Request): Promise<Submission> {
       email: typeof body.email === 'string' ? body.email : '',
       honeypot: typeof body.website === 'string' ? body.website : '',
       language: typeof body.language === 'string' ? body.language : 'en',
-      topics: Array.isArray(body.topics) ? body.topics.map(String) : [],
     };
   }
 
@@ -1558,7 +1530,6 @@ async function readSubmission(request: Request): Promise<Submission> {
     email: String(form.get('email') ?? ''),
     honeypot: String(form.get('website') ?? ''),
     language: String(form.get('language') ?? 'en'),
-    topics: form.getAll('topics').map(String),
   };
 }
 
@@ -1636,7 +1607,6 @@ async function createToken(subscription: Subscription, secret: string): Promise<
   const payload = JSON.stringify({
     e: subscription.email,
     l: subscription.language,
-    t: subscription.topics,
     x: Math.floor(Date.now() / 1000) + TOKEN_TTL_SECONDS,
   });
   return `${base64UrlEncode(payload)}.${await sign(payload, secret)}`;
@@ -1659,7 +1629,7 @@ async function verifyToken(token: string, secret: string): Promise<Subscription 
     return null;
   }
 
-  let parsed: { e?: unknown; l?: unknown; t?: unknown; x?: unknown };
+  let parsed: { e?: unknown; l?: unknown; x?: unknown };
   try {
     parsed = JSON.parse(payload);
   } catch {
@@ -1672,17 +1642,13 @@ async function verifyToken(token: string, secret: string): Promise<Subscription 
   }
 
   const email = typeof parsed.e === 'string' ? parsed.e : '';
-  const topics = Array.isArray(parsed.t)
-    ? parsed.t.filter((topic): topic is Topic => topic === 'essays' || topic === 'daily')
-    : [];
-  if (!email || topics.length === 0) {
+  if (!email) {
     return null;
   }
 
   return {
     email,
     language: parsed.l === 'ko' ? 'ko' : 'en',
-    topics,
   };
 }
 

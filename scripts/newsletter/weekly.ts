@@ -160,7 +160,7 @@ async function send(window: WeekWindow) {
   }
 
   const apiKey = requireEnv('RESEND_API_KEY');
-  const topicId = requireEnv('RESEND_TOPIC_DAILY');
+  const topicId = requireEnv('RESEND_TOPIC_NEWSLETTER');
 
   for (const language of pending) {
     const { html, subject } = build(language, weeks[language], window, headline);

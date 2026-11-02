@@ -1,11 +1,12 @@
 # Newsletter
 
-Two mailings, two schedules, one sent-log.
+Two mailings, two schedules, one sent-log, one subscription: everyone is opted
+in to a single Resend topic (`RESEND_TOPIC_NEWSLETTER`) and picks only a language.
 
 | Mailing | Trigger | Runner | Topic |
 | --- | --- | --- | --- |
-| Essays | after a successful deploy, one email per new post | GitHub Actions (`.github/workflows/newsletter.yml`) | `RESEND_TOPIC_ESSAYS` |
-| Daily Insights letter | Monday morning, covering the week that just closed | launchd prepares, GitHub Actions sends | `RESEND_TOPIC_DAILY` |
+| Essays (not notes) | after a successful deploy, one email per new essay | GitHub Actions (`.github/workflows/newsletter.yml`) | `RESEND_TOPIC_NEWSLETTER` |
+| Daily Insights letter | Monday morning, covering the week that just closed | launchd prepares, GitHub Actions sends | `RESEND_TOPIC_NEWSLETTER` |
 
 Each mailing goes out twice, once per language segment (`RESEND_SEGMENT_EN`,
 `RESEND_SEGMENT_KO`).
@@ -121,7 +122,7 @@ and left nothing recorded, so the same backlog was retried and failed nightly.
 ## Credentials
 
 The essay workflow reads them from GitHub Actions: secret `RESEND_API_KEY`,
-variables `RESEND_SEGMENT_EN`, `RESEND_SEGMENT_KO`, `RESEND_TOPIC_ESSAYS`.
+variables `RESEND_SEGMENT_EN`, `RESEND_SEGMENT_KO`, `RESEND_TOPIC_NEWSLETTER`.
 
 The weekly letter reads the same names from the same place, because its send
 step runs in Actions too. The Mac never touches Resend.

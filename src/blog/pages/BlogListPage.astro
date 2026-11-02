@@ -57,10 +57,6 @@ const description =
 
   {/* Notes are not mailed, so only the essays page offers the subscription. */}
   {type === 'essay' && (
-    <SubscribeForm
-      topics={['essays']}
-      heading="Essays by email"
-      blurb=""
-    />
+    <SubscribeForm heading="Get my essays by email." />
   )}
 </BaseLayout>

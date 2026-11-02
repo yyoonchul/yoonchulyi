@@ -52,7 +52,7 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           RESEND_SEGMENT_EN: ${{ vars.RESEND_SEGMENT_EN }}
           RESEND_SEGMENT_KO: ${{ vars.RESEND_SEGMENT_KO }}
-          RESEND_TOPIC_ESSAYS: ${{ vars.RESEND_TOPIC_ESSAYS }}
+          RESEND_TOPIC_NEWSLETTER: ${{ vars.RESEND_TOPIC_NEWSLETTER }}
         run: |
           npx tsx scripts/newsletter/send.ts \
             ${{ inputs.dry_run && '--dry-run' || '' }}

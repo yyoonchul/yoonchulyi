@@ -14,7 +14,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   <section class="py-16">
     <h1 class="font-serif text-2xl mb-3" data-confirm-heading>You're subscribed.</h1>
     <p class="font-serif text-lg leading-relaxed text-text mb-6" data-confirm-body>
-      New posts will land in your inbox. Every email has an unsubscribe link.
+      New essays and a weekly roundup of the articles I read will land in your inbox. Every email has an unsubscribe link.
     </p>
     <a
       href="/essays/"
@@ -36,7 +36,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     if (heading) heading.textContent = '구독이 완료되었습니다.';
     if (body) {
       body.textContent =
-        '새 글이 올라오면 메일로 보내드립니다. 모든 메일에 수신거부 링크가 있습니다.';
+        '새 에세이와 한 주 동안 제가 읽은 글 모음을 메일로 보내드립니다. 모든 메일에 수신거부 링크가 있습니다.';
     }
     if (link) link.textContent = '지난 글 보기 ↗';
   }
