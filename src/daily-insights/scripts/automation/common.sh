@@ -159,7 +159,23 @@ automation_on_exit() {
   if [[ -n "${ACTIVE_LOCK_PATH:-}" ]]; then
     release_lock "${ACTIVE_LOCK_PATH}"
   fi
+
+  if [[ "${status}" -ne 0 && "${DAILY_FLOW_NOTIFY_FAILURE:-false}" == "true" ]]; then
+    notify_daily_insights_discord failure \
+      --detail "생성·발행 작업이 종료 코드 ${status}로 실패했습니다. 로그: ${RUN_LOG_PATH}" \
+      --date "$(date +%Y/%m/%d)" || echo "WARNING: Discord failure notification could not be sent." >&2
+  fi
 }
+
+notify_daily_insights_discord() (
+  # Keep credentials local, including when the publisher is run on its own.
+  set -a
+  if [[ -f "${REPO_ROOT}/.env" ]]; then
+    source "${REPO_ROOT}/.env"
+  fi
+  set +a
+  python3 "${SCRIPT_DIR}/notify-discord.py" "$@"
+)
 
 require_command() {
   local command_name="$1"
@@ -497,6 +513,9 @@ PY
       fi
       rm -f "${pending_path}"
       run_log_event "Publish completed" "Digest: \`content/${date_path}.md\`."
+      notify_daily_insights_discord success --date "${date_path}" \
+        --detail "생성과 Git 푸시를 마쳤습니다. 사이트 배포에는 잠시 시간이 걸릴 수 있습니다." \
+        || echo "WARNING: Discord success notification could not be sent." >&2
       return 0
     fi
     run_log_event "Publish attempt failed" "Digest: \`content/${date_path}.md\`. Attempt: \`${attempt}/3\`."

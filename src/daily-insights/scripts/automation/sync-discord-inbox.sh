@@ -155,6 +155,10 @@ to_react = []
 unchecked_with_urls = 0
 
 for message in ordered:
+    # Notifications share the inbox channel; never feed bot/webhook links back
+    # into digest generation.
+    if (message.get("author") or {}).get("bot") or message.get("webhook_id"):
+        continue
     reactions = message.get("reactions") or []
     has_check = any((reaction.get("emoji") or {}).get("name") == "✅" for reaction in reactions)
     if has_check:

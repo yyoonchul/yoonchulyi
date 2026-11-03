@@ -38,6 +38,7 @@ if [[ -f "${REPO_ROOT}/.env" ]]; then
   source "${REPO_ROOT}/.env"
 fi
 set +a
+DAILY_FLOW_NOTIFY_FAILURE=true
 
 current_hour="$((10#$(date +%H)))"
 local_inbox_path="${REPO_ROOT}/${LOCAL_INBOX_RELATIVE_PATH}"
@@ -120,10 +121,10 @@ fi
 print_header "Inbox has URLs. Running full daily flow under caffeinate."
 run_log_event "Running full daily flow" "Runner: \`${flow_runner}\`"$'\n'"Window: \`${run_window_id}\`."
 if command -v caffeinate >/dev/null 2>&1; then
-  caffeinate -dimsu "${flow_runner}"
+  DAILY_FLOW_NOTIFY_FAILURE=false caffeinate -dimsu "${flow_runner}"
 else
   run_log_event "caffeinate not found" "Running full daily flow without sleep prevention."
-  "${flow_runner}"
+  DAILY_FLOW_NOTIFY_FAILURE=false "${flow_runner}"
 fi
 
 {

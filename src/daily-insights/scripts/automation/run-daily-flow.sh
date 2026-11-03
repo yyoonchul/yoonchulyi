@@ -27,6 +27,7 @@ if [[ -f "${REPO_ROOT}/.env" ]]; then
   source "${REPO_ROOT}/.env"
 fi
 set +a
+DAILY_FLOW_NOTIFY_FAILURE="${DAILY_FLOW_NOTIFY_FAILURE:-true}"
 
 [[ -x "${publish_runner}" ]] || {
   echo "ERROR: publish runner is not executable: ${publish_runner}" >&2

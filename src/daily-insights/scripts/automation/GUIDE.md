@@ -30,6 +30,34 @@
 
 ## 사전 준비
 
+### Discord 성공·실패 알림
+
+기존 인박스 채널 하나에서 링크 수집과 성공·실패 알림을 함께 처리합니다.
+채널 이름은 `#daily-insights`를 권장합니다. 이름을 바꿔도 채널 ID는 유지됩니다.
+봇에는 해당 채널의 View Channel, Send Messages 권한이 필요합니다.
+봇·웹훅이 보낸 메시지는 링크 수집에서 제외해 알림 URL이 다시 입력되지 않게 합니다.
+
+- 로컬 `src/daily-insights/.env`: 기존 `DISCORD_BOT_TOKEN`,
+  `DISCORD_INBOX_CHANNEL_ID`를 그대로 사용합니다.
+
+daily flow 또는 resilient flow가 실패하면 로컬에서 실패 알림을 보냅니다.
+resilient flow 내부 실행의 중복 실패 알림은 억제합니다. 게시 대기열의 각
+다이제스트가 Git 푸시와 로컬 동기화까지 성공하면 로컬에서 성공 알림과
+해당 다이제스트 URL을 보냅니다. GitHub Actions secrets 등록은 필요 없습니다.
+성공은 푸시 완료를 뜻하며, 이후 사이트 빌드·배포 결과는 감시하지 않습니다. inbox가 비어
+생성을 건너뛴 경우에는 알림을 보내지 않습니다.
+
+알림 전송 실패는 원래 작업의 종료 코드를 바꾸지 않습니다. 채널 ID 또는 토큰이
+없으면 경고만 기록합니다. 컴퓨터 종료나 강제 종료로 프로세스가 실행되지
+못한 경우에는 로컬 실패 알림도 보낼 수 없습니다.
+
+실제 메시지를 보내지 않고 내용을 확인하려면:
+
+```bash
+python3 src/daily-insights/scripts/automation/notify-discord.py success --date 2026/11/03 --dry-run
+python3 src/daily-insights/scripts/automation/notify-discord.py failure --detail '생성 실패' --dry-run
+```
+
 1. Codex 로그인
 ```bash
 codex login
