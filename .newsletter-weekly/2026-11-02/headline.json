@@ -1,0 +1,19 @@
+{
+  "lead": "Anthropic is still grappling with the economics of compute",
+  "subject": {
+    "en": "Anthropic’s compute bill now eats 58% of revenue",
+    "ko": "Anthropic 매출의 58%를 차지한 컴퓨트 비용"
+  },
+  "tldr": {
+    "en": [
+      "Anthropic’s Q3 revenue reached $17 billion, but compute consumed 58% of it and a $10 billion quarterly bill exposed how demand is outrunning supply.",
+      "Trucks VC received pitches from 81 new autonomous vehicle startups in 2026, exceeding the 2016–17 boom as foundation models lower the cost of entry.",
+      "A DEJAN experiment raised Gemma 3 270M’s five-number sorting accuracy from 0.2% to 97% by tuning just 1,000 weights."
+    ],
+    "ko": [
+      "Anthropic의 3분기 매출은 170억 달러에 이르렀지만 컴퓨트 비용이 매출의 58%를 차지했고, 분기 지출 100억 달러는 수요가 공급을 앞지르는 현실을 드러냈다.",
+      "Trucks VC는 2026년 신규 자율주행차 스타트업 81곳의 투자 제안을 받았으며, 파운데이션 모델이 진입 비용을 낮추면서 2016~2017년 호황기 규모를 넘어섰다.",
+      "DEJAN의 실험에서 Gemma 3 270M은 가중치 1,000개만 조정해 숫자 다섯 개 정렬 정확도를 0.2%에서 97%로 높였다."
+    ]
+  }
+}
