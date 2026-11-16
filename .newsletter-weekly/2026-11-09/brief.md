@@ -1,0 +1,175 @@
+# Daily Insights — week of 2026-11-09 to 2026-11-15
+
+Write `headline.json` in this directory. Nothing else in here is yours to edit.
+
+## EN
+
+### 2026-11-09
+
+#### Goldman Sachs Is Pulling Claude Code From Its Bankers and Traders
+Source: State of AI · Category: AI
+- October guidance reportedly limits Anthropic’s Claude Code and Microsoft’s GitHub to Goldman Sachs engineers, while “strats” retain access.
+- Bankers and traders had used coding agents to monitor client flows, model markets and positions, and prepare written and visual materials.
+- Goldman cites productivity and risk review; the article points to code review, information barriers, cost, and missing replacement workflows as key considerations.
+
+### 2026-11-10
+
+#### Our newest TPUs: 8tx and 8i Max, built for the agentic era
+Source: Google Blog · Category: Cloud
+- Google added TPU 8tx for confidential inference and TPU 8i Max for workloads with very large context windows.
+- TPU 8tx protects data and model weights during use and can lower latency by up to 2× versus TPU 8t.
+- TPU 8i Max combines two 8i chips, doubling compute, SRAM, and HBM bandwidth within the existing rack footprint.
+
+#### Siri AI Rumored to Become 'More Like an Agent' as Early as Next Year
+Source: MacRumors · Category: AI
+- Mark Gurman reports Apple may make Siri more agent-like as early as next year; the plan and implementation remain unconfirmed.
+- The envisioned agents track goals, decide next steps, and continue working without a prompt for every action.
+- Apple CEO John Ternus reportedly urged software chief Craig Federighi to accelerate the roadmap beyond incremental Siri upgrades.
+
+#### A year as a Research Engineer working on RSI at Meta
+Source: X · Author: Tom Mann (@TomasMann1878) · Category: DevTools
+- Meta research engineer Tom Mann describes his path from technical support into research engineering and argues the title matters less than research contribution.
+- Recursive self-improvement (RSI) can improve a model itself or the prompts, tools, memory, and code around it.
+- His practical advice: build a small agent experiment, run a baseline, inspect traces, and explain both results and failures.
+
+#### The components of agent memory
+Source: Anthropic · Category: AI
+- Anthropic describes agent memory as a hierarchy of session logs, notes, organized representations such as wikis, and selectively injected context.
+- Offline “dreaming” can validate notes against transcripts, build linked knowledge maps, and correct outdated or mistaken memories.
+- In evaluations, memory and wikis helped most on long-horizon or multi-document tasks, while overbuilt wikis and rigid memory rules could hurt.
+
+### 2026-11-11
+
+#### Will Anthropic Grow Into Its Compute Bill?
+Source: X · Author: Ornn (@OrnnExchange) · Category: Business
+- Anthropic’s amended S-1 puts total committed spending at about $895.4 billion, including roughly $447.5 billion due by the end of 2030.
+- At its current compute-to-revenue ratio, the company would need about $200 billion in annual revenue to support the average compute commitments due from late 2027 through 2030.
+- The estimate hinges on continued margins and growth; financing conditions, customer flexibility, delivery delays, and spot compute prices create risks on both sides.
+
+#### AutoCompress: Automated Hardware-Guided Model Compression
+Source: arXiv · Category: AI
+- AutoCompress searches model architectures against actual deployment limits for latency, throughput, and memory, instead of using parameter count as a proxy.
+- Across eight benchmarks, it improved average accuracy over an adapted Minitron baseline by 6.57 points on RTX 5070, 2.35 on RTX 5080, and 0.57 on H100.
+- A Nemotron 3.5 Super case compressed 120B to 74B parameters for 128K-context BF16 serving on one B200, retaining 95% of its mean benchmark score.
+
+### 2026-11-12
+
+#### I reverse-engineered Instinct. Here's the whole machine
+Source: X · Author: Nizzy (@nizzyabi) · Category: AI
+- Nizzy describes how Instinct completed a dental-insurance enrollment in 22 minutes through nine text messages and two secure forms.
+- A 12-week analysis of 185 user messages and 375 assistant messages highlights fast read receipts, concise replies, tapbacks, follow-ups, and separate background task work.
+- The teardown praises careful confirmation and candid failure reporting while flagging memory retention and delivery-verification gaps; the author presents Keiki as infrastructure for similar assistants.
+
+#### OpenAI's quarterly revenue crossed $10 billion. But so did its losses
+Source: Quartz · Category: Business
+- OpenAI generated $10 billion in revenue and recorded a $10.9 billion operating loss in the three months ending September 2026.
+- Revenue grew about 50% quarter over quarter; adjusted operating margin improved from -150% in Q2 to -109% in Q3.
+- Bloomberg says a new funding round values OpenAI at $1.25 trillion; the company has pushed its public-listing timeline to next year.
+
+### 2026-11-14
+
+#### Building always-on agents
+Source: Claude by Anthropic · Category: AI
+- Always-on agents are event-driven systems that sleep between short runs, retaining state across sessions rather than running continuously.
+- The architecture centers on five primitives: an event inbox, timers, memory, permissions, and an outbox.
+- Durable storage, a single active worker per inbox, retryable events, and carefully tuned user messaging make unattended operation more reliable.
+
+### 2026-11-15
+
+#### Tesla opens Cybercab pre-orders ‘for personal use,’ with geo restrictions and a $299 monthly fee
+Source: TechCrunch · Category: Business
+- Select customers can pre-order Cybercabs for personal use, with delivery estimated for December 2026.
+- The vehicle is listed at $29,990 plus a $299 monthly operating fee; initial delivery and use are restricted to selected Texas cities and geofenced areas.
+- Elon Musk said nationwide availability depends on regulatory approval and suggested the monthly fee should be closer to about $115.
+
+#### OpenAI reassigns robotics researchers as general-purpose models advance
+Source: The Decoder · Category: AI
+- OpenAI reorganized its robotics group, distributing researchers between the main research team and Greg Brockman’s Applied organization; the company says robotics work continues.
+- A simulated-robot study reported a 74.8% success rate for GPT-6 Astra, while a separate five-task benchmark showed limited but higher performance than MolmoAct2.
+- The strategic bet is that general-purpose models may handle robotics directly, though specialized systems can still offer advantages in cost, reliability, speed, and energy use.
+
+## KO
+
+### 2026-11-09
+
+#### 골드만삭스, 은행원과 트레이더의 클로드 코드 사용 제한
+출처: State of AI · 카테고리: 인공지능
+- 블룸버그 보도에 따르면 골드만삭스는 10월 지침으로 앤스로픽(Anthropic)의 클로드 코드(Claude Code)와 마이크로소프트(Microsoft)의 깃허브(GitHub)를 엔지니어만 사용하도록 제한했으며, 트레이딩 전략 담당자(strats)는 계속 이용할 수 있다.
+- 은행원과 트레이더는 코딩 에이전트로 고객 거래 흐름을 추적하고 시장과 포지션을 모델링했으며, 문서와 시각 자료도 만들었다.
+- 회사는 생산성과 위험을 검토했다고 밝혔으며, 기사는 코드 검토, 정보 차단, 비용, 대체 업무 흐름의 부재를 주요 쟁점으로 짚는다.
+
+### 2026-11-10
+
+#### 에이전트 시대를 위해 설계한 새 TPU: 8tx와 8i Max
+출처: Google 블로그 · 카테고리: 클라우드
+- 구글은 기밀 추론용 TPU 8tx와 매우 긴 문맥을 처리하는 TPU 8i Max를 공개했다.
+- TPU 8tx는 사용 중인 데이터와 모델 가중치를 보호하며, TPU 8t보다 지연 시간을 최대 2배 줄일 수 있다.
+- TPU 8i Max는 8i 칩 두 개를 결합해 기존 랙 공간에서 연산량, SRAM, HBM 대역폭을 각각 두 배로 늘린다.
+
+#### 내년부터 시리를 ‘에이전트에 더 가까운’ 형태로 바꿀 수 있다는 보도
+출처: MacRumors · 카테고리: AI
+- 마크 거먼은 애플이 이르면 내년에 시리를 에이전트처럼 작동하게 만들 수 있다고 전했지만, 계획과 구현 방식은 확인되지 않았다.
+- 구상된 에이전트는 목표를 추적하고 다음 단계를 판단하며, 매번 지시를 받지 않아도 작업을 이어간다.
+- 존 터너스 최고경영자가 소프트웨어 책임자 크레이그 페더리기에게 시리의 점진적 개선을 넘어 개발 일정을 앞당기라고 했다는 보도도 나왔다.
+
+#### 메타에서 RSI 연구 엔지니어로 보낸 1년
+출처: X · 작성자: 톰 만(@TomasMann1878) · 카테고리: 개발 도구
+- 메타 연구 엔지니어 톰 만은 기술 지원에서 연구 엔지니어로 옮긴 경험을 소개하며, 직함보다 연구에 기여하는 능력이 중요하다고 말한다.
+- 재귀적 자기 개선(RSI)은 모델 자체를 개선하거나 주변의 프롬프트, 도구, 메모리, 코드를 개선하는 방식으로 이뤄질 수 있다.
+- 작은 에이전트 실험을 만들고 기준 결과를 측정한 뒤, 실행 기록을 살피며 성과와 실패를 설명하라고 조언한다.
+
+#### 에이전트 메모리의 구성 요소
+출처: Anthropic · 카테고리: AI
+- 앤트로픽은 에이전트 메모리를 세션 기록, 메모, 위키 같은 구조화된 표현, 새 세션에 선택적으로 넣는 문맥으로 나눠 설명한다.
+- 오프라인 ‘꿈꾸기(dreaming)’ 과정은 기록 원문과 메모를 대조하고, 지식 지도를 만들며, 오래되거나 잘못된 기억을 바로잡을 수 있다.
+- 평가에서 메모리와 위키는 장기 과제나 여러 문서를 아우르는 작업에 특히 유용했지만, 지나치게 커진 위키나 경직된 기록 규칙은 성능을 낮출 수 있었다.
+
+### 2026-11-11
+
+#### Anthropic은 컴퓨팅 비용을 감당할 만큼 성장할 수 있을까?
+출처: X · 작성자: Ornn (@OrnnExchange) · 카테고리: 비즈니스
+- 수정된 S-1 공시에 따르면 Anthropic의 총 약정 지출은 약 8,954억 달러이며, 이 가운데 약 4,475억 달러가 2030년 말까지 지급될 예정이다.
+- 현재 컴퓨팅 비용 대비 매출 비율을 유지한다면 2027년 말부터 2030년까지의 연평균 컴퓨팅 약정을 감당하려면 연 매출 약 2,000억 달러가 필요하다.
+- 이 추정은 현재 수준의 수익성과 성장이 이어진다는 가정에 달려 있다. 자금 조달 조건, 고객의 계약 유연성, 공급 지연, 단기 컴퓨팅 가격은 양방향 위험 요인이다.
+
+#### AutoCompress: 하드웨어 지침을 반영한 자동 모델 압축
+출처: arXiv · 카테고리: 인공지능
+- AutoCompress는 매개변수 수를 대리 지표로 삼는 대신 실제 배포 환경의 지연 시간, 처리량, 메모리 한도에 맞춰 모델 구조를 탐색한다.
+- 8개 벤치마크에서 조정된 Minitron 기준선보다 평균 정확도가 RTX 5070에서 6.57점, RTX 5080에서 2.35점, H100에서 0.57점 높았다.
+- Nemotron 3.5 Super를 120B에서 74B 매개변수로 줄여 단일 B200에서 128K 문맥 BF16으로 구동했고, 평균 벤치마크 점수의 95%를 유지했다.
+
+### 2026-11-12
+
+#### 인스팅트를 역설계했다. 전체 구조를 살펴보다
+출처: X · 작성자: 니지(Nizzy, @nizzyabi) · 카테고리: 인공지능
+- 니지는 인스팅트(Instinct)가 문자 아홉 건과 보안 양식 두 개를 거쳐 22분 만에 치과 보험 가입을 마친 경험을 소개한다.
+- 12주간 사용자 메시지 185건과 비서 메시지 375건을 분석해 빠른 읽음 표시, 짧은 답변, 탭 반응, 후속 연락, 별도 백그라운드 작업 구조를 살펴본다.
+- 필요한 확인을 거치고 실패를 솔직히 알리는 점은 높이 평가하지만, 기억 보존과 작업 전달 확인에는 우려를 제기한다. 비슷한 비서를 만들 기반으로 케이키(Keiki)를 소개한다.
+
+#### 오픈AI의 분기 매출이 100억 달러를 넘었다. 영업손실도 그만큼 커졌다
+출처: 쿼츠(Quartz) · 카테고리: 비즈니스
+- 오픈AI(OpenAI)는 2026년 9월로 끝난 3개월 동안 매출 100억 달러와 영업손실 109억 달러를 기록했다.
+- 매출은 전 분기보다 약 50% 늘었고, 조정 영업이익률은 2분기 -150%에서 3분기 -109%로 개선됐다.
+- 블룸버그에 따르면 새 투자 유치에서 기업가치를 1조 2,500억 달러로 평가받을 전망이며, 상장 시점은 내년으로 미뤄졌다.
+
+### 2026-11-14
+
+#### 항상 대기하는 에이전트 구축하기 (Building always-on agents)
+출처: Claude by Anthropic · 카테고리: AI
+- 항상 대기하는 에이전트는 계속 실행되는 프로그램이 아니라, 짧은 작업을 마친 뒤 잠들고 세션 간 상태를 보존하는 이벤트 기반 시스템이다.
+- 핵심 구조는 이벤트 수신함(event inbox), 타이머(timers), 메모리(memory), 권한(permissions), 발신함(outbox)이라는 다섯 요소로 이뤄진다.
+- 지속성 있는 저장소, 수신함마다 하나의 활성 작업자(worker), 재시도 가능한 이벤트, 세심하게 조절한 사용자 메시지가 무인 실행의 안정성을 높인다.
+
+### 2026-11-15
+
+#### 테슬라, 지역 제한과 월 299달러 요금을 적용해 사이버캡 개인용 사전 주문 개시
+출처: 테크크런치(TechCrunch) · 카테고리: 비즈니스
+- 테슬라가 일부 고객에게 사이버캡(Cybercab) 개인용 사전 주문을 허용했으며, 인도 예정 시기는 2026년 12월이다.
+- 차량 가격은 2만 9,990달러이고 운행료로 월 299달러가 추가된다. 초기 인도와 운행은 텍사스 일부 도시와 지정 구역으로 제한된다.
+- 일론 머스크(Elon Musk)는 전국 확대에 규제 승인이 필요하다고 밝혔고, 월 이용료는 약 115달러에 가까워야 한다고 말했다.
+
+#### 범용 모델의 진전에 맞춰 로보틱스 연구 인력을 재배치한 오픈AI
+출처: 더 디코더(The Decoder) · 카테고리: 인공지능
+- 오픈AI(OpenAI)는 로보틱스 조직을 개편해 연구 인력을 주 연구팀과 그렉 브록먼(Greg Brockman)의 응용 조직으로 나눴으며, 로봇 연구는 계속한다고 밝혔다.
+- 모의 로봇 연구에서 GPT-6 Astra는 성공률 74.8%를 기록했다. 별도의 다섯 과제 평가에서는 성과가 제한적이었지만 MolmoAct2보다 높은 점수를 냈다.
+- 범용 모델이 로봇을 직접 제어할 수 있다는 가능성에 기대를 걸고 있지만, 전문 모델은 비용·신뢰성·속도·에너지 효율에서 여전히 이점이 있을 수 있다.

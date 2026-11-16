@@ -1,0 +1,19 @@
+{
+  "lead": "Will Anthropic Grow Into Its Compute Bill?",
+  "subject": {
+    "en": "Can Anthropic grow fast enough to cover its compute bill?",
+    "ko": "Anthropic은 컴퓨팅 약정을 감당할 만큼 성장할 수 있을까?"
+  },
+  "tldr": {
+    "en": [
+      "Anthropic’s amended S-1 puts committed spending at $895.4 billion, implying roughly $200 billion in annual revenue may be needed to support its 2027–2030 compute commitments.",
+      "Google introduced TPU 8tx for confidential inference and TPU 8i Max for very large context windows, doubling key resources within the existing rack footprint.",
+      "Anthropic’s always-on agent design uses event-driven short runs, persistent state, and five primitives: an inbox, timers, memory, permissions, and an outbox."
+    ],
+    "ko": [
+      "Anthropic의 수정된 S-1 공시에 총 약정 지출 8,954억 달러가 담겼으며, 2027~2030년 컴퓨팅 약정을 감당하려면 연 매출 약 2,000억 달러가 필요할 수 있다.",
+      "Google은 기밀 추론용 TPU 8tx와 긴 문맥용 TPU 8i Max를 공개해 기존 랙 공간에서 주요 자원을 두 배로 늘렸다.",
+      "Anthropic이 제시한 상시 대기 에이전트는 이벤트에 따라 짧게 실행되고 상태를 보존하며, 수신함·타이머·메모리·권한·발신함을 핵심 요소로 삼는다."
+    ]
+  }
+}
