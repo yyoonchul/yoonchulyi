@@ -1,0 +1,19 @@
+{
+  "lead": "Google's AI Overviews cut clicks to websites by 40%",
+  "subject": {
+    "en": "AI Overviews cut website clicks by 40%",
+    "ko": "AI Overviews가 웹사이트 클릭을 40% 줄였다"
+  },
+  "tldr": {
+    "en": [
+      "A randomized desktop experiment found Google AI Overviews cut external-site clicks by 39.8% when they appeared.",
+      "An essay estimates AI tools are speeding up AI research by as much as 10×, while compute, data and oversight remain constraints.",
+      "A reported $40 billion SpaceX chip-financing deal may restrict use of the financed chips in orbital data centers, though its terms remain unclear."
+    ],
+    "ko": [
+      "무작위 배정 데스크톱 실험에서 Google AI Overviews가 표시되면 외부 사이트 클릭이 39.8% 줄었다.",
+      "한 에세이는 AI 도구가 연구 업무를 최대 10배 빠르게 할 수 있다고 추정하면서도 연산 자원과 데이터, 인간 감독이 제약으로 남는다고 지적한다.",
+      "보도된 SpaceX의 400억 달러 칩 금융 계약은 대출 칩의 우주 데이터센터 사용을 제한할 수 있지만, 구체적인 조건은 불분명하다."
+    ]
+  }
+}
